@@ -131,6 +131,19 @@ namespace FluentTerminal.App.Services.Implementation
                         }
                     };
 
+                case Command.NewMoshTab:
+                    return new List<KeyBinding>
+                    {
+                        new KeyBinding
+                        {
+                            Command = nameof(Command.NewMoshTab),
+                            Ctrl = false,
+                            Alt = true,
+                            Shift = false,
+                            Key = (int)ExtendedVirtualKey.Y
+                        }
+                    };
+
                 case Command.ChangeTabTitle:
                     return new List<KeyBinding>
                 {

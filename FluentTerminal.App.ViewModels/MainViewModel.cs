@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentTerminal.App.ViewModels.Utilities;
 
 namespace FluentTerminal.App.ViewModels
 {
@@ -45,6 +46,7 @@ namespace FluentTerminal.App.ViewModels
             _keyboardCommandService = keyboardCommandService;
             _keyboardCommandService.RegisterCommandHandler(nameof(Command.NewTab), () => AddTerminal());
             _keyboardCommandService.RegisterCommandHandler(nameof(Command.NewSshTab), () => AddRemoteTerminal(RemoteHostType.Ssh));
+            _keyboardCommandService.RegisterCommandHandler(nameof(Command.NewMoshTab), () => AddRemoteTerminal(RemoteHostType.Mosh));
             _keyboardCommandService.RegisterCommandHandler(nameof(Command.ConfigurableNewTab), () => AddConfigurableTerminal());
             _keyboardCommandService.RegisterCommandHandler(nameof(Command.ChangeTabTitle), () => SelectedTerminal.EditTitle());
             _keyboardCommandService.RegisterCommandHandler(nameof(Command.CloseTab), CloseCurrentTab);
@@ -215,7 +217,7 @@ namespace FluentTerminal.App.ViewModels
             });
         }
 
-        public async Task AddRemoteTerminal(RemoteHostType type)
+        private async Task AddRemoteTerminal(RemoteHostType type)
         {
             ShellProfile profile;
 
@@ -241,6 +243,43 @@ namespace FluentTerminal.App.ViewModels
                         Location = @"C:\Windows\System32\OpenSSH\ssh.exe",
                         WorkingDirectory = string.Empty,
                         LineEndingTranslation = LineEndingStyle.DoNotModify,
+                    };
+
+                    break;
+
+                case RemoteHostType.Mosh:
+
+                    var moshConnectionInfo = await _dialogService.ShowMoshConnectionInfoDialogAsync();
+
+                    if (moshConnectionInfo == null)
+                    {
+                        if (Terminals.Count == 0)
+                        {
+                            await ApplicationView.TryClose();
+                        }
+
+                        return;
+                    }
+
+                    (string key, ushort port) = MoshAuthenticator.GetMoshKeyAndPort(moshConnectionInfo);
+
+                    if (port == 0)
+                    {
+                        if (Terminals.Count == 0)
+                        {
+                            await ApplicationView.TryClose();
+                        }
+
+                        return;
+                    }
+
+                    profile = new ShellProfile
+                    {
+                        Arguments = $"{moshConnectionInfo.Host} {port:#####}",
+                        Location = @"C:\Work\mosh-client\bin\mosh-client.exe",
+                        WorkingDirectory = string.Empty,
+                        LineEndingTranslation = LineEndingStyle.DoNotModify,
+                        EnvironmentVariables = { {"MOSH_USER", moshConnectionInfo.Username}, { "MOSH_KEY", key } }
                     };
 
                     break;

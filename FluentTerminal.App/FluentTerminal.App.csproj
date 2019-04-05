@@ -134,6 +134,9 @@
     <Compile Include="Dialogs\InputDialog.xaml.cs">
       <DependentUpon>InputDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Dialogs\MoshInfoDialog.xaml.cs">
+      <DependentUpon>MoshInfoDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Dialogs\ShellProfileSelectionDialog.xaml.cs">
       <DependentUpon>ShellProfileSelectionDialog.xaml</DependentUpon>
     </Compile>
@@ -301,6 +304,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Dialogs\MoshInfoDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Dialogs\ShellProfileSelectionDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -376,6 +383,9 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Asmodat.Standard.SSH.NET">
+      <Version>1.0.0.1</Version>
+    </PackageReference>
     <PackageReference Include="Autofac">
       <Version>4.9.1</Version>
     </PackageReference>
