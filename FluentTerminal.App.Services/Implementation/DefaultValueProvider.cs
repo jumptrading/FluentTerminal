@@ -118,12 +118,12 @@ namespace FluentTerminal.App.Services.Implementation
                     }
                 };
 
-                case Command.NewRemoteTab:
+                case Command.NewSshTab:
                     return new List<KeyBinding>
                     {
                         new KeyBinding
                         {
-                            Command = nameof(Command.NewRemoteTab),
+                            Command = nameof(Command.NewSshTab),
                             Ctrl = false,
                             Alt = true,
                             Shift = false,

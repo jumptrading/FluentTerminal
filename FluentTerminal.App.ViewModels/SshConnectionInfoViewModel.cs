@@ -28,5 +28,13 @@ namespace FluentTerminal.App.ViewModels
             get => _username;
             set => Set(ref _username, value);
         }
+
+        private string _fingerprint = string.Empty;
+
+        public string Fingerprint
+        {
+            get => _fingerprint;
+            set => Set(ref _fingerprint, value);
+        }
     }
 }

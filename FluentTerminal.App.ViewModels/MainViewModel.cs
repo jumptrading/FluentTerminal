@@ -9,7 +9,6 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
-using FluentTerminal.App.Services.Implementation;
 
 namespace FluentTerminal.App.ViewModels
 {
@@ -21,7 +20,6 @@ namespace FluentTerminal.App.ViewModels
         private readonly IKeyboardCommandService _keyboardCommandService;
         private readonly ISettingsService _settingsService;
         private readonly ITrayProcessCommunicationService _trayProcessCommunicationService;
-        private readonly IDefaultValueProvider _defaultValueProvider;
         private ApplicationSettings _applicationSettings;
         private string _background;
         private double _backgroundOpacity;
@@ -30,7 +28,7 @@ namespace FluentTerminal.App.ViewModels
         private string _windowTitle;
 
         public MainViewModel(ISettingsService settingsService, ITrayProcessCommunicationService trayProcessCommunicationService, IDialogService dialogService, IKeyboardCommandService keyboardCommandService,
-            IApplicationView applicationView, IDispatcherTimer dispatcherTimer, IClipboardService clipboardService, IDefaultValueProvider defaultValueProvider)
+            IApplicationView applicationView, IDispatcherTimer dispatcherTimer, IClipboardService clipboardService)
         {
             _settingsService = settingsService;
             _settingsService.CurrentThemeChanged += OnCurrentThemeChanged;
@@ -44,10 +42,9 @@ namespace FluentTerminal.App.ViewModels
             ApplicationView = applicationView;
             _dispatcherTimer = dispatcherTimer;
             _clipboardService = clipboardService;
-            _defaultValueProvider = defaultValueProvider;
             _keyboardCommandService = keyboardCommandService;
             _keyboardCommandService.RegisterCommandHandler(nameof(Command.NewTab), () => AddTerminal());
-            _keyboardCommandService.RegisterCommandHandler(nameof(Command.NewRemoteTab), () => AddRemoteTerminal());
+            _keyboardCommandService.RegisterCommandHandler(nameof(Command.NewSshTab), () => AddRemoteTerminal(RemoteHostType.Ssh));
             _keyboardCommandService.RegisterCommandHandler(nameof(Command.ConfigurableNewTab), () => AddConfigurableTerminal());
             _keyboardCommandService.RegisterCommandHandler(nameof(Command.ChangeTabTitle), () => SelectedTerminal.EditTitle());
             _keyboardCommandService.RegisterCommandHandler(nameof(Command.CloseTab), CloseCurrentTab);
@@ -218,32 +215,41 @@ namespace FluentTerminal.App.ViewModels
             });
         }
 
-        public Task AddRemoteTerminal()
+        public async Task AddRemoteTerminal(RemoteHostType type)
         {
-            return ApplicationView.RunOnDispatcherThread(async () =>
-            {
-                var connectionInfo = await _dialogService.ShowSshConnectionInfoDialogAsync();
+            ShellProfile profile;
 
-                if (connectionInfo == null)
-                {
-                    if (Terminals.Count == 0)
+            switch (type)
+            {
+                case RemoteHostType.Ssh:
+
+                    var sshConnectionInfo = await _dialogService.ShowSshConnectionInfoDialogAsync();
+
+                    if (sshConnectionInfo == null)
                     {
-                        await ApplicationView.TryClose();
+                        if (Terminals.Count == 0)
+                        {
+                            await ApplicationView.TryClose();
+                        }
+
+                        return;
                     }
 
+                    profile = new ShellProfile
+                    {
+                        Arguments = $"-p {sshConnectionInfo.Port:#####} {sshConnectionInfo.Username}@{sshConnectionInfo.Host}",
+                        Location = @"C:\Windows\System32\OpenSSH\ssh.exe",
+                        WorkingDirectory = string.Empty,
+                        LineEndingTranslation = LineEndingStyle.DoNotModify,
+                    };
+
+                    break;
+
+                default:
                     return;
-                }
+            }
 
-                var profile = new ShellProfile
-                {
-                    Arguments = $"-p {connectionInfo.Port:#####} {connectionInfo.Username}@{connectionInfo.Host}",
-                    Location = @"C:\Windows\System32\OpenSSH\ssh.exe",
-                    WorkingDirectory = string.Empty,
-                    LineEndingTranslation = LineEndingStyle.DoNotModify,
-                };
-
-                AddTerminal(profile);
-            });
+            await ApplicationView.RunOnDispatcherThread( () => AddTerminal(profile));
         }
 
         public void AddTerminal()
