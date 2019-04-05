@@ -15,7 +15,7 @@ namespace FluentTerminal.App.Protocols
 
         private static readonly Regex SshUrlRx =
             new Regex(
-                @"^ssh://(?<user>[^;@]+)(;fingerprint=(?<fingerprint>[^@]+))?@(?<host>[^/:\s]+)(:(?<port>\d{1,5}))?/?$",
+                @"^\s*ssh://(?<user>[^;@]+)(;fingerprint=(?<fingerprint>[^@]+))?@(?<host>[^/:\s]+)(:(?<port>\d{1,5}))?/?\s*$",
                 RegexOptions.Compiled);
 
         internal static bool IsSshProtocol(ProtocolActivatedEventArgs protocolEventArgs) =>
