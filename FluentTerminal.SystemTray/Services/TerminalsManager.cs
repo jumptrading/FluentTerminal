@@ -50,6 +50,17 @@ namespace FluentTerminal.SystemTray.Services
                 _terminals.Clear();
             }
 
+            if (string.Equals(request.Profile?.Location, "mosh-client.exe", StringComparison.OrdinalIgnoreCase))
+            {
+                string moshClientPath = Utilities.GetMoshClientPath();
+
+                if (moshClientPath == null)
+                    return new CreateTerminalResponse {Error = "mosh-client.exe not found."};
+
+                // ReSharper disable once PossibleNullReferenceException
+                request.Profile.Location = moshClientPath;
+            }
+
             ITerminalSession terminal = null;
             try
             {

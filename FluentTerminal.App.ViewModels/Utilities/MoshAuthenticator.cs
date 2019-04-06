@@ -4,12 +4,12 @@ using Renci.SshNet;
 
 namespace FluentTerminal.App.ViewModels.Utilities
 {
-    public static class MoshAuthenticator
+    internal static class MoshAuthenticator
     {
         private static readonly Regex MoshServerResponseRx =
             new Regex(@"^\s*MOSH\sCONNECT\s(?<port>\d{1,5}) (?<key>\S+)\s*$", RegexOptions.Compiled);
 
-        public static (string, ushort) GetMoshKeyAndPort(IMoshConnectionInfo moshConnectionInfo)
+        internal static (string, ushort) GetMoshKeyAndPort(IMoshConnectionInfo moshConnectionInfo)
         {
             ConnectionInfo connectionInfo = new ConnectionInfo(moshConnectionInfo.Host, moshConnectionInfo.Port,
                 moshConnectionInfo.Username,

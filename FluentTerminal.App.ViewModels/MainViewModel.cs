@@ -248,7 +248,7 @@ namespace FluentTerminal.App.ViewModels
                     break;
 
                 case RemoteHostType.Mosh:
-
+                    
                     var moshConnectionInfo = await _dialogService.ShowMoshConnectionInfoDialogAsync();
 
                     if (moshConnectionInfo == null)
@@ -276,7 +276,7 @@ namespace FluentTerminal.App.ViewModels
                     profile = new ShellProfile
                     {
                         Arguments = $"{moshConnectionInfo.Host} {port:#####}",
-                        Location = @"C:\Work\mosh-client\bin\mosh-client.exe",
+                        Location = "mosh-client.exe",
                         WorkingDirectory = string.Empty,
                         LineEndingTranslation = LineEndingStyle.DoNotModify,
                         EnvironmentVariables = { {"MOSH_USER", moshConnectionInfo.Username}, { "MOSH_KEY", key } }
