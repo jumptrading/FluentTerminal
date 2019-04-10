@@ -23,7 +23,7 @@ namespace FluentTerminal.App.Services.Implementation
             if (latest > GetCurrentVersion())
             {
                 _notificationService.ShowNotification("Update available",
-                    "Click to open the releases page.", "https://github.com/jumptrading/FluentTerminal/releases");
+                    "Click to open the releases page.", "https://github.com/MaxRis/FluentTerminal/releases");
             }
             else if (notifyNoUpdate)
             {
@@ -40,7 +40,7 @@ namespace FluentTerminal.App.Services.Implementation
         public async Task<Version> GetLatestVersionAsync()
         {
             var restClient = new RestClient(apiEndpoint);
-            var restRequest = new RestRequest("/repos/jumptrading/fluentterminal/releases", Method.GET);
+            var restRequest = new RestRequest("/repos/MaxRis/fluentterminal/releases", Method.GET);
 
             var restResponse = await restClient.ExecuteTaskAsync(restRequest);
             if (restResponse.IsSuccessful)
