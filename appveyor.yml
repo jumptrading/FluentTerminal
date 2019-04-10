@@ -24,7 +24,7 @@ test_script:
   - echo Skipt tests run
 deploy:
   release: 'FluentTerminal-%APPVEYOR_BUILD_VERSION%-${GIT_COMMIT_SHORT}'
-  description: 'Build ${APPVEYOR_REPO_COMMIT} on update-availablility-check branch'
+  description: 'Build ${APPVEYOR_REPO_COMMIT} on !! update-availablility-check branch'
   provider: GitHub
   auth_token:
     secure: rwuDF3ROrdEzxJ9HaT/aedOWRuiDPDp6T5a7WmdGBl54bm4d5z9S2L6SLMYD9WRo
