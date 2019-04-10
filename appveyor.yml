@@ -8,10 +8,10 @@ platform:
 skip_tags: true
 before_build:
 - cmd: git rev-parse --short HEAD>commit.txt && set /p GIT_COMMIT_SHORT=<commit.txt
-- ps:
-  - [xml]$manifest = Get-Content './FluentTerminal.App/Package.appxmanifest'
-  - $manifest.Package.Identity.Version = "$Env:APPVEYOR_BUILD_VERSION"
-  - $manifest.Save((Resolve-Path './FluentTerminal.App/Package.appxmanifest'))
+- ps: |
+    [xml]$manifest = Get-Content './FluentTerminal.App/Package.appxmanifest'
+    $manifest.Package.Identity.Version = "$Env:APPVEYOR_BUILD_VERSION"
+    $manifest.Save((Resolve-Path './FluentTerminal.App/Package.appxmanifest'))
 - cmd: pushd . && cd FluentTerminal.Client && npm install && npm run-script build && popd && nuget restore FluentTerminal.sln
 after_build:
 - cmd: '7z a FluentTerminal-v%APPVEYOR_BUILD_VERSION%-%GIT_COMMIT_SHORT%.zip FluentTerminal.App\AppPackages\*'
