@@ -8,27 +8,30 @@
     Title="SSH Info"
     PrimaryButtonText="OK"
     SecondaryButtonText="Cancel"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    Loaded="SshInfoDialog_Loaded">
     <ContentDialog.DataContext>
         <vm:SshConnectionInfoViewModel />
     </ContentDialog.DataContext>
     <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
         <TextBox
-            Width="50"
+            Width="100"
             PlaceholderText="user"
             Text="{Binding Username, Mode=TwoWay}" />
         <TextBlock
             Width="20"
             FontSize="22"
-            Text="@" />
+            Text="@" 
+            TextAlignment="Center" />
         <TextBox
-            Width="120"
+            Width="160"
             PlaceholderText="host"
             Text="{Binding Host, Mode=TwoWay}" />
         <TextBlock
             Width="20"
             FontSize="22"
-            Text=":" />
+            Text=":" 
+            TextAlignment="Center" />
         <TextBox
             Width="50"
             PlaceholderText="port"

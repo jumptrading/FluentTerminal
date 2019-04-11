@@ -8,13 +8,14 @@
     mc:Ignorable="d"
     Title="MOSH Info"
     PrimaryButtonText="OK"
-    SecondaryButtonText="Cancel">
+    SecondaryButtonText="Cancel"
+    Loaded="MoshInfoDialog_Loaded">
     <ContentDialog.DataContext>
         <viewModels:MoshConnectionInfoViewModel />
     </ContentDialog.DataContext>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="133"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
@@ -24,21 +25,23 @@
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center" Orientation="Horizontal">
             <TextBox
-                Width="50"
+                Width="100"
                 PlaceholderText="user"
                 Text="{Binding Username, Mode=TwoWay}" />
             <TextBlock
                 Width="20"
                 FontSize="22"
-                Text="@" />
+                Text="@"
+                TextAlignment="Center" />
             <TextBox
-                Width="120"
+                Width="160"
                 PlaceholderText="host"
                 Text="{Binding Host, Mode=TwoWay}" />
             <TextBlock
                 Width="20"
                 FontSize="22"
-                Text=":" />
+                Text=":"
+                TextAlignment="Center" />
             <TextBox
                 Width="50"
                 PlaceholderText="port"

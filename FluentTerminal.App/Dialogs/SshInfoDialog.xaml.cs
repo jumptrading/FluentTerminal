@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Windows.Foundation.Metadata;
 using Windows.UI.Xaml.Controls;
 using FluentTerminal.App.Services.Dialogs;
 using FluentTerminal.App.Utilities;
@@ -21,6 +22,14 @@ namespace FluentTerminal.App.Dialogs
             ContentDialogResult result = await ShowAsync();
 
             return result == ContentDialogResult.Primary ? (ISshConnectionInfo)DataContext : null;
+        }
+
+        private void SshInfoDialog_Loaded(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            if (ApiInformation.IsPropertyPresent("Windows.UI.Xaml.Controls.ContentDialog", "DefaultButton"))
+            {
+                this.DefaultButton = ContentDialogButton.Primary;
+            }
         }
     }
 }
