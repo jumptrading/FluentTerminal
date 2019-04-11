@@ -30,8 +30,7 @@ namespace FluentTerminal.App.Protocols
                 {
                     Host = match.Groups["host"].Value,
                     Port = match.Groups["port"].Success ? ushort.Parse(match.Groups["port"].Value) : DefaultSshPort,
-                    Username = match.Groups["user"].Value,
-                    Fingerprint = match.Groups["fingerprint"].Success ? match.Groups["fingerprint"].Value : string.Empty
+                    Username = match.Groups["user"].Value
                 }
                 : null;
         }

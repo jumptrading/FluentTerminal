@@ -7,7 +7,5 @@
         ushort Port { get; set; }
 
         string Username { get; set; }
-
-        string Fingerprint { get; set; }
     }
 }

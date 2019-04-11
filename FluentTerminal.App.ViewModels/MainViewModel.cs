@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentTerminal.App.Services.Implementation;
 using FluentTerminal.App.ViewModels.Utilities;
 
 namespace FluentTerminal.App.ViewModels
@@ -21,6 +22,7 @@ namespace FluentTerminal.App.ViewModels
         private readonly IKeyboardCommandService _keyboardCommandService;
         private readonly ISettingsService _settingsService;
         private readonly ITrayProcessCommunicationService _trayProcessCommunicationService;
+        private readonly IDefaultValueProvider _defaultValueProvider;
         private ApplicationSettings _applicationSettings;
         private string _background;
         private double _backgroundOpacity;
@@ -29,7 +31,7 @@ namespace FluentTerminal.App.ViewModels
         private string _windowTitle;
 
         public MainViewModel(ISettingsService settingsService, ITrayProcessCommunicationService trayProcessCommunicationService, IDialogService dialogService, IKeyboardCommandService keyboardCommandService,
-            IApplicationView applicationView, IDispatcherTimer dispatcherTimer, IClipboardService clipboardService)
+            IApplicationView applicationView, IDispatcherTimer dispatcherTimer, IClipboardService clipboardService, IDefaultValueProvider defaultValueProvider)
         {
             _settingsService = settingsService;
             _settingsService.CurrentThemeChanged += OnCurrentThemeChanged;
@@ -43,6 +45,7 @@ namespace FluentTerminal.App.ViewModels
             ApplicationView = applicationView;
             _dispatcherTimer = dispatcherTimer;
             _clipboardService = clipboardService;
+            _defaultValueProvider = defaultValueProvider;
             _keyboardCommandService = keyboardCommandService;
             _keyboardCommandService.RegisterCommandHandler(nameof(Command.NewTab), () => AddTerminal());
             _keyboardCommandService.RegisterCommandHandler(nameof(Command.NewSshTab), () => AddRemoteTerminal(RemoteHostType.Ssh));

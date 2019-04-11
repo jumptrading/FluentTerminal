@@ -158,6 +158,9 @@
     <Compile Include="Dialogs\CreateKeyBindingDialog.xaml.cs">
       <DependentUpon>CreateKeyBindingDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\OverlayView.xaml.cs">
+      <DependentUpon>OverlayView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\SettingsPage.xaml.cs">
       <DependentUpon>SettingsPage.xaml</DependentUpon>
     </Compile>
@@ -241,6 +244,7 @@
     <Content Include="Win32\winpty.dll" />
     <Content Include="Win32\winpty.NET.dll" />
     <None Include="FluentTerminal.App_StoreKey.pfx" />
+    <None Include="FluentTerminal.App_TemporaryKey.pfx" />
     <Content Include="Client\bundle.js" />
     <Content Include="Client\index.html" />
     <Content Include="Client\style.css" />
@@ -746,8 +750,8 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Dialogs\MoshInfoDialog.xaml">
-      <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Dialogs\ShellProfileSelectionDialog.xaml">
       <SubType>Designer</SubType>
@@ -767,6 +771,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Page>
     <Page Include="Dialogs\CreateKeyBindingDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\OverlayView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -824,9 +832,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Asmodat.Standard.SSH.NET">
-      <Version>1.0.0.1</Version>
-    </PackageReference>
     <PackageReference Include="Autofac">
       <Version>4.9.1</Version>
     </PackageReference>

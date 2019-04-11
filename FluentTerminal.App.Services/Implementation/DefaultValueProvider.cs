@@ -38,9 +38,6 @@ namespace FluentTerminal.App.Services.Implementation
                     new KeyBinding
                     {
                         Command = nameof(Command.ToggleWindow),
-                        Ctrl = false,
-                        Alt = false,
-                        Shift = false,
                         Key = (int)ExtendedVirtualKey.Scroll
                     }
                 };
@@ -52,8 +49,6 @@ namespace FluentTerminal.App.Services.Implementation
                     {
                         Command = nameof(Command.NextTab),
                         Ctrl = true,
-                        Alt = false,
-                        Shift = false,
                         Key = (int)ExtendedVirtualKey.Tab
                     }
                 };
@@ -65,7 +60,6 @@ namespace FluentTerminal.App.Services.Implementation
                     {
                         Command = nameof(Command.PreviousTab),
                         Ctrl = true,
-                        Alt = false,
                         Shift = true,
                         Key = (int)ExtendedVirtualKey.Tab
                     }
@@ -85,9 +79,7 @@ namespace FluentTerminal.App.Services.Implementation
                     new KeyBinding
                     {
                         Command = command.ToString(),
-                        Ctrl = true,
-                        Alt = false,
-                        Shift = false,
+                        Alt = true,
                         Key = (int)ExtendedVirtualKey.Number1 + (command - Command.SwitchToTerm1)
                     }
                 };
@@ -99,8 +91,7 @@ namespace FluentTerminal.App.Services.Implementation
                     {
                         Command = nameof(Command.NewTab),
                         Ctrl = true,
-                        Alt = false,
-                        Shift = false,
+                        Shift = true,
                         Key = (int)ExtendedVirtualKey.T
                     }
                 };
@@ -112,8 +103,7 @@ namespace FluentTerminal.App.Services.Implementation
                     {
                         Command = nameof(Command.ConfigurableNewTab),
                         Ctrl = true,
-                        Alt = false,
-                        Shift = true,
+                        Alt = true,
                         Key = (int)ExtendedVirtualKey.T
                     }
                 };
@@ -151,7 +141,6 @@ namespace FluentTerminal.App.Services.Implementation
                     {
                         Command = nameof(Command.ChangeTabTitle),
                         Ctrl = true,
-                        Alt = false,
                         Shift = true,
                         Key = (int)ExtendedVirtualKey.R
                     }
@@ -164,8 +153,7 @@ namespace FluentTerminal.App.Services.Implementation
                     {
                         Command = nameof(Command.CloseTab),
                         Ctrl = true,
-                        Alt = false,
-                        Shift = false,
+                        Shift = true,
                         Key = (int)ExtendedVirtualKey.W
                     }
                 };
@@ -177,8 +165,7 @@ namespace FluentTerminal.App.Services.Implementation
                     {
                         Command = nameof(Command.NewWindow),
                         Ctrl = true,
-                        Alt = false,
-                        Shift = false,
+                        Shift = true,
                         Key = (int)ExtendedVirtualKey.N
                     }
                 };
@@ -190,8 +177,7 @@ namespace FluentTerminal.App.Services.Implementation
                     {
                         Command = nameof(Command.ConfigurableNewWindow),
                         Ctrl = true,
-                        Alt = false,
-                        Shift = true,
+                        Alt = true,
                         Key = (int)ExtendedVirtualKey.N
                     }
                 };
@@ -203,8 +189,7 @@ namespace FluentTerminal.App.Services.Implementation
                     {
                         Command = nameof(Command.ShowSettings),
                         Ctrl = true,
-                        Alt = false,
-                        Shift = false,
+                        Shift = true,
                         Key = (int)ExtendedVirtualKey.Comma
                     }
                 };
@@ -216,8 +201,7 @@ namespace FluentTerminal.App.Services.Implementation
                     {
                         Command = nameof(Command.Copy),
                         Ctrl = true,
-                        Alt = false,
-                        Shift = false,
+                        Shift = true,
                         Key = (int)ExtendedVirtualKey.C
                     }
                 };
@@ -229,8 +213,7 @@ namespace FluentTerminal.App.Services.Implementation
                     {
                         Command = nameof(Command.Paste),
                         Ctrl = true,
-                        Alt = false,
-                        Shift = false,
+                        Shift = true,
                         Key = (int)ExtendedVirtualKey.V
                     }
                 };
@@ -243,8 +226,7 @@ namespace FluentTerminal.App.Services.Implementation
                     {
                         Command = nameof(Command.PasteWithoutNewlines),
                         Ctrl = true,
-                        Alt = false,
-                        Shift = true,
+                        Alt = true,
                         Key = (int)ExtendedVirtualKey.V
                     }
                 };
@@ -256,8 +238,7 @@ namespace FluentTerminal.App.Services.Implementation
                     {
                         Command = nameof(Command.Search),
                         Ctrl = true,
-                        Alt = false,
-                        Shift = false,
+                        Shift = true,
                         Key = (int)ExtendedVirtualKey.F
                     }
                 };
@@ -268,9 +249,7 @@ namespace FluentTerminal.App.Services.Implementation
                     new KeyBinding
                     {
                         Command = nameof(Command.ToggleFullScreen),
-                        Ctrl = false,
                         Alt = true,
-                        Shift = false,
                         Key = (int)ExtendedVirtualKey.Enter
                     }
                 };
@@ -282,8 +261,7 @@ namespace FluentTerminal.App.Services.Implementation
                     {
                         Command = nameof(Command.SelectAll),
                         Ctrl = true,
-                        Alt = false,
-                        Shift = false,
+                        Shift = true,
                         Key = (int)ExtendedVirtualKey.A
                     }
                 };
@@ -295,8 +273,7 @@ namespace FluentTerminal.App.Services.Implementation
                     {
                         Command = nameof(Command.Clear),
                         Ctrl = true,
-                        Alt = false,
-                        Shift = false,
+                        Alt = true,
                         Key = (int)ExtendedVirtualKey.L
                     }
                 };
@@ -604,18 +581,18 @@ namespace FluentTerminal.App.Services.Implementation
                     Black = "#300A24",
                     Red = "#CC0000",
                     Green = "#4E9A06",
-                    Yellow = "#06989A",
+                    Yellow = "#C4A000",
                     Blue = "#3465A4",
                     Magenta = "#75507B",
-                    Cyan = "#C4A000",
+                    Cyan = "#06989A",
                     White = "#D3D7CF",
                     BrightBlack = "#554E53",
                     BrightRed = "#EF2929",
                     BrightGreen = "#8AE234",
-                    BrightYellow = "#34E2E2",
+                    BrightYellow = "#FCE94F",
                     BrightBlue = "#729FCF",
                     BrightMagenta = "#AD7FA8",
-                    BrightCyan = "#FCE94F",
+                    BrightCyan = "#34E2E2",
                     BrightWhite = "#EEEEEE"
                 }
             };
