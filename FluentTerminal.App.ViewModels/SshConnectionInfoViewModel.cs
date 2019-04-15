@@ -1,4 +1,4 @@
-﻿using FluentTerminal.App.Services.Dialogs;
+﻿using FluentTerminal.Models;
 using GalaSoft.MvvmLight;
 
 namespace FluentTerminal.App.ViewModels
@@ -53,6 +53,20 @@ namespace FluentTerminal.App.ViewModels
             set => Set(ref _password, value);
         }
 
+        private bool _passphraseNeeded;
+
+        public bool PassphraseNeeded
+        {
+            get => _passphraseNeeded;
+            set
+            {
+                Set(ref _passphraseNeeded, value);
+
+                if (!value)
+                    Passphrase = string.Empty;
+            }
+        }
+
         private string _passphrase = string.Empty;
 
         public string Passphrase
@@ -67,6 +81,30 @@ namespace FluentTerminal.App.ViewModels
         {
             get => _moshPorts;
             set => Set(ref _moshPorts, value);
+        }
+
+        public void CopyFrom(ISshConnectionInfo original)
+        {
+            Host = original.Host;
+            SshPort = original.SshPort;
+            Username = original.Username;
+            IdentityFile = original.IdentityFile;
+            UseMosh = original.UseMosh;
+            Password = original.Password;
+            Passphrase = original.Passphrase;
+            MoshPorts = original.MoshPorts;
+        }
+
+        public void CopyTo(ISshConnectionInfo copy)
+        {
+            copy.Host = Host;
+            copy.SshPort = SshPort;
+            copy.Username = Username;
+            copy.IdentityFile = IdentityFile;
+            copy.UseMosh = UseMosh;
+            copy.Password = Password;
+            copy.Passphrase = Passphrase;
+            copy.MoshPorts = MoshPorts;
         }
     }
 }

@@ -1,0 +1,52 @@
+﻿<ContentDialog
+    x:Class="FluentTerminal.App.Dialogs.SshAuthenticationDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:FluentTerminal.App.ViewModels"
+    xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    mc:Ignorable="d"
+    Title="Authentication"
+    PrimaryButtonText="OK"
+    SecondaryButtonText="Cancel">
+    <ContentDialog.DataContext>
+        <vm:SshConnectionInfoViewModel />
+    </ContentDialog.DataContext>
+    <StackPanel Orientation="Vertical" Width="500" VerticalAlignment="Center">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding Username}"/>
+            <TextBlock Text="@"/>
+            <TextBlock Text="{Binding Host}"/>
+        </StackPanel>
+        <controls:TabView HorizontalAlignment="Stretch">
+            <controls:TabViewItem Header="Identity File">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <TextBox Grid.Column="0" Grid.Row="0" 
+                             Text="{Binding IdentityFile}" 
+                             PlaceholderText="Identity file path" />
+                    <Button Grid.Column="1" Grid.Row="0" 
+                            Content="Browse" 
+                            HorizontalAlignment="Right" 
+                            Width="76" 
+                            Click="BrowseButtonOnClick"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Passphrase:"/>
+                        <PasswordBox Password="{Binding Passphrase, Mode=TwoWay}"/>
+                    </StackPanel>
+                </Grid>
+            </controls:TabViewItem>
+            <controls:TabViewItem Header="Password">
+                <PasswordBox Password="{Binding Password, Mode=TwoWay}" VerticalAlignment="Center"/>
+            </controls:TabViewItem>
+        </controls:TabView>
+    </StackPanel>
+</ContentDialog>

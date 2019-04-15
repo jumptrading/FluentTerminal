@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text.RegularExpressions;
 using FluentTerminal.App.Services.Dialogs;
+using FluentTerminal.Models;
 using Renci.SshNet;
 
 namespace FluentTerminal.SystemTray.Tools

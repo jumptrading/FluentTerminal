@@ -1,9 +1,10 @@
 ﻿using System.Threading.Tasks;
+using FluentTerminal.Models;
 
 namespace FluentTerminal.App.Services.Dialogs
 {
     public interface ISshConnectionInfoDialog
     {
-        Task<ISshConnectionInfo> GetSshConnectionInfoAsync();
+        Task<SshConnectionInfo> GetSshConnectionInfoAsync();
     }
 }

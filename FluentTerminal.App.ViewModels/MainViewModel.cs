@@ -236,9 +236,16 @@ namespace FluentTerminal.App.ViewModels
                         return;
                     }
 
+                    string arguments = sshConnectionInfo.SshPort == 22 ? "" : $"-p {sshConnectionInfo.SshPort:#####} ";
+
+                    if (!string.IsNullOrEmpty(sshConnectionInfo.IdentityFile))
+                        arguments += $"-i {sshConnectionInfo.IdentityFile} ";
+
+                    arguments += $"{sshConnectionInfo.Username}@{sshConnectionInfo.Host}";
+
                     profile = new ShellProfile
                     {
-                        Arguments = $"-p {sshConnectionInfo.SshPort:#####} {sshConnectionInfo.Username}@{sshConnectionInfo.Host}",
+                        Arguments = arguments,
                         Location = @"C:\Windows\System32\OpenSSH\ssh.exe",
                         WorkingDirectory = string.Empty,
                         LineEndingTranslation = LineEndingStyle.DoNotModify,

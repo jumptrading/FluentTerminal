@@ -1,4 +1,4 @@
-﻿namespace FluentTerminal.App.Services.Dialogs
+﻿namespace FluentTerminal.Models
 {
     public interface ISshConnectionInfo
     {
