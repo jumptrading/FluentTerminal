@@ -12,26 +12,55 @@
     <ContentDialog.DataContext>
         <vm:SshConnectionInfoViewModel />
     </ContentDialog.DataContext>
-    <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-        <TextBox
-            Width="50"
-            PlaceholderText="user"
-            Text="{Binding Username, Mode=TwoWay}" />
-        <TextBlock
-            Width="20"
-            FontSize="22"
-            Text="@" />
-        <TextBox
-            Width="120"
-            PlaceholderText="host"
-            Text="{Binding Host, Mode=TwoWay}" />
-        <TextBlock
-            Width="20"
-            FontSize="22"
-            Text=":" />
-        <TextBox
-            Width="50"
-            PlaceholderText="port"
-            Text="{Binding Port, Mode=TwoWay}" />
-    </StackPanel>
+    <Grid Width="500">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Column="0" Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Stretch">
+            <TextBox
+                Width="100"
+                PlaceholderText="user"
+                Text="{Binding Username, Mode=TwoWay}" />
+            <TextBlock
+                Width="22"
+                FontSize="22"
+                Text="@" />
+            <TextBox
+                Width="280"
+                PlaceholderText="host"
+                Text="{Binding Host, Mode=TwoWay}"
+                HorizontalAlignment="Stretch" />
+            <TextBlock
+                Margin="4 0 0 0"
+                FontSize="22"
+                Text=":" />
+        </StackPanel>
+        <TextBox Grid.Column="1" Grid.Row="0"
+                 Width="76"
+                 PlaceholderText="port"
+                 Text="{Binding SshPort, Mode=TwoWay}"
+                 Margin="10 0 0 0" />
+        <TextBox Grid.Column="0" Grid.Row="1" 
+                 Text="{Binding IdentityFile}" 
+                 PlaceholderText="Identity file path" 
+                 Margin="0 10 0 0"/>
+        <Button Grid.Column="1" Grid.Row="1" 
+                Content="Browse" 
+                HorizontalAlignment="Right" 
+                Width="76" 
+                Margin="10 10 0 0"
+                Click="BrowseButtonOnClick"/>
+        <CheckBox Grid.Column="0" Grid.Row="2" 
+                  IsChecked="{Binding UseMosh}" 
+                  Content="Use MOSH" 
+                  HorizontalAlignment="Left" 
+                  Margin="0 10 0 0"/>
+    </Grid>
 </ContentDialog>

@@ -20,7 +20,5 @@ namespace FluentTerminal.App.Services
         Task<string> ShowInputDialogAsync(string title);
 
         Task<ISshConnectionInfo> ShowSshConnectionInfoDialogAsync();
-
-        Task<IMoshConnectionInfo> ShowMoshConnectionInfoDialogAsync();
     }
 }

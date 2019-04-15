@@ -89,7 +89,6 @@ namespace FluentTerminal.App
             builder.RegisterType<InputDialog>().As<IInputDialog>().InstancePerDependency();
             builder.RegisterType<MessageDialogAdapter>().As<IMessageDialog>().InstancePerDependency();
             builder.RegisterType<SshInfoDialog>().As<ISshConnectionInfoDialog>().InstancePerDependency();
-            builder.RegisterType<MoshInfoDialog>().As<IMoshConnectionInfoDialog>().InstancePerDependency();
             builder.RegisterType<ApplicationViewAdapter>().As<IApplicationView>().InstancePerDependency();
             builder.RegisterType<DispatcherTimerAdapter>().As<IDispatcherTimer>().InstancePerDependency();
             builder.RegisterType<StartupTaskService>().As<IStartupTaskService>().SingleInstance();
@@ -151,8 +150,21 @@ namespace FluentTerminal.App
             }
         }
 
+        private static (string, bool) GetIdentityFile()
+        {
+            DirectoryInfo ssh = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.Personal)).Parent;
+
+            ssh = new DirectoryInfo(Path.Combine(ssh.FullName, ".ssh"));
+
+            FileInfo[] files = ssh.GetFiles();
+
+            return ("", false);
+        }
+
         protected override void OnActivated(IActivatedEventArgs args)
         {
+            (string pera, bool mika) = GetIdentityFile();
+
             if (args is ProtocolActivatedEventArgs protocolActivated)
             {
                 // TODO: Check what happens if ssh link is invalid?

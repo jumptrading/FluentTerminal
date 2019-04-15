@@ -9,8 +9,6 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
-using FluentTerminal.App.Services.Implementation;
-using FluentTerminal.App.ViewModels.Utilities;
 
 namespace FluentTerminal.App.ViewModels
 {
@@ -22,7 +20,6 @@ namespace FluentTerminal.App.ViewModels
         private readonly IKeyboardCommandService _keyboardCommandService;
         private readonly ISettingsService _settingsService;
         private readonly ITrayProcessCommunicationService _trayProcessCommunicationService;
-        private readonly IDefaultValueProvider _defaultValueProvider;
         private ApplicationSettings _applicationSettings;
         private string _background;
         private double _backgroundOpacity;
@@ -31,7 +28,7 @@ namespace FluentTerminal.App.ViewModels
         private string _windowTitle;
 
         public MainViewModel(ISettingsService settingsService, ITrayProcessCommunicationService trayProcessCommunicationService, IDialogService dialogService, IKeyboardCommandService keyboardCommandService,
-            IApplicationView applicationView, IDispatcherTimer dispatcherTimer, IClipboardService clipboardService, IDefaultValueProvider defaultValueProvider)
+            IApplicationView applicationView, IDispatcherTimer dispatcherTimer, IClipboardService clipboardService)
         {
             _settingsService = settingsService;
             _settingsService.CurrentThemeChanged += OnCurrentThemeChanged;
@@ -45,7 +42,6 @@ namespace FluentTerminal.App.ViewModels
             ApplicationView = applicationView;
             _dispatcherTimer = dispatcherTimer;
             _clipboardService = clipboardService;
-            _defaultValueProvider = defaultValueProvider;
             _keyboardCommandService = keyboardCommandService;
             _keyboardCommandService.RegisterCommandHandler(nameof(Command.NewTab), () => AddTerminal());
             _keyboardCommandService.RegisterCommandHandler(nameof(Command.NewSshTab), () => AddRemoteTerminal(RemoteHostType.Ssh));
@@ -242,7 +238,7 @@ namespace FluentTerminal.App.ViewModels
 
                     profile = new ShellProfile
                     {
-                        Arguments = $"-p {sshConnectionInfo.Port:#####} {sshConnectionInfo.Username}@{sshConnectionInfo.Host}",
+                        Arguments = $"-p {sshConnectionInfo.SshPort:#####} {sshConnectionInfo.Username}@{sshConnectionInfo.Host}",
                         Location = @"C:\Windows\System32\OpenSSH\ssh.exe",
                         WorkingDirectory = string.Empty,
                         LineEndingTranslation = LineEndingStyle.DoNotModify,
@@ -250,42 +246,42 @@ namespace FluentTerminal.App.ViewModels
 
                     break;
 
-                case RemoteHostType.Mosh:
+                //case RemoteHostType.Mosh:
                     
-                    var moshConnectionInfo = await _dialogService.ShowMoshConnectionInfoDialogAsync();
+                //    var moshConnectionInfo = await _dialogService.ShowMoshConnectionInfoDialogAsync();
 
-                    if (moshConnectionInfo == null)
-                    {
-                        if (Terminals.Count == 0)
-                        {
-                            await ApplicationView.TryClose();
-                        }
+                //    if (moshConnectionInfo == null)
+                //    {
+                //        if (Terminals.Count == 0)
+                //        {
+                //            await ApplicationView.TryClose();
+                //        }
 
-                        return;
-                    }
+                //        return;
+                //    }
 
-                    (string key, ushort port) = MoshAuthenticator.GetMoshKeyAndPort(moshConnectionInfo);
+                //    (string key, ushort port) = SshTools.GetMoshKeyAndPort(moshConnectionInfo);
 
-                    if (port == 0)
-                    {
-                        if (Terminals.Count == 0)
-                        {
-                            await ApplicationView.TryClose();
-                        }
+                //    if (port == 0)
+                //    {
+                //        if (Terminals.Count == 0)
+                //        {
+                //            await ApplicationView.TryClose();
+                //        }
 
-                        return;
-                    }
+                //        return;
+                //    }
 
-                    profile = new ShellProfile
-                    {
-                        Arguments = $"{moshConnectionInfo.Host} {port:#####}",
-                        Location = "mosh-client.exe",
-                        WorkingDirectory = string.Empty,
-                        LineEndingTranslation = LineEndingStyle.DoNotModify,
-                        EnvironmentVariables = { {"MOSH_USER", moshConnectionInfo.Username}, { "MOSH_KEY", key } }
-                    };
+                //    profile = new ShellProfile
+                //    {
+                //        Arguments = $"{moshConnectionInfo.Host} {port:#####}",
+                //        Location = "mosh-client.exe",
+                //        WorkingDirectory = string.Empty,
+                //        LineEndingTranslation = LineEndingStyle.DoNotModify,
+                //        EnvironmentVariables = { {"MOSH_USER", moshConnectionInfo.Username}, { "MOSH_KEY", key } }
+                //    };
 
-                    break;
+                //    break;
 
                 default:
                     return;

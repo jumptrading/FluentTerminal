@@ -29,7 +29,7 @@ namespace FluentTerminal.App.Protocols
                 ? new SshConnectionInfoViewModel
                 {
                     Host = match.Groups["host"].Value,
-                    Port = match.Groups["port"].Success ? ushort.Parse(match.Groups["port"].Value) : DefaultSshPort,
+                    SshPort = match.Groups["port"].Success ? ushort.Parse(match.Groups["port"].Value) : DefaultSshPort,
                     Username = match.Groups["user"].Value
                 }
                 : null;

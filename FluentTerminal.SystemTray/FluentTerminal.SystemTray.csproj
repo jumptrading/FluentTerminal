@@ -132,6 +132,7 @@
     <Compile Include="Services\TerminalsManager.cs" />
     <Compile Include="Services\WinPty\WinPtySession.cs" />
     <Compile Include="SystemTrayApplicationContext.cs" />
+    <Compile Include="Tools\SshTools.cs" />
     <Compile Include="Utilities.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -161,6 +162,9 @@
     <None Include="Resources\Square44x44Logo.scale-100.ico" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Asmodat.Standard.SSH.NET">
+      <Version>1.0.0.1</Version>
+    </PackageReference>
     <PackageReference Include="Autofac">
       <Version>4.9.1</Version>
     </PackageReference>
@@ -184,11 +188,16 @@
       <Project>{A1AD7385-F92E-46AC-A349-43DC99B1E72D}</Project>
       <Name>FluentTerminal.App.Services</Name>
     </ProjectReference>
+    <ProjectReference Include="..\FluentTerminal.App.ViewModels\FluentTerminal.App.ViewModels.csproj">
+      <Project>{44e8e225-f46c-47ec-9290-ffa08fccf1b5}</Project>
+      <Name>FluentTerminal.App.ViewModels</Name>
+    </ProjectReference>
     <ProjectReference Include="..\FluentTerminal.Models\FluentTerminal.Models.csproj">
       <Project>{5EA40453-A0AA-449E-8406-D6EA51D7E70E}</Project>
       <Name>FluentTerminal.Models</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy /y "$(ProjectDir)BinaryDependencies\$(PlatformName)" "$(ProjectDir)bin\$(PlatformName)\$(ConfigurationName)\"
