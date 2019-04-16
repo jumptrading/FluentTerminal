@@ -17,11 +17,12 @@ namespace FluentTerminal.SystemTray.Services.ConPty
 
         public string ShellExecutableName { get; private set; }
 
-        public event EventHandler ConnectionClosed;
+        public event EventHandler<int> ConnectionClosed;
 
         public void Close()
         {
-            ConnectionClosed?.Invoke(this, EventArgs.Empty);
+            // FIXME - 0 is a lie, determine actual exit code
+            ConnectionClosed?.Invoke(this, 0);
         }
 
         public void Resize(TerminalSize size)

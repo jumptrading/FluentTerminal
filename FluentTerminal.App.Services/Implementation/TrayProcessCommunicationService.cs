@@ -16,7 +16,7 @@ namespace FluentTerminal.App.Services.Implementation
         private readonly Dictionary<int, Action<byte[]>> _terminalOutputHandlers;
         private int _nextTerminalId = 0;
 
-        public event EventHandler<int> TerminalExited;
+        public event EventHandler<(int, int)> TerminalExited;
 
         public TrayProcessCommunicationService(ISettingsService settingsService)
         {
@@ -91,7 +91,7 @@ namespace FluentTerminal.App.Services.Implementation
 
                 Logger.Instance.Debug("Received TerminalExitedRequest: {@request}", request);
 
-                TerminalExited?.Invoke(this, request.TerminalId);
+                TerminalExited?.Invoke(this, (request.TerminalId, request.ExitCode));
             }
         }
 
@@ -138,7 +138,8 @@ namespace FluentTerminal.App.Services.Implementation
         {
             var request = new TerminalExitedRequest
             {
-                TerminalId = terminalId
+                TerminalId = terminalId,
+                ExitCode = -1,
             };
 
             Logger.Instance.Debug("Sending TerminalExitedRequest: {@request}", request);

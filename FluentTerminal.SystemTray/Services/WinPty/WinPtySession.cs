@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
+using FluentTerminal.App.Services;
 using static winpty.WinPty;
 
 namespace FluentTerminal.SystemTray.Services.WinPty
@@ -114,7 +115,7 @@ namespace FluentTerminal.SystemTray.Services.WinPty
             return configuration.WorkingDirectory;
         }
 
-        public event EventHandler ConnectionClosed;
+        public event EventHandler<int> ConnectionClosed;
 
         public int Id { get; private set; }
 
@@ -129,7 +130,13 @@ namespace FluentTerminal.SystemTray.Services.WinPty
 
         public void Close()
         {
-            ConnectionClosed?.Invoke(this, EventArgs.Empty);
+            int exitCode = -1;
+            if (_shellProcess != null && _shellProcess.HasExited)
+            {
+                Logger.Instance.Information("process exited with {exitcode}", _shellProcess.ExitCode);
+                exitCode = _shellProcess.ExitCode;
+            }
+            ConnectionClosed?.Invoke(this, exitCode);
         }
 
         public void Write(byte[] data)

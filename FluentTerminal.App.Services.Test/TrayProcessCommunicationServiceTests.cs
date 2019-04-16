@@ -114,13 +114,16 @@ namespace FluentTerminal.App.Services.Test
         [Fact]
         public void OnMessageReceived_TerminalExitedRequest_InvokesTerminalExitedEvent()
         {
-            var terminalId = _fixture.Create<int>();
-            var receivedTerminalId = 0;
-            var terminalExitedEventCalled = false;
             var request = new TerminalExitedRequest
             {
-                TerminalId = terminalId
+                TerminalId = _fixture.Create<int>(),
+                ExitCode = _fixture.Create<int>(),
             };
+
+            var terminalExitedEventCalled = false;
+            var receivedTerminalId = 0;
+            var receivedExitCode = 0;
+
             var message = new Dictionary<string, string>
             {
                 [MessageKeys.Type] = nameof(TerminalExitedRequest),
@@ -138,13 +141,14 @@ namespace FluentTerminal.App.Services.Test
             trayProcessCommunicationService.TerminalExited += (s, e) =>
             {
                 terminalExitedEventCalled = true;
-                receivedTerminalId = e;
+                (receivedTerminalId, receivedExitCode) = e;
             };
 
             appServiceConnection.Raise(x => x.MessageReceived += null, null, message);
 
             terminalExitedEventCalled.Should().BeTrue();
-            receivedTerminalId.Should().Be(terminalId);
+            receivedTerminalId.Should().Be(request.TerminalId);
+            receivedExitCode.Should().Be(request.ExitCode);
         }
 
         [Fact]
