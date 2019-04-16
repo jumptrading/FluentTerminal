@@ -22,9 +22,6 @@ namespace FluentTerminal.Models.Enums
         [Description("New SSH tab")]
         NewSshTab,
 
-        [Description("New MOSH tab")]
-        NewMoshTab,
-
         [Description("Change tab title")]
         ChangeTabTitle,
 
