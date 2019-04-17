@@ -118,6 +118,14 @@ namespace FluentTerminal.App.ViewModels
 
         public event EventHandler ShowAboutRequested;
 
+        public event EventHandler ActivatedMV;
+
+        public void FocusWindow()
+        {
+            ActivatedMV?.Invoke(this, EventArgs.Empty);
+        }
+
+
         public RelayCommand AddTerminalCommand { get; }
 
         public string WindowTitle
