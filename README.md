@@ -58,7 +58,10 @@ A Terminal Emulator based on UWP and web technologies.
 
 ![Install Certificate into Local Machine](Screenshots/install-certificate_local-machine.png)
 
-- double click the *.appxbundle
+- double click the *.appxbundle to sideload the app with `App Installer` or execute in PowerShell with admin rights:
+```powershell
+Add-AppxPackage -Path FluentTerminal.App_x.x.xx.0_x86_x64.appxbundle
+```
 - **Optional:** Install Context menu integration from [here](https://github.com/felixse/FluentTerminal/tree/master/Explorer%20Context%20Menu%20Integration)
 
 ## How to set up a development environment
