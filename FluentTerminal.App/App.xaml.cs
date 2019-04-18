@@ -50,6 +50,7 @@ namespace FluentTerminal.App
         private IAppServiceConnection _appServiceConnection;
         private BackgroundTaskDeferral _appServiceDeferral;
         private Parser _commandLineParser;
+        private int? _activeWindowId;
 
         public App()
         {
@@ -161,7 +162,7 @@ namespace FluentTerminal.App
 
                     if (profile != null)
 #pragma warning disable 4014
-                        CreateTerminal(profile, NewTerminalLocation.Tab);
+                        CreateTerminal(profile, _applicationSettings.NewTerminalLocation);
 #pragma warning restore 4014
                 } else if (MoshProtocolHandler.IsMoshProtocol(protocolActivated))
                 {
@@ -325,6 +326,7 @@ namespace FluentTerminal.App
                     mainViewModel.NewWindowRequested += OnNewWindowRequested;
                     mainViewModel.ShowSettingsRequested += OnShowSettingsRequested;
                     mainViewModel.ShowAboutRequested += OnShowAboutRequested;
+                    mainViewModel.ActivatedMV += OnMainViewActivated;
                     _mainViewModels.Add(mainViewModel);
                 }
 
@@ -341,6 +343,7 @@ namespace FluentTerminal.App
             viewModel.NewWindowRequested += OnNewWindowRequested;
             viewModel.ShowSettingsRequested += OnShowSettingsRequested;
             viewModel.ShowAboutRequested += OnShowAboutRequested;
+            viewModel.ActivatedMV += OnMainViewActivated;
             _mainViewModels.Add(viewModel);
 
             return viewModel;
@@ -390,8 +393,19 @@ namespace FluentTerminal.App
                 viewModel.NewWindowRequested -= OnNewWindowRequested;
                 viewModel.ShowSettingsRequested -= OnShowSettingsRequested;
                 viewModel.ShowAboutRequested -= OnShowAboutRequested;
-
+                viewModel.ActivatedMV -= OnMainViewActivated;
+                if (_activeWindowId == viewModel.ApplicationView.Id)
+                    _activeWindowId = 0;
                 _mainViewModels.Remove(viewModel);
+            }
+        }
+
+        private void OnMainViewActivated(object sender, EventArgs e)
+        {
+            if (sender is MainViewModel viewModel)
+            {
+                Logger.Instance.Debug("MainViewModel with ApplicationView Id: {@id} activated.", viewModel.ApplicationView.Id);
+                _activeWindowId = viewModel.ApplicationView.Id;
             }
         }
 
@@ -442,7 +456,16 @@ namespace FluentTerminal.App
             }
             else if (location == NewTerminalLocation.Tab && _mainViewModels.Count > 0)
             {
-                _mainViewModels.Last().AddTerminal(profile);
+                
+                MainViewModel item = _mainViewModels.FirstOrDefault(o => o.ApplicationView.Id == _activeWindowId);
+                if (item != null)
+                {
+                    item.AddTerminal(profile);
+                }
+                else
+                {
+                    _mainViewModels.Last().AddTerminal(profile);
+                }
             }
             else
             {
