@@ -7,8 +7,8 @@
     xmlns:vm="using:FluentTerminal.App.ViewModels"
     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
     Title="SSH Info"
-    PrimaryButtonText="OK"
-    SecondaryButtonText="Cancel"
+    PrimaryButtonText=""
+    SecondaryButtonText=""
     PrimaryButtonClick="SshInfoDialog_OnPrimaryButtonClick"
     DefaultButton="Primary"
     mc:Ignorable="d">
@@ -61,7 +61,7 @@
                   Content="Use MOSH"
                   Margin="0 10 0 0" />
         <controls:Expander Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="5" 
-                           Margin="0 10 0 0"
+                           Margin="0 0 0 0"
                            Header="Advanced" 
                            IsExpanded="False"
                            HorizontalContentAlignment="Stretch" Padding="0 10 0 10">
@@ -111,12 +111,25 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" 
+                    HorizontalAlignment="Stretch"
+                    Margin="0,0,80,0"
+                    ToolTipService.ToolTip="Add Shortcut"   
+                    Click="SaveLink_OnClick" VerticalAlignment="Center">
+                <SymbolIcon Symbol="Add"/>
+            </Button>
             <Button Grid.Column="1" Grid.Row="0" 
                     HorizontalAlignment="Stretch"
-                    Margin="0 0 2 0"
-                    Content="Save Shortcut"
-                    Click="SaveLink_OnClick"/>
+                    Margin="0 0"
+                    Content="Connect"
+                    Click="Connect_OnClick"/>
+            <Button Grid.Column="2" Grid.Row="0" 
+                    HorizontalAlignment="Stretch"
+                    Margin="5 0 0 0"
+                    Content="Cancel"
+                    Click="Cancel_OnClick"/>
         </Grid>
     </Grid>
 </ContentDialog>
