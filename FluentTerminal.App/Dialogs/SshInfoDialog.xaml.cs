@@ -39,25 +39,21 @@ namespace FluentTerminal.App.Dialogs
         {
             SshConnectionInfoViewModel vm = (SshConnectionInfoViewModel)DataContext;
 
-            if (string.IsNullOrEmpty(vm.Username) || string.IsNullOrEmpty(vm.Host))
+            if (string.IsNullOrEmpty(vm.Host))
             {
-                args.Cancel = true;
-
-                MessageDialog d = new MessageDialog("User and host are mandatory fields.", "Invalid Form");
-
+                MessageDialog d = new MessageDialog("Please provide a host to connect to.", "Invalid");
                 await d.ShowAsync();
 
+                args.Cancel = true;
                 return;
             }
 
             if (vm.SshPort == 0)
             {
-                args.Cancel = true;
-
-                MessageDialog d = new MessageDialog("Port cannot be 0.", "Invalid Form");
-
+                MessageDialog d = new MessageDialog("Port cannot be 0.", "Invalid");
                 await d.ShowAsync();
 
+                args.Cancel = true;
                 return;
             }
 

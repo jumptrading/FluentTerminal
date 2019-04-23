@@ -10,6 +10,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentTerminal.App.ViewModels.Utilities;
+using System.Text;
 
 namespace FluentTerminal.App.ViewModels
 {
@@ -239,16 +240,22 @@ namespace FluentTerminal.App.ViewModels
                 return;
             }
 
-            string arguments = sshConnectionInfo.SshPort == 22 ? "" : $"-p {sshConnectionInfo.SshPort:#####} ";
-
-            if (!string.IsNullOrEmpty(sshConnectionInfo.IdentityFile))
-                arguments += $"-i {sshConnectionInfo.IdentityFile} ";
-
-            arguments += $"{sshConnectionInfo.Username}@{sshConnectionInfo.Host}";
+            StringBuilder arguments = new StringBuilder();
+            if (sshConnectionInfo.SshPort != 22)
+            {
+                arguments.Append($"-p {sshConnectionInfo.SshPort:#####} ");
+            }
+            if (!string.IsNullOrEmpty(sshConnectionInfo.IdentityFile)) { 
+                arguments.Append($"-i {sshConnectionInfo.IdentityFile} ");
+            }
+            if (!string.IsNullOrEmpty(sshConnectionInfo.Username)) {
+                arguments.Append($"{sshConnectionInfo.Username}@");
+            }
+            arguments.Append(sshConnectionInfo.Host);
 
             ShellProfile profile = new ShellProfile
             {
-                Arguments = arguments,
+                Arguments = arguments.ToString(),
                 Location = Helpers.SshExeLocation,
                 WorkingDirectory = string.Empty,
                 LineEndingTranslation = LineEndingStyle.DoNotModify,
