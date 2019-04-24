@@ -167,8 +167,8 @@ namespace FluentTerminal.App
                 } else if (MoshProtocolHandler.IsMoshProtocol(protocolActivated))
                 {
                     var moshConnectionInfo = MoshProtocolHandler.GetMoshConnectionInfo(protocolActivated);
-                    var moshKey = await _trayProcessCommunicationService.GetMoshKey(moshConnectionInfo).ConfigureAwait(true);
-                    var profile = MoshProtocolHandler.GetSshShellProfile(protocolActivated);
+                    var connectionCredentials = await _trayProcessCommunicationService.GetMoshConnectionCredentials(moshConnectionInfo).ConfigureAwait(true);
+                    var profile = MoshProtocolHandler.GetMoshShellProfile(protocolActivated, connectionCredentials.Port, connectionCredentials.Key, connectionCredentials.FilePath);
 
                     if (profile != null)
 #pragma warning disable 4014

@@ -40,7 +40,7 @@ namespace FluentTerminal.App.Protocols
                 : null;
         }
 
-        internal static ShellProfile GetSshShellProfile(ProtocolActivatedEventArgs protocolEventArgs)
+        internal static ShellProfile GetMoshShellProfile(ProtocolActivatedEventArgs protocolEventArgs, string port, string key, string moshClientPath)
         {
             Match match = MoshUrlRx.Match(protocolEventArgs.Uri.AbsoluteUri);
 
@@ -48,10 +48,11 @@ namespace FluentTerminal.App.Protocols
                 ? new ShellProfile
                 {
                     Arguments =
-                        $"-p {(match.Groups["port"].Success ? ushort.Parse(match.Groups["port"].Value) : DefaultSshPort):#####} {match.Groups["user"].Value}@{match.Groups["host"].Value}",
-                    Location = @"C:\Windows\System32\OpenSSH\ssh.exe",
+                        $"{match.Groups["host"].Value} {port}",
+                    Location = moshClientPath,
                     WorkingDirectory = string.Empty,
-                    LineEndingTranslation = LineEndingStyle.DoNotModify
+                    LineEndingTranslation = LineEndingStyle.DoNotModify,
+                    EnvironmentVariables = { { "MOSH_KEY", key } }
                 }
                 : null;
         }
