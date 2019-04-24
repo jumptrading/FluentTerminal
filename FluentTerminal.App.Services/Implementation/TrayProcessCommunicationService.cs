@@ -41,6 +41,23 @@ namespace FluentTerminal.App.Services.Implementation
             return response;
         }
 
+        public async Task<GetMoshKeyResponse> GetMoshKey(ISshConnectionInfo connectionInfo)
+        {
+            GetMoshKeyRequest request = new GetMoshKeyRequest();
+            request.Host = connectionInfo.Host;
+            request.SshPort = connectionInfo.SshPort;
+            request.Username = connectionInfo.Username;
+            request.IdentityFile = connectionInfo.IdentityFile;
+            request.MoshPorts = connectionInfo.MoshPorts;
+
+            var responseMessage = await _appServiceConnection.SendMessageAsync(CreateMessage(request));
+            var response = JsonConvert.DeserializeObject<GetMoshKeyResponse>(responseMessage[MessageKeys.Content]);
+
+            Logger.Instance.Debug("Received GetMoshKeyResponse: {@response}", response);
+
+            return response;
+        }
+
         public async Task<CreateTerminalResponse> CreateTerminal(int id, TerminalSize size, ShellProfile shellProfile,
             SessionType sessionType)
         {

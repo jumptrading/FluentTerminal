@@ -33,7 +33,7 @@ namespace FluentTerminal.App.Protocols
                     SshPort = match.Groups["port"].Success ? ushort.Parse(match.Groups["port"].Value) : DefaultSshPort,
                     Username = match.Groups["user"].Value,
                     UseMosh = true,
-                    MoshPorts = match.Groups["moshports"].Success ? match.Groups["moshports"].Value : "60000-60050",
+                    MoshPorts = match.Groups["moshports"].Success ? match.Groups["moshports"].Value.Replace("-", ":") : "60000:60050",
                     FirstMoshPort = match.Groups["firstport"].Success ? match.Groups["firstport"].Value : "60000",
                     LastMoshPort = match.Groups["lastport"].Success ? match.Groups["lastport"].Value : "60050"
                 }

@@ -128,6 +128,18 @@ namespace FluentTerminal.SystemTray.Services
 
                 deferral.Complete();
             }
+            else if (messageType == nameof(GetMoshKeyRequest))
+            {
+                var deferral = args.GetDeferral();
+
+                var request = JsonConvert.DeserializeObject<GetMoshKeyRequest>(messageContent);
+
+                var response = new GetMoshKeyResponse { MoshKey = Utilities.GetMoshKeyAsync(request) };
+
+                await args.Request.SendResponseAsync(CreateMessage(response));
+
+                deferral.Complete();
+            }
         }
 
         private ValueSet CreateMessage(object content)

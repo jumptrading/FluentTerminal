@@ -151,7 +151,7 @@ namespace FluentTerminal.App
             }
         }
 
-        protected override void OnActivated(IActivatedEventArgs args)
+        protected override async void OnActivated(IActivatedEventArgs args)
         {
             if (args is ProtocolActivatedEventArgs protocolActivated)
             {
@@ -166,6 +166,8 @@ namespace FluentTerminal.App
 #pragma warning restore 4014
                 } else if (MoshProtocolHandler.IsMoshProtocol(protocolActivated))
                 {
+                    var moshConnectionInfo = MoshProtocolHandler.GetMoshConnectionInfo(protocolActivated);
+                    var moshKey = await _trayProcessCommunicationService.GetMoshKey(moshConnectionInfo).ConfigureAwait(true);
                     var profile = MoshProtocolHandler.GetSshShellProfile(protocolActivated);
 
                     if (profile != null)

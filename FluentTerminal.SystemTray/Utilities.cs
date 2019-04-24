@@ -1,10 +1,14 @@
 ﻿using FluentTerminal.Models.Enums;
+using FluentTerminal.Models.Requests;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 
@@ -14,6 +18,77 @@ namespace FluentTerminal.SystemTray
     {
         private const int FirstDynamicPort = 49151;
         private static readonly List<int> _sentOutPorts = new List<int>();
+
+        public static string GetSshLocation()
+        {
+            //
+            // See https://stackoverflow.com/a/25919981
+            //
+
+            string system32Folder;
+
+            if (Environment.Is64BitOperatingSystem && !Environment.Is64BitProcess)
+            {
+                system32Folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), @"Sysnative");
+            }
+            else
+            {
+                system32Folder = Environment.GetFolderPath(Environment.SpecialFolder.System);
+            }
+
+            return Path.Combine(system32Folder, @"OpenSSH\ssh.exe");
+        }
+
+        public static string GetMoshKeyAsync(GetMoshKeyRequest request)
+        {
+            string moshKey = String.Empty;
+            AutoResetEvent endEvent = new AutoResetEvent(false);
+
+            Process sshProcess = new Process();
+            sshProcess.StartInfo.FileName = "cmd.exe";
+            sshProcess.StartInfo.UseShellExecute = false;
+            sshProcess.StartInfo.RedirectStandardInput = true;
+            sshProcess.StartInfo.RedirectStandardOutput = true;
+            sshProcess.EnableRaisingEvents = true;
+            sshProcess.OutputDataReceived += (sender, e) =>
+            {
+                if (e.Data == null)
+                {
+                    return;
+                }
+                if (e.Data.Contains("Microsoft Corporation. All rights reserved."))
+                {
+                    // cmd.exe was started successfully
+                    endEvent.Set();
+                }
+                if (e.Data.Contains("MOSH CONNECT"))
+                {
+                    const int MOSH_RESPONSE_WORD_COUNT = 4;
+                    string[] moshConnectionInfo = e.Data.Split(' ');
+                    if (moshConnectionInfo.Length == MOSH_RESPONSE_WORD_COUNT)
+                    {
+                        moshKey = moshConnectionInfo[3];
+                    }
+                    
+                    sshProcess.CloseMainWindow();
+                    sshProcess.Close();
+
+                    endEvent.Set();
+                }
+            };
+
+            sshProcess.Start();
+            sshProcess.BeginOutputReadLine();
+
+            endEvent.WaitOne();
+
+            Task.Delay(500);
+            sshProcess.StandardInput.WriteLineAsync(String.Format("{0} -T {1}@{2} \"mosh-server new -p {3}\"", GetSshLocation(), request.Username, request.Host, request.MoshPorts));
+
+            endEvent.WaitOne();
+
+            return moshKey;
+        }
 
         public static int? GetAvailablePort()
         {
