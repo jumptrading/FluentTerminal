@@ -43,12 +43,14 @@ namespace FluentTerminal.App.Services.Implementation
 
         public async Task<GetMoshConnectionResponse> GetMoshConnectionCredentials(ISshConnectionInfo connectionInfo)
         {
-            GetMoshConnectionRequest request = new GetMoshConnectionRequest();
-            request.Host = connectionInfo.Host;
-            request.SshPort = connectionInfo.SshPort;
-            request.Username = connectionInfo.Username;
-            request.IdentityFile = connectionInfo.IdentityFile;
-            request.MoshPorts = connectionInfo.MoshPorts;
+            GetMoshConnectionRequest request = new GetMoshConnectionRequest
+            {
+                Host = connectionInfo.Host,
+                SshPort = connectionInfo.SshPort,
+                Username = connectionInfo.Username,
+                IdentityFile = connectionInfo.IdentityFile,
+                MoshPorts = connectionInfo.MoshPorts
+            };
 
             var responseMessage = await _appServiceConnection.SendMessageAsync(CreateMessage(request));
             var response = JsonConvert.DeserializeObject<GetMoshConnectionResponse>(responseMessage[MessageKeys.Content]);

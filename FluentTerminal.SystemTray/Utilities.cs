@@ -88,8 +88,12 @@ namespace FluentTerminal.SystemTray
 
             processEvent.WaitOne();
 
-            await Task.Delay(500);
-            await sshProcess.StandardInput.WriteLineAsync(String.Format("{0} -T {1}@{2} \"mosh-server new -p {3}\"", GetSshLocation(), request.Username, request.Host, request.MoshPorts));
+            await sshProcess.StandardInput.WriteLineAsync(String.Format("{0} -T {1}@{2}{3} \"mosh-server new -p {4}\"",
+                GetSshLocation(),
+                request.Username,
+                request.Host,
+                String.IsNullOrEmpty(request.IdentityFile) ? "" : " -i " + request.IdentityFile,
+                request.MoshPorts));
 
             processEvent.WaitOne();
 
