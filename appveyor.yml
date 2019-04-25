@@ -23,4 +23,4 @@ artifacts:
 build_script:
   - msbuild /maxcpucount:%NUMBER_OF_PROCESSORS% /t:Build /p:Configuration=Release /p:AppxBundle=Always /p:Platform="x64" /v:q /nologo FluentTerminal.sln
 test_script:
-  - "%xunit20%\xunit.console ./FluentTerminal.App.Services.Test/bin/Release/netcoreapp2.0/FluentTerminal.App.Services.Test.dll -appveyor"
+  - "%xunit20%/xunit.console ./FluentTerminal.App.Services.Test/bin/Release/netcoreapp2.0/FluentTerminal.App.Services.Test.dll -appveyor"
