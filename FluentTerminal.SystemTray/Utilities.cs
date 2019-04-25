@@ -47,55 +47,71 @@ namespace FluentTerminal.SystemTray
 
             AutoResetEvent processEvent = new AutoResetEvent(false);
 
-            Process sshProcess = new Process();
-            sshProcess.StartInfo.FileName = "cmd.exe";
-            sshProcess.StartInfo.UseShellExecute = false;
-            sshProcess.StartInfo.RedirectStandardInput = true;
-            sshProcess.StartInfo.RedirectStandardOutput = true;
-            sshProcess.EnableRaisingEvents = true;
-            sshProcess.OutputDataReceived += (sender, e) =>
+            try
             {
-                if (e.Data == null)
+                using (Process sshProcess = new Process())
                 {
-                    return;
-                }
-                if (e.Data.Contains("Microsoft Corporation. All rights reserved."))
-                {
-                    // cmd.exe was started successfully
-                    processEvent.Set();
-                }
-                if (e.Data.Contains("MOSH CONNECT"))
-                {
-                    const int MOSH_RESPONSE_WORD_COUNT = 4;
-                    const int MOSH_PORT_RESPONSE_POSITION = 2;
-                    const int MOSH_KEY_RESPONSE_POSITION = 3;
-                    string[] moshConnectionInfo = e.Data.Split(' ');
-                    if (moshConnectionInfo.Length == MOSH_RESPONSE_WORD_COUNT)
+                    sshProcess.StartInfo.FileName = "cmd.exe";
+                    sshProcess.StartInfo.UseShellExecute = false;
+                    sshProcess.StartInfo.RedirectStandardInput = true;
+                    sshProcess.StartInfo.RedirectStandardOutput = true;
+                    sshProcess.EnableRaisingEvents = true;
+                    sshProcess.Exited += (sender, e) =>
                     {
-                        response.Port = moshConnectionInfo[MOSH_PORT_RESPONSE_POSITION];
-                        response.Key = moshConnectionInfo[MOSH_KEY_RESPONSE_POSITION];
+                        processEvent.Set();
+                    };
+                    sshProcess.OutputDataReceived += (sender, e) =>
+                    {
+                        if (e.Data == null)
+                        {
+                            return;
+                        }
+                        if (e.Data.Contains("Microsoft Corporation. All rights reserved."))
+                        {
+                            // cmd.exe was started successfully
+                            processEvent.Set();
+                        }
+                        if (e.Data.Contains("MOSH CONNECT"))
+                        {
+                            const int MOSH_RESPONSE_WORD_COUNT = 4;
+                            const int MOSH_PORT_RESPONSE_POSITION = 2;
+                            const int MOSH_KEY_RESPONSE_POSITION = 3;
+                            string[] moshConnectionInfo = e.Data.Split(' ');
+                            if (moshConnectionInfo.Length == MOSH_RESPONSE_WORD_COUNT)
+                            {
+                                response.Port = moshConnectionInfo[MOSH_PORT_RESPONSE_POSITION];
+                                response.Key = moshConnectionInfo[MOSH_KEY_RESPONSE_POSITION];
+                            }
+
+                            sshProcess.CloseMainWindow();
+                            sshProcess.Close();
+
+                            processEvent.Set();
+                        }
+                    };
+
+                    sshProcess.Start();
+                    sshProcess.BeginOutputReadLine();
+
+                    processEvent.WaitOne();
+
+                    if (sshProcess.HasExited == false)
+                    {
+                        await sshProcess.StandardInput.WriteLineAsync(String.Format("{0} -T {1}@{2}{3} \"mosh-server new -p {4}\"",
+                            GetSshLocation(),
+                            request.Username,
+                            request.Host,
+                            String.IsNullOrEmpty(request.IdentityFile) ? "" : " -i " + request.IdentityFile,
+                            request.MoshPorts));
+
+                        processEvent.WaitOne();
                     }
-                    
-                    sshProcess.CloseMainWindow();
-                    sshProcess.Close();
-
-                    processEvent.Set();
                 }
-            };
+            }
+            catch (Exception)
+            {
 
-            sshProcess.Start();
-            sshProcess.BeginOutputReadLine();
-
-            processEvent.WaitOne();
-
-            await sshProcess.StandardInput.WriteLineAsync(String.Format("{0} -T {1}@{2}{3} \"mosh-server new -p {4}\"",
-                GetSshLocation(),
-                request.Username,
-                request.Host,
-                String.IsNullOrEmpty(request.IdentityFile) ? "" : " -i " + request.IdentityFile,
-                request.MoshPorts));
-
-            processEvent.WaitOne();
+            }
 
             return response;
         }
