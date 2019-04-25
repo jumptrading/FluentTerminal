@@ -1,14 +1,13 @@
-﻿using System.Text.RegularExpressions;
-using Windows.ApplicationModel.Activation;
+﻿using System;
+using System.Text.RegularExpressions;
 using FluentTerminal.App.Services;
-using FluentTerminal.App.Services.Dialogs;
 using FluentTerminal.App.ViewModels;
 using FluentTerminal.Models;
 using FluentTerminal.Models.Enums;
 
 namespace FluentTerminal.App.Protocols
 {
-    internal static class MoshProtocolHandler
+    public static class MoshProtocolHandler
     {
         private const ushort DefaultSshPort = 22;
 
@@ -19,12 +18,12 @@ namespace FluentTerminal.App.Protocols
                 @"^\s*mosh://(?<user>[^;@]+)(;fingerprint=(?<fingerprint>[^@]+))?@(?<host>[^/:\s]+)(:(?<port>\d{1,5}))?/?\?(mosh-ports=(?<moshports>(?<firstport>\d{1,5})-(?<lastport>\d{1,5})))?\s*$",
                 RegexOptions.Compiled);
 
-        internal static bool IsMoshProtocol(ProtocolActivatedEventArgs protocolEventArgs) =>
-            protocolEventArgs.Uri.Scheme.ToLowerInvariant().Equals(MoshProtocol);
+        public static bool IsMoshProtocol(Uri uri) =>
+            uri.Scheme.ToLowerInvariant().Equals(MoshProtocol);
 
-        internal static ISshConnectionInfo GetMoshConnectionInfo(ProtocolActivatedEventArgs protocolEventArgs)
+        public static ISshConnectionInfo GetMoshConnectionInfo(Uri uri)
         {
-            Match match = MoshUrlRx.Match(protocolEventArgs.Uri.AbsoluteUri);
+            Match match = MoshUrlRx.Match(uri.AbsoluteUri);
 
             return match.Success
                 ? new SshConnectionInfoViewModel
@@ -40,21 +39,17 @@ namespace FluentTerminal.App.Protocols
                 : null;
         }
 
-        internal static ShellProfile GetMoshShellProfile(ProtocolActivatedEventArgs protocolEventArgs, string port, string key, string moshClientPath)
+        public static ShellProfile GetMoshShellProfile(ISshConnectionInfo connectionInfo, string port, string key, string moshClientPath)
         {
-            Match match = MoshUrlRx.Match(protocolEventArgs.Uri.AbsoluteUri);
-
-            return match.Success
-                ? new ShellProfile
+            return new ShellProfile
                 {
                     Arguments =
-                        $"{match.Groups["host"].Value} {port}",
+                        $"{connectionInfo.Host} {port}",
                     Location = moshClientPath,
                     WorkingDirectory = string.Empty,
                     LineEndingTranslation = LineEndingStyle.DoNotModify,
                     EnvironmentVariables = { { "MOSH_KEY", key } }
-                }
-                : null;
+                };
         }
     }
 }
