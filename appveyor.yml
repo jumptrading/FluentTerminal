@@ -30,3 +30,13 @@ build_script:
   - msbuild /maxcpucount:%NUMBER_OF_PROCESSORS% /t:Build /p:Configuration=Release /p:AppxBundle=Always /p:Platform="x64" /v:q /nologo FluentTerminal.sln
 test_script:
   - dotnet test ./FluentTerminal.App.Services.Test
+deploy:
+  release: 'FluentTerminal-%APPVEYOR_BUILD_VERSION%-${GIT_COMMIT_SHORT}'
+  description: 'Build ${APPVEYOR_REPO_COMMIT} on !! update-availablility-check branch'
+  provider: GitHub
+  auth_token:
+    secure: rwuDF3ROrdEzxJ9HaT/aedOWRuiDPDp6T5a7WmdGBl54bm4d5z9S2L6SLMYD9WRo
+  draft: false
+  prerelease: false
+  on:
+    branch: update-availablility-check
