@@ -59,7 +59,6 @@ namespace FluentTerminal.App.Services.Test
             var serialized = JsonConvert.SerializeObject(theme);
             var stream = new MemoryStream(Encoding.UTF8.GetBytes(serialized));
             var parser = new FluentTerminalThemeParser();
-            parser = null;
 
             Func<Task<TerminalTheme>> parse = () => parser.Parse(fileName, stream);
 
