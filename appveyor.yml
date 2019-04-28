@@ -16,8 +16,8 @@ before_build:
     $manifest.Save((Resolve-Path './FluentTerminal.App/Package.appxmanifest'))
 - cmd: pushd . && cd FluentTerminal.Client && npm install && npm run-script build && popd && nuget restore FluentTerminal.sln
 after_build:
+- cmd: '7z a FluentTerminal-v%APPVEYOR_BUILD_VERSION%-%GIT_COMMIT_SHORT%.zip FluentTerminal.App\AppPackages\*'
 - cmd: >-
-    '7z a FluentTerminal-v%APPVEYOR_BUILD_VERSION%-%GIT_COMMIT_SHORT%.zip FluentTerminal.App\AppPackages\*'
      pushd FluentTerminal.App\AppPackages\FluentTerminal*\Dependencies && dir && xcopy * "../../../../MsiInstaller/Dependencies" /e/i/f && popd
      pushd FluentTerminal.App\AppPackages\FluentTerminal*\ && dir && xcopy "*.appxbundle" "../../../MsiInstaller/" /e/i/f && popd && ren MsiInstaller\*.appxbundle FluentTerminal.App.appxbundle
      pushd FluentTerminal.App\AppPackages\FluentTerminal*\ && dir && xcopy "*.cer" "../../../MsiInstaller/" /e/i/f && popd && ren MsiInstaller\*.cer FluentTerminal.App.cer
