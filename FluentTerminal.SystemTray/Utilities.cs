@@ -517,5 +517,43 @@ namespace FluentTerminal.SystemTray
             using (StreamWriter writer = new StreamWriter(@"C:\Users\peske\Desktop\f.log", true))
                 writer.WriteLine(message);
         }
+
+        public static void StopPreviousInstance(bool _stopAll)
+        {
+            int _ProcessID = System.Diagnostics.Process.GetCurrentProcess().Id;
+            System.Diagnostics.Process[] pname = System.Diagnostics.Process.GetProcessesByName(System.Diagnostics.Process.GetCurrentProcess().ProcessName);
+            if (!_stopAll)
+            {
+                if (pname.Length > 1)
+                {
+                    for (int i = 0; i < pname.Length; i++)
+                    {
+                        if (pname[i].Id != _ProcessID)
+                        {
+                            pname[i].Kill();
+                            System.Threading.Thread.Sleep(2000);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (pname.Length > 0)
+                {
+                    for (int i = 0; i < pname.Length; i++)
+                    {
+                        if (pname[i].Id != _ProcessID)
+                        {
+                            pname[i].Kill();
+                            System.Threading.Thread.Sleep(2000);
+                        }
+                    }
+
+                    System.Diagnostics.Process.GetCurrentProcess().Kill();
+                    System.Threading.Thread.Sleep(2000);
+                }
+            }
+        }
+
     }
 }

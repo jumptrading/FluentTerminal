@@ -320,6 +320,7 @@ namespace FluentTerminal.App.ViewModels
                 terminal.CustomTitleChanged -= Terminal_CustomTitleChanged;
                 await terminal.Close();
             }
+            Closed?.Invoke(this, EventArgs.Empty);
         }
 
         private void CloseCurrentTab()
@@ -401,6 +402,7 @@ namespace FluentTerminal.App.ViewModels
                 if (Terminals.Count == 0)
                 {
                     await ApplicationView.TryClose();
+                    Closed?.Invoke(this, EventArgs.Empty);
                 }
             }
         }

@@ -26,5 +26,6 @@ namespace FluentTerminal.App.Services
         Task CloseTerminal(int terminalId);
         Task<GetAvailablePortResponse> GetAvailablePort();
         int GetNextTerminalId();
+        void TrayProcessClose();
     }
 }

@@ -155,5 +155,13 @@ namespace FluentTerminal.App.Services.Implementation
                 [MessageKeys.Content] = JsonConvert.SerializeObject(content)
             };
         }
+        public void TrayProcessClose()
+        {
+            var request = new TrayProcessCloseRequest()
+            {
+                AppId = System.Diagnostics.Process.GetCurrentProcess().Id
+            };
+            _appServiceConnection.SendMessageAsync(CreateMessage(request));
+        }
     }
 }

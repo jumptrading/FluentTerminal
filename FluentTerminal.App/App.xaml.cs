@@ -33,7 +33,10 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using FluentTerminal.App.Protocols;
 using IContainer = Autofac.IContainer;
-
+// OLD GUID: f7225014-f405-4342-ad2e-ebf6ac60ea2c
+// OLD Name: 53621FSApps.FluentTerminal
+// NEW GUID: 8708b5ec-dcef-40a6-a97f-cee532dc98f7
+// NEW Name: 73721FSApps.FluentTerminal
 namespace FluentTerminal.App
 {
     public sealed partial class App : Application
@@ -59,10 +62,11 @@ namespace FluentTerminal.App
             InitializeComponent();
 
             UnhandledException += OnUnhandledException;
+            
 
             var applicationDataContainers = new ApplicationDataContainers
             {
-                LocalSettings = new ApplicationDataContainerAdapter(ApplicationData.Current.LocalSettings),
+                LocalSettings = new ApplicationDataContainerAdapter(ApplicationData.Current.LocalSettings), 
                 RoamingSettings = new ApplicationDataContainerAdapter(ApplicationData.Current.RoamingSettings),
                 KeyBindings = new ApplicationDataContainerAdapter(ApplicationData.Current.RoamingSettings.CreateContainer(Constants.KeyBindingsContainerName, ApplicationDataCreateDisposition.Always)),
                 ShellProfiles = new ApplicationDataContainerAdapter(ApplicationData.Current.LocalSettings.CreateContainer(Constants.ShellProfilesContainerName, ApplicationDataCreateDisposition.Always)),
@@ -121,6 +125,9 @@ namespace FluentTerminal.App
                 settings.CaseInsensitiveEnumValues = true;
             });
         }
+
+
+
 
         private void OnUnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
         {
@@ -246,6 +253,32 @@ namespace FluentTerminal.App
                     }
                 });
             }
+
+            if (args is ToastNotificationActivatedEventArgs toastNotificationActivatedEventArgs)
+            {
+                string sArg = toastNotificationActivatedEventArgs.Argument;
+                var parsed = System.Web.HttpUtility.ParseQueryString(sArg);
+                string sUrl = "";
+                try
+                {
+                    sUrl = parsed["wurl"];
+                }
+                catch { }
+
+                if (sUrl != "")
+                {
+                    var uriBing = new System.Uri(sUrl);
+
+                    // Launch the URI
+                    var success = Windows.System.Launcher.LaunchUriAsync(uriBing);
+                }
+                if (_mainViewModels.Count == 0)
+                {
+                    var viewModel = _container.Resolve<MainViewModel>();
+                    viewModel.AddTerminal();
+                    CreateMainView(typeof(MainPage), viewModel, true).ConfigureAwait(true);
+                }
+            }
         }
 
         protected override async void OnLaunched(LaunchActivatedEventArgs args)
@@ -271,6 +304,7 @@ namespace FluentTerminal.App
                 viewModel.AddTerminal();
                 await CreateMainView(typeof(MainPage), viewModel, true).ConfigureAwait(true);
                 Window.Current.Activate();
+                this._container.Resolve<IUpdateService>().CheckForUpdate();
             }
             else if (_mainViewModels.Count == 0)
             {
@@ -397,6 +431,8 @@ namespace FluentTerminal.App
                 if (_activeWindowId == viewModel.ApplicationView.Id)
                     _activeWindowId = 0;
                 _mainViewModels.Remove(viewModel);
+                if (_mainViewModels.Count == 0)
+                    this._trayProcessCommunicationService.TrayProcessClose();
             }
         }
 
@@ -456,13 +492,21 @@ namespace FluentTerminal.App
             }
             else if (location == NewTerminalLocation.Tab && _mainViewModels.Count > 0)
             {
-                
-                MainViewModel item = _mainViewModels.FirstOrDefault(o => o.ApplicationView.Id == _activeWindowId);
-                if (item != null)
+                bool blLastActiveWindowFound = false;
+                if (_activeWindowId != 0)
                 {
-                    item.AddTerminal(profile);
+                    for (int i = 0; i < _mainViewModels.Count; i++)
+                    {
+                        if (_mainViewModels[i].ApplicationView.Id == _activeWindowId)
+                        {
+                            blLastActiveWindowFound = true;
+                            _mainViewModels[i].AddTerminal(profile);
+                            break;
+                        }
+                    }
                 }
-                else
+
+                if (!blLastActiveWindowFound)
                 {
                     _mainViewModels.Last().AddTerminal(profile);
                 }

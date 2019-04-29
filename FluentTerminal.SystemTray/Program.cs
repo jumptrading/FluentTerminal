@@ -26,6 +26,7 @@ namespace FluentTerminal.SystemTray
         {
             if (!Mutex.TryOpenExisting(MutexName, out Mutex mutex))
             {
+                Utilities.StopPreviousInstance(false);
                 mutex = new Mutex(false, MutexName);
 
                 Application.EnableVisualStyles();
@@ -87,7 +88,7 @@ namespace FluentTerminal.SystemTray
                     appCommunicationService.StartAppServiceConnection();
                 }
 
-                Task.Run(() => container.Resolve<IUpdateService>().CheckForUpdate());
+                //Task.Run(() => container.Resolve<IUpdateService>().CheckForUpdate());
 
                 var settingsService = container.Resolve<ISettingsService>();
                 if (settingsService.GetApplicationSettings().EnableTrayIcon)
@@ -112,5 +113,6 @@ namespace FluentTerminal.SystemTray
         {
             Logger.Instance.Error((Exception)e.ExceptionObject, "Unhandled Exception");
         }
+
     }
 }

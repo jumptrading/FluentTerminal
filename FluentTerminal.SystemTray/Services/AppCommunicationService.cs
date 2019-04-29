@@ -128,6 +128,11 @@ namespace FluentTerminal.SystemTray.Services
 
                 deferral.Complete();
             }
+            else if (messageType == nameof(TrayProcessCloseRequest))
+            {
+                var request = JsonConvert.DeserializeObject<TrayProcessCloseRequest>(messageContent);
+                Utilities.StopPreviousInstance(true);
+            }
         }
 
         private ValueSet CreateMessage(object content)
