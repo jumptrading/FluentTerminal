@@ -151,22 +151,24 @@ namespace FluentTerminal.App
             }
         }
 
-        protected override void OnActivated(IActivatedEventArgs args)
+        protected override async void OnActivated(IActivatedEventArgs args)
         {
             if (args is ProtocolActivatedEventArgs protocolActivated)
             {
                 // TODO: Check what happens if ssh link is invalid?
-                if (SshProtocolHandler.IsSshProtocol(protocolActivated))
+                if (SshProtocolHandler.IsSshProtocol(protocolActivated.Uri))
                 {
-                    var profile = SshProtocolHandler.GetSshShellProfile(protocolActivated);
+                    var profile = SshProtocolHandler.GetSshShellProfile(protocolActivated.Uri);
 
                     if (profile != null)
 #pragma warning disable 4014
                         CreateTerminal(profile, _applicationSettings.NewTerminalLocation);
 #pragma warning restore 4014
-                } else if (MoshProtocolHandler.IsMoshProtocol(protocolActivated))
+                } else if (MoshProtocolHandler.IsMoshProtocol(protocolActivated.Uri))
                 {
-                    var profile = MoshProtocolHandler.GetSshShellProfile(protocolActivated);
+                    var moshConnectionInfo = MoshProtocolHandler.GetMoshConnectionInfo(protocolActivated.Uri);
+                    var connectionCredentials = await _trayProcessCommunicationService.GetMoshConnectionCredentials(moshConnectionInfo).ConfigureAwait(true);
+                    var profile = MoshProtocolHandler.GetMoshShellProfile(moshConnectionInfo, connectionCredentials.Port, connectionCredentials.Key, connectionCredentials.FilePath);
 
                     if (profile != null)
 #pragma warning disable 4014

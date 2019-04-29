@@ -239,20 +239,29 @@ namespace FluentTerminal.App.ViewModels
                 return;
             }
 
-            string arguments = sshConnectionInfo.SshPort == 22 ? "" : $"-p {sshConnectionInfo.SshPort:#####} ";
-
-            if (!string.IsNullOrEmpty(sshConnectionInfo.IdentityFile))
-                arguments += $"-i {sshConnectionInfo.IdentityFile} ";
-
-            arguments += $"{sshConnectionInfo.Username}@{sshConnectionInfo.Host}";
-
-            ShellProfile profile = new ShellProfile
+            ShellProfile profile = null;
+            if (sshConnectionInfo.UseMosh)
             {
-                Arguments = arguments,
-                Location = Helpers.SshExeLocation,
-                WorkingDirectory = string.Empty,
-                LineEndingTranslation = LineEndingStyle.DoNotModify,
-            };
+                var connectionCredentials = await _trayProcessCommunicationService.GetMoshConnectionCredentials(sshConnectionInfo).ConfigureAwait(true);
+                profile = FluentTerminal.App.Protocols.MoshProtocolHandler.GetMoshShellProfile(sshConnectionInfo, connectionCredentials.Port, connectionCredentials.Key, connectionCredentials.FilePath);
+            }
+            else
+            {
+                string arguments = sshConnectionInfo.SshPort == 22 ? "" : $"-p {sshConnectionInfo.SshPort:#####} ";
+
+                if (!string.IsNullOrEmpty(sshConnectionInfo.IdentityFile))
+                    arguments += $"-i {sshConnectionInfo.IdentityFile} ";
+
+                arguments += $"{sshConnectionInfo.Username}@{sshConnectionInfo.Host}";
+
+                profile = new ShellProfile
+                {
+                    Arguments = arguments,
+                    Location = Helpers.SshExeLocation,
+                    WorkingDirectory = string.Empty,
+                    LineEndingTranslation = LineEndingStyle.DoNotModify,
+                };
+            }
 
             await ApplicationView.RunOnDispatcherThread( () => AddTerminal(profile));
         }
