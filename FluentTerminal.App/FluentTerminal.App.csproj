@@ -217,6 +217,7 @@
     <Content Include="Win32\FluentTerminal.SystemTray.exe" />
     <Content Include="Win32\FluentTerminal.SystemTray.pdb" />
     <Content Include="Win32\GlobalHotKey.dll" />
+    <Content Include="Win32\mosh-client.exe" />
     <Content Include="Win32\Newtonsoft.Json.dll" />
     <Content Include="Win32\PListNet.dll" />
     <Content Include="Win32\RestSharp.dll" />
@@ -240,7 +241,6 @@
     <Content Include="Win32\winpty.dll" />
     <Content Include="Win32\winpty.NET.dll" />
     <None Include="FluentTerminal.App_StoreKey.pfx" />
-    <None Include="FluentTerminal.App_TemporaryKey.pfx" />
     <Content Include="Client\bundle.js" />
     <Content Include="Client\index.html" />
     <Content Include="Client\style.css" />
