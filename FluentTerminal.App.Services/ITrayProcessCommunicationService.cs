@@ -28,5 +28,7 @@ namespace FluentTerminal.App.Services
         int GetNextTerminalId();
 
         Task<GetMoshConnectionResponse> GetMoshConnectionCredentials(ISshConnectionInfo connectionInfo);
+
+        Task<GetUserNameResponse> GetUserName();
     }
 }

@@ -136,6 +136,16 @@ namespace FluentTerminal.SystemTray.Services
 
                 deferral.Complete();
             }
+            else if (messageType == nameof(GetUserNameRequest))
+            {
+                var deferral = args.GetDeferral();
+
+                var response = new GetUserNameResponse { UserName = Environment.UserName };
+
+                await args.Request.SendResponseAsync(CreateMessage(response));
+
+                deferral.Complete();
+            }
         }
 
         private ValueSet CreateMessage(object content)
