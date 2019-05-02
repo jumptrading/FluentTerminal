@@ -81,7 +81,8 @@ namespace FluentTerminal.App.ViewModels
             _applicationSettings = _settingsService.GetApplicationSettings();
             TabsPosition = _applicationSettings.TabsPosition;
 
-            AddTerminalCommand = new RelayCommand(() => AddTerminal());
+            AddLocalShellCommand = new RelayCommand(() => AddTerminal());
+            AddRemoteShellCommand = new RelayCommand(() => AddRemoteTerminal());
             ShowAboutCommand = new RelayCommand(ShowAbout);
             ShowSettingsCommand = new RelayCommand(ShowSettings);
 
@@ -127,7 +128,8 @@ namespace FluentTerminal.App.ViewModels
         }
 
 
-        public RelayCommand AddTerminalCommand { get; }
+        public RelayCommand AddLocalShellCommand { get; }
+        public RelayCommand AddRemoteShellCommand { get; }
 
         public string WindowTitle
         {

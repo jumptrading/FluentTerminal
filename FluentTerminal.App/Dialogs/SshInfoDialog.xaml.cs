@@ -26,13 +26,28 @@ URL={0}
 ";
 
         private readonly ISshHelperService _sshHelperService;
+        private readonly ITrayProcessCommunicationService _trayProcessCommunicationService;
 
-        public SshInfoDialog(ISettingsService settingsService, ISshHelperService sshHelperService)
+        public SshInfoDialog(ISettingsService settingsService, ISshHelperService sshHelperService, ITrayProcessCommunicationService trayProcessCommunicationService)
         {
             _sshHelperService = sshHelperService;
             InitializeComponent();
+            _trayProcessCommunicationService = trayProcessCommunicationService;
             var currentTheme = settingsService.GetCurrentTheme();
             RequestedTheme = ContrastHelper.GetIdealThemeForBackgroundColor(currentTheme.Colors.Background);
+        }
+
+        private async void OnLoading(FrameworkElement sender, object args)
+        {
+            SshConnectionInfoViewModel vm = (SshConnectionInfoViewModel)DataContext;
+            vm.Username = await GetUsername();
+            if (false == String.IsNullOrEmpty(vm.Username))
+                hostTextBox.Focus(FocusState.Programmatic);
+        }
+
+        private async Task<string> GetUsername()
+        {
+            return (await _trayProcessCommunicationService.GetUserName().ConfigureAwait(true)).UserName;
         }
 
         private async void BrowseButtonOnClick(object sender, RoutedEventArgs e)
