@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using Windows.System;
 using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -21,6 +22,35 @@ namespace FluentTerminal.App.Dialogs
             InitializeComponent();
             var currentTheme = settingsService.GetCurrentTheme();
             RequestedTheme = ContrastHelper.GetIdealThemeForBackgroundColor(currentTheme.Colors.Background);
+        }
+
+        private async void OnLoading(FrameworkElement sender, object args)
+        {
+            SshConnectionInfoViewModel vm = (SshConnectionInfoViewModel)DataContext;
+            vm.Username = await GetUsername();
+        }
+
+        private static async Task<string> GetUsername()
+        {
+            // FindAllAsync seems to return users associated with just the
+            // current session. There's usually just one but there are
+            // apparently ways for multiple users to share a session. This is
+            // poorly documented however.
+            // Somewhat related: https://docs.microsoft.com/en-us/gaming/xbox-live/using-xbox-live/auth/retrieving-windows-system-user-on-uwp
+            var users = await User.FindAllAsync();
+            var user = users.FirstOrDefault();
+
+            string domainWithUser = (string)await user.GetPropertyAsync(KnownUserProperties.DomainName); 
+            if (String.IsNullOrEmpty(domainWithUser))  {
+                // Fallback for non-domain account
+                string accountName = ((string)await user.GetPropertyAsync(KnownUserProperties.AccountName)).ToLower();
+                if (String.IsNullOrEmpty(accountName))
+                {
+                    return ((string)await user.GetPropertyAsync(KnownUserProperties.DisplayName)).ToLower();
+                }
+                return accountName;
+            }
+            return domainWithUser.Split(@"\", 1).Last(); // @"domain\user" form 
         }
 
         private async void BrowseButtonOnClick(object sender, RoutedEventArgs e)
