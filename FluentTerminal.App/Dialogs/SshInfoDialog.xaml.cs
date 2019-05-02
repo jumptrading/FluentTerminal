@@ -43,7 +43,12 @@ namespace FluentTerminal.App.Dialogs
             string domainWithUser = (string)await user.GetPropertyAsync(KnownUserProperties.DomainName); 
             if (String.IsNullOrEmpty(domainWithUser))  {
                 // Fallback for non-domain account
-                return ((string)await user.GetPropertyAsync(KnownUserProperties.FirstName)).ToLower();
+                string accountName = ((string)await user.GetPropertyAsync(KnownUserProperties.AccountName)).ToLower();
+                if (String.IsNullOrEmpty(accountName))
+                {
+                    return ((string)await user.GetPropertyAsync(KnownUserProperties.DisplayName)).ToLower();
+                }
+                return accountName;
             }
             return domainWithUser.Split(@"\", 1).Last(); // @"domain\user" form 
         }
