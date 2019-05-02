@@ -47,15 +47,23 @@
                 <Button.Flyout>
                     <MenuFlyout>
                         <MenuFlyoutItem
-                            Width="160"
-                            Command="{x:Bind ViewModel.AddTerminalCommand}"
-                            Text="New tab">
+                            Width="170"
+                            Command="{x:Bind ViewModel.AddLocalShellCommand}"
+                            Text="New local shell">
                             <MenuFlyoutItem.Icon>
                                 <SymbolIcon Symbol="Add" />
                             </MenuFlyoutItem.Icon>
                         </MenuFlyoutItem>
                         <MenuFlyoutItem
-                            Width="160"
+                            Width="170"
+                            Command="{x:Bind ViewModel.AddRemoteShellCommand}"
+                            Text="New remote shell">
+                            <MenuFlyoutItem.Icon>
+                                <SymbolIcon Symbol="Add" />
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                        <MenuFlyoutItem
+                            Width="170"
                             Command="{x:Bind ViewModel.ShowSettingsCommand}"
                             Text="Settings">
                             <MenuFlyoutItem.Icon>
@@ -63,7 +71,7 @@
                             </MenuFlyoutItem.Icon>
                         </MenuFlyoutItem>
                         <MenuFlyoutItem
-                            Width="160"
+                            Width="170"
                             Command="{x:Bind ViewModel.ShowAboutCommand}"
                             Text="About">
                             <MenuFlyoutItem.Icon>
@@ -181,7 +189,7 @@
             <views:TabBar
                 Grid.Column="1"
                 HorizontalAlignment="Left"
-                AddCommand="{x:Bind ViewModel.AddTerminalCommand}"
+                AddCommand="{x:Bind ViewModel.AddLocalShellCommand}"
                 ItemsSource="{x:Bind ViewModel.Terminals, Mode=OneWay}"
                 SelectedItem="{x:Bind ViewModel.SelectedTerminal, Mode=TwoWay}"
                 Visibility="{x:Bind ViewModel.ShowTabsOnTop, Mode=OneWay}" />
@@ -195,7 +203,7 @@
         <views:TabBar
             Grid.Row="2"
             HorizontalAlignment="Left"
-            AddCommand="{x:Bind ViewModel.AddTerminalCommand}"
+            AddCommand="{x:Bind ViewModel.AddLocalShellCommand}"
             ItemsSource="{x:Bind ViewModel.Terminals, Mode=OneWay}"
             SelectedItem="{x:Bind ViewModel.SelectedTerminal, Mode=TwoWay}"
             Visibility="{x:Bind ViewModel.ShowTabsOnBottom, Mode=OneWay}" />
