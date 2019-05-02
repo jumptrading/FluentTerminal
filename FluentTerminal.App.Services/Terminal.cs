@@ -10,6 +10,8 @@ namespace FluentTerminal.App.Services
     {
         private readonly ITrayProcessCommunicationService _trayProcessCommunicationService;
         private Func<Task<string>> _selectedTextCallback;
+        private bool _closingFromUI = false;
+        private bool _exited = false;
 
         public Terminal(ITrayProcessCommunicationService trayProcessCommunicationService)
         {
@@ -18,12 +20,14 @@ namespace FluentTerminal.App.Services
             Id = _trayProcessCommunicationService.GetNextTerminalId();
         }
 
-        private void OnTerminalExited(object sender, int e)
+        private void OnTerminalExited(object sender, TerminalExitStatus status)
         {
-            if (e == Id)
+            if (status.TerminalId == Id &&
+                (_closingFromUI == true || status.ExitCode == 0 || status.ExitCode == -1))
             {
                 Closed?.Invoke(this, System.EventArgs.Empty);
             }
+            _exited = true;
         }
 
         /// <summary>
@@ -60,6 +64,12 @@ namespace FluentTerminal.App.Services
         /// </summary>
         public async Task Close()
         {
+            if (_exited)
+            {
+                Closed?.Invoke(this, System.EventArgs.Empty);
+                return;
+            }
+            _closingFromUI = true;
             await _trayProcessCommunicationService.CloseTerminal(Id).ConfigureAwait(true);
         }
 

@@ -39,13 +39,9 @@ namespace FluentTerminal.SystemTray.Services
             });
         }
 
-        private void _terminalsManager_TerminalExited(object sender, int e)
+        private void _terminalsManager_TerminalExited(object sender, TerminalExitStatus status)
         {
-            var request = new TerminalExitedRequest
-            {
-                TerminalId = e
-            };
-
+            var request = new TerminalExitedRequest(status);
             _appServiceConnection?.SendMessageAsync(CreateMessage(request));
         }
 
@@ -123,6 +119,18 @@ namespace FluentTerminal.SystemTray.Services
                 var deferral = args.GetDeferral();
 
                 var response = new GetAvailablePortResponse { Port = Utilities.GetAvailablePort().Value };
+
+                await args.Request.SendResponseAsync(CreateMessage(response));
+
+                deferral.Complete();
+            }
+            else if (messageType == nameof(GetMoshConnectionRequest))
+            {
+                var deferral = args.GetDeferral();
+
+                var request = JsonConvert.DeserializeObject<GetMoshConnectionRequest>(messageContent);
+
+                var response = await Utilities.GetMoshKeyResponseAsync(request);
 
                 await args.Request.SendResponseAsync(CreateMessage(response));
 

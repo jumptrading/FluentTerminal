@@ -16,7 +16,7 @@ namespace FluentTerminal.App.Services.Implementation
         private readonly Dictionary<int, Action<byte[]>> _terminalOutputHandlers;
         private int _nextTerminalId = 0;
 
-        public event EventHandler<int> TerminalExited;
+        public event EventHandler<TerminalExitStatus> TerminalExited;
 
         public TrayProcessCommunicationService(ISettingsService settingsService)
         {
@@ -37,6 +37,25 @@ namespace FluentTerminal.App.Services.Implementation
             var response = JsonConvert.DeserializeObject<GetAvailablePortResponse>(responseMessage[MessageKeys.Content]);
 
             Logger.Instance.Debug("Received GetAvailablePortResponse: {@response}", response);
+
+            return response;
+        }
+
+        public async Task<GetMoshConnectionResponse> GetMoshConnectionCredentials(ISshConnectionInfo connectionInfo)
+        {
+            GetMoshConnectionRequest request = new GetMoshConnectionRequest
+            {
+                Host = connectionInfo.Host,
+                SshPort = connectionInfo.SshPort,
+                Username = connectionInfo.Username,
+                IdentityFile = connectionInfo.IdentityFile,
+                MoshPorts = connectionInfo.MoshPorts
+            };
+
+            var responseMessage = await _appServiceConnection.SendMessageAsync(CreateMessage(request));
+            var response = JsonConvert.DeserializeObject<GetMoshConnectionResponse>(responseMessage[MessageKeys.Content]);
+
+            Logger.Instance.Debug("Received GetMoshKeyResponse: {@response}", response);
 
             return response;
         }
@@ -89,10 +108,9 @@ namespace FluentTerminal.App.Services.Implementation
             else if (messageType == nameof(TerminalExitedRequest))
             {
                 var request = JsonConvert.DeserializeObject<TerminalExitedRequest>(messageContent);
-
                 Logger.Instance.Debug("Received TerminalExitedRequest: {@request}", request);
 
-                TerminalExited?.Invoke(this, request.TerminalId);
+                TerminalExited?.Invoke(this, request.ToStatus());
             }
         }
 
@@ -137,10 +155,7 @@ namespace FluentTerminal.App.Services.Implementation
 
         public Task CloseTerminal(int terminalId)
         {
-            var request = new TerminalExitedRequest
-            {
-                TerminalId = terminalId
-            };
+            var request = new TerminalExitedRequest(terminalId, -1);
 
             Logger.Instance.Debug("Sending TerminalExitedRequest: {@request}", request);
 
