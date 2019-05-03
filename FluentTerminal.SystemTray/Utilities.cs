@@ -1,17 +1,12 @@
 ﻿using FluentTerminal.Models.Enums;
-using FluentTerminal.Models.Requests;
-using FluentTerminal.Models.Responses;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.Windows.Input;
+using FluentTerminal.Models;
 
 namespace FluentTerminal.SystemTray
 {
@@ -19,102 +14,6 @@ namespace FluentTerminal.SystemTray
     {
         private const int FirstDynamicPort = 49151;
         private static readonly List<int> _sentOutPorts = new List<int>();
-
-        public static string GetSshLocation()
-        {
-            //
-            // See https://stackoverflow.com/a/25919981
-            //
-
-            string system32Folder;
-
-            if (Environment.Is64BitOperatingSystem && !Environment.Is64BitProcess)
-            {
-                system32Folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), @"Sysnative");
-            }
-            else
-            {
-                system32Folder = Environment.GetFolderPath(Environment.SpecialFolder.System);
-            }
-
-            return Path.Combine(system32Folder, @"OpenSSH\ssh.exe");
-        }
-
-        public static async Task<GetMoshConnectionResponse> GetMoshKeyResponseAsync(GetMoshConnectionRequest request)
-        {
-            GetMoshConnectionResponse response = new GetMoshConnectionResponse();
-            response.FilePath = GetMoshClientPath();
-
-            AutoResetEvent processEvent = new AutoResetEvent(false);
-
-            try
-            {
-                using (Process sshProcess = new Process())
-                {
-                    sshProcess.StartInfo.FileName = "cmd.exe";
-                    sshProcess.StartInfo.UseShellExecute = false;
-                    sshProcess.StartInfo.RedirectStandardInput = true;
-                    sshProcess.StartInfo.RedirectStandardOutput = true;
-                    sshProcess.EnableRaisingEvents = true;
-                    sshProcess.Exited += (sender, e) =>
-                    {
-                        processEvent.Set();
-                    };
-                    sshProcess.OutputDataReceived += (sender, e) =>
-                    {
-                        if (e.Data == null)
-                        {
-                            return;
-                        }
-                        if (e.Data.Contains("Microsoft Corporation. All rights reserved."))
-                        {
-                            // cmd.exe was started successfully
-                            processEvent.Set();
-                        }
-                        if (e.Data.Contains("MOSH CONNECT"))
-                        {
-                            const int MOSH_RESPONSE_WORD_COUNT = 4;
-                            const int MOSH_PORT_RESPONSE_POSITION = 2;
-                            const int MOSH_KEY_RESPONSE_POSITION = 3;
-                            string[] moshConnectionInfo = e.Data.Split(' ');
-                            if (moshConnectionInfo.Length == MOSH_RESPONSE_WORD_COUNT)
-                            {
-                                response.Port = moshConnectionInfo[MOSH_PORT_RESPONSE_POSITION];
-                                response.Key = moshConnectionInfo[MOSH_KEY_RESPONSE_POSITION];
-                            }
-
-                            sshProcess.CloseMainWindow();
-                            sshProcess.Close();
-
-                            processEvent.Set();
-                        }
-                    };
-
-                    sshProcess.Start();
-                    sshProcess.BeginOutputReadLine();
-
-                    processEvent.WaitOne();
-
-                    if (sshProcess.HasExited == false)
-                    {
-                        await sshProcess.StandardInput.WriteLineAsync(String.Format("{0} -T {1}@{2}{3} \"mosh-server new -p {4}\"",
-                            GetSshLocation(),
-                            request.Username,
-                            request.Host,
-                            String.IsNullOrEmpty(request.IdentityFile) ? "" : " -i " + request.IdentityFile,
-                            request.MoshPorts));
-
-                        processEvent.WaitOne();
-                    }
-                }
-            }
-            catch (Exception)
-            {
-
-            }
-
-            return response;
-        }
 
         public static int? GetAvailablePort()
         {
@@ -596,16 +495,45 @@ namespace FluentTerminal.SystemTray
             }
         }
 
-        internal static string GetMoshClientPath()
+        #region Mosh locator
+
+#if X64
+        private const string MoshArchDir = @"x64";
+#else
+        private const string MoshArchDir = @"x86";
+#endif
+
+        internal static string CheckIfMosh(this ShellProfile profile)
         {
-            DirectoryInfo dir = new FileInfo(Assembly.GetEntryAssembly().Location).Directory;
+            if (profile?.Location == null)
+                return null;
+
+            string location = profile.Location.Trim();
+
+            if (location.Equals("mosh.exe", StringComparison.OrdinalIgnoreCase) ||
+                location.Equals("mosh", StringComparison.OrdinalIgnoreCase))
+            {
+                location = GetMoshPath();
+
+                if (string.IsNullOrEmpty(location))
+                    return "mosh.exe not found.";
+
+                profile.Location = location;
+            }
+
+            return null;
+        }
+
+        private static string GetMoshPath()
+        {
+            DirectoryInfo dir = new FileInfo(Assembly.GetExecutingAssembly().Location).Directory;
 
             while (dir != null)
             {
-                string moshClientPath = Path.Combine(dir.FullName, @"Win32\mosh-client.exe");
+                string path = Path.Combine(dir.FullName, "MoshExecutables", MoshArchDir, "mosh.exe");
 
-                if (File.Exists(moshClientPath))
-                    return moshClientPath;
+                if (System.IO.File.Exists(path))
+                    return path;
 
                 dir = dir.Parent;
             }
@@ -613,10 +541,6 @@ namespace FluentTerminal.SystemTray
             return null;
         }
 
-        private static void Log(string message)
-        {
-            using (StreamWriter writer = new StreamWriter(@"C:\Users\peske\Desktop\f.log", true))
-                writer.WriteLine(message);
-        }
+        #endregion Mosh locator
     }
 }
