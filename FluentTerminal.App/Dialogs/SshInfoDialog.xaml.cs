@@ -28,11 +28,12 @@ URL={0}
         private readonly ISshHelperService _sshHelperService;
         private readonly ITrayProcessCommunicationService _trayProcessCommunicationService;
 
-        public SshInfoDialog(ISettingsService settingsService, ISshHelperService sshHelperService, ITrayProcessCommunicationService trayProcessCommunicationService)
+        public SshInfoDialog(ISettingsService settingsService, ISshHelperService sshHelperService,
+            ITrayProcessCommunicationService trayProcessCommunicationService)
         {
             _sshHelperService = sshHelperService;
-            InitializeComponent();
             _trayProcessCommunicationService = trayProcessCommunicationService;
+            InitializeComponent();
             var currentTheme = settingsService.GetCurrentTheme();
             RequestedTheme = ContrastHelper.GetIdealThemeForBackgroundColor(currentTheme.Colors.Background);
         }
@@ -40,14 +41,14 @@ URL={0}
         private async void OnLoading(FrameworkElement sender, object args)
         {
             SshConnectionInfoViewModel vm = (SshConnectionInfoViewModel)DataContext;
-            vm.Username = await GetUsername();
-            if (false == String.IsNullOrEmpty(vm.Username))
-                hostTextBox.Focus(FocusState.Programmatic);
-        }
 
-        private async Task<string> GetUsername()
-        {
-            return (await _trayProcessCommunicationService.GetUserName().ConfigureAwait(true)).UserName;
+            if (!string.IsNullOrEmpty(vm.Username))
+                return;
+
+            vm.Username = await _trayProcessCommunicationService.GetUserName();
+
+            if (string.IsNullOrEmpty(vm.Host) && !string.IsNullOrEmpty(vm.Username))
+                hostTextBox.Focus(FocusState.Programmatic);
         }
 
         private async void BrowseButtonOnClick(object sender, RoutedEventArgs e)

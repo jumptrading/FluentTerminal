@@ -27,6 +27,6 @@ namespace FluentTerminal.App.Services
         Task<GetAvailablePortResponse> GetAvailablePort();
         int GetNextTerminalId();
 
-        Task<GetUserNameResponse> GetUserName();
+        Task<string> GetUserName();
     }
 }

@@ -41,14 +41,34 @@ namespace FluentTerminal.App.Services.Implementation
             return response;
         }
 
-        public async Task<GetUserNameResponse> GetUserName()
+        private string _userName;
+
+        public async Task<string> GetUserName()
         {
-            var responseMessage = await _appServiceConnection.SendMessageAsync(CreateMessage(new GetUserNameRequest()));
-            var response = JsonConvert.DeserializeObject<GetUserNameResponse>(responseMessage[MessageKeys.Content]);
+            if (!string.IsNullOrEmpty(_userName))
+                // Returning the username from cache
+                return _userName;
+
+            GetUserNameResponse response;
+
+            // No need to crash for username, so try/catch
+            try
+            {
+                var responseMessage = await _appServiceConnection.SendMessageAsync(CreateMessage(new GetUserNameRequest()));
+                response = JsonConvert.DeserializeObject<GetUserNameResponse>(responseMessage[MessageKeys.Content]);
+            }
+            catch (Exception e)
+            {
+                Logger.Instance.Error(e, "Error while trying to get username.");
+
+                return null;
+            }
 
             Logger.Instance.Debug("Received GetUserNameResponse: {@response}", response);
 
-            return response;
+            _userName = response.UserName;
+
+            return _userName;
         }
 
         public async Task<CreateTerminalResponse> CreateTerminal(int id, TerminalSize size, ShellProfile shellProfile,
