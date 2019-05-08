@@ -47,6 +47,14 @@
                 <Button.Flyout>
                     <MenuFlyout>
                         <MenuFlyoutItem
+                            Width="160"
+                            Command="{x:Bind ViewModel.AddTerminalCommand}"
+                            x:Uid="NewTab">
+                            <MenuFlyoutItem.Icon>
+                                <SymbolIcon Symbol="Add" />
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                        <MenuFlyoutItem
                             Width="170"
                             Command="{x:Bind ViewModel.AddLocalShellCommand}"
                             Text="New local shell">
@@ -65,7 +73,7 @@
                         <MenuFlyoutItem
                             Width="170"
                             Command="{x:Bind ViewModel.ShowSettingsCommand}"
-                            Text="Settings">
+                            x:Uid="Settings">
                             <MenuFlyoutItem.Icon>
                                 <SymbolIcon Symbol="Setting" />
                             </MenuFlyoutItem.Icon>
@@ -73,7 +81,7 @@
                         <MenuFlyoutItem
                             Width="170"
                             Command="{x:Bind ViewModel.ShowAboutCommand}"
-                            Text="About">
+                            x:Uid="About">
                             <MenuFlyoutItem.Icon>
                                 <FontIcon
                                     FontFamily="Segoe MDL2 Assets"
@@ -92,12 +100,12 @@
                 Background="{x:Bind ViewModel.SelectedTerminal.TabTheme, Mode=OneWay, Converter={StaticResource TabColorFallbackConverter}, ConverterParameter=Background}">
                 <RelativePanel.ContextFlyout>
                     <MenuFlyout>
-                        <MenuFlyoutSubItem Text="Color">
+                        <MenuFlyoutSubItem x:Uid="Color">
                             <ToggleMenuFlyoutItem
                                 Command="{x:Bind ViewModel.SelectedTerminal.SelectTabThemeCommand}"
                                 CommandParameter="None"
                                 IsChecked="{x:Bind ViewModel.SelectedTerminal.TabTheme, Mode=OneWay, Converter={StaticResource TabThemeSelectedConverter}, ConverterParameter=None}"
-                                Text="None">
+                                x:Uid="None">
                                 <ToggleMenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xF126;" />
                                 </ToggleMenuFlyoutItem.Icon>
@@ -106,7 +114,7 @@
                                 Command="{x:Bind ViewModel.SelectedTerminal.SelectTabThemeCommand}"
                                 CommandParameter="Red"
                                 IsChecked="{x:Bind ViewModel.SelectedTerminal.TabTheme, Mode=OneWay, Converter={StaticResource TabThemeSelectedConverter}, ConverterParameter=Red}"
-                                Text="Red">
+                                x:Uid="Red">
                                 <ToggleMenuFlyoutItem.Icon>
                                     <FontIcon
                                         FontFamily="Segoe MDL2 Assets"
@@ -118,7 +126,7 @@
                                 Command="{x:Bind ViewModel.SelectedTerminal.SelectTabThemeCommand}"
                                 CommandParameter="Green"
                                 IsChecked="{x:Bind ViewModel.SelectedTerminal.TabTheme, Mode=OneWay, Converter={StaticResource TabThemeSelectedConverter}, ConverterParameter=Green}"
-                                Text="Green">
+                                x:Uid="Green">
                                 <ToggleMenuFlyoutItem.Icon>
                                     <FontIcon
                                         FontFamily="Segoe MDL2 Assets"
@@ -130,7 +138,7 @@
                                 Command="{x:Bind ViewModel.SelectedTerminal.SelectTabThemeCommand}"
                                 CommandParameter="Blue"
                                 IsChecked="{x:Bind ViewModel.SelectedTerminal.TabTheme, Mode=OneWay, Converter={StaticResource TabThemeSelectedConverter}, ConverterParameter=Blue}"
-                                Text="Blue">
+                                x:Uid="Blue">
                                 <ToggleMenuFlyoutItem.Icon>
                                     <FontIcon
                                         FontFamily="Segoe MDL2 Assets"
@@ -142,7 +150,7 @@
                                 Command="{x:Bind ViewModel.SelectedTerminal.SelectTabThemeCommand}"
                                 CommandParameter="Purple"
                                 IsChecked="{x:Bind ViewModel.SelectedTerminal.TabTheme, Mode=OneWay, Converter={StaticResource TabThemeSelectedConverter}, ConverterParameter=Purple}"
-                                Text="Purple">
+                                x:Uid="Purple">
                                 <ToggleMenuFlyoutItem.Icon>
                                     <FontIcon
                                         FontFamily="Segoe MDL2 Assets"
@@ -154,7 +162,7 @@
                                 Command="{x:Bind ViewModel.SelectedTerminal.SelectTabThemeCommand}"
                                 CommandParameter="Orange"
                                 IsChecked="{x:Bind ViewModel.SelectedTerminal.TabTheme, Mode=OneWay, Converter={StaticResource TabThemeSelectedConverter}, ConverterParameter=Orange}"
-                                Text="Orange">
+                                x:Uid="Orange">
                                 <ToggleMenuFlyoutItem.Icon>
                                     <FontIcon
                                         FontFamily="Segoe MDL2 Assets"
@@ -166,7 +174,7 @@
                                 Command="{x:Bind ViewModel.SelectedTerminal.SelectTabThemeCommand}"
                                 CommandParameter="Teal"
                                 IsChecked="{x:Bind ViewModel.SelectedTerminal.TabTheme, Mode=OneWay, Converter={StaticResource TabThemeSelectedConverter}, ConverterParameter=Teal}"
-                                Text="Teal">
+                                x:Uid="Teal">
                                 <ToggleMenuFlyoutItem.Icon>
                                     <FontIcon
                                         FontFamily="Segoe MDL2 Assets"
@@ -175,7 +183,7 @@
                                 </ToggleMenuFlyoutItem.Icon>
                             </ToggleMenuFlyoutItem>
                         </MenuFlyoutSubItem>
-                        <MenuFlyoutItem Command="{x:Bind ViewModel.SelectedTerminal.EditTitleCommand}" Text="Edit Title" />
+                        <MenuFlyoutItem Command="{x:Bind ViewModel.SelectedTerminal.EditTitleCommand}" x:Uid="EditTitle" />
                     </MenuFlyout>
                 </RelativePanel.ContextFlyout>
                 <TextBlock
