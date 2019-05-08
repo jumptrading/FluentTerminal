@@ -5,7 +5,7 @@ $InstallFilesWixobj = "..\FluentTerminalInstaller.wixobj"
 if(!(Test-Path "$WixRoot\candle.exe"))
 {
     
-	Write-Host Downloading Wixtools..
+    Write-Host Downloading Wixtools..
     New-Item $WixRoot -type directory -force | Out-Null
     # Download Wix version 3.11.1 - https://github.com/wixtoolset/wix3/releases/tag/wix3111rtm
     Invoke-WebRequest -Uri https://github.com/wixtoolset/wix3/releases/download/wix3111rtm/wix311-binaries.zip -Method Get -OutFile $WixRoot\WixTools.zip

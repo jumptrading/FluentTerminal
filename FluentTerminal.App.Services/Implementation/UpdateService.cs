@@ -47,11 +47,8 @@ namespace FluentTerminal.App.Services.Implementation
             {
                 dynamic restResponseData = JsonConvert.DeserializeObject(restResponse.Content);
                 string tag = restResponseData[0].tag_name;
-                if (tag.Split('-').Length == 3)
-                {
-                    var latestVersion = new Version(tag.Split('-')[1]);
-                    return new Version(latestVersion.Major, latestVersion.Minor, latestVersion.Build, latestVersion.Revision);
-                }
+                var latestVersion = new Version(tag);
+                return new Version(latestVersion.Major, latestVersion.Minor, latestVersion.Build, latestVersion.Revision);
             }
             return new Version(0, 0, 0, 0);
         }

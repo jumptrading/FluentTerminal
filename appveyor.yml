@@ -1,4 +1,4 @@
-version: 1.0.{build}.0
+version: 1.1.{build}
 pull_requests:
   do_not_increment_build_number: true
 os: Visual Studio 2017
@@ -7,29 +7,35 @@ platform:
 - x64
 skip_tags: true
 before_build:
+- cmd: set APP_BUILD_VERSION=%APPVEYOR_BUILD_VERSION%.0
 - cmd: git rev-parse --short HEAD>commit.txt && set /p GIT_COMMIT_SHORT=<commit.txt
+- cmd: set MSI_ARTIFACT_NAME=FluentTerminalInstaller-v%APP_BUILD_VERSION%-%GIT_COMMIT_SHORT%.msi
+- cmd: set APPX_ARTIFACT_NAME=FluentTerminal-v%APP_BUILD_VERSION%-%GIT_COMMIT_SHORT%.zip
 - ps: |
     [xml]$manifest = Get-Content './FluentTerminal.App/Package.appxmanifest'
-    $manifest.Package.Identity.Version = "1.0.$Env:APPVEYOR_BUILD_NUMBER.0"
+    $manifest.Package.Identity.Version = "$Env:APP_BUILD_VERSION"
     $manifest.Save((Resolve-Path './FluentTerminal.App/Package.appxmanifest'))
+    [xml]$msiTemplate = Get-Content './MsiInstaller/Template.wxs'
+    $msiTemplate.Wix.Product.Version = "$Env:APP_BUILD_VERSION"
+    $msiTemplate.Save((Resolve-Path './MsiInstaller/Template.wxs'))
 - cmd: pushd . && cd FluentTerminal.Client && npm install && npm run-script build && popd && nuget restore FluentTerminal.sln
 after_build:
-- cmd: '7z a FluentTerminal-v%APPVEYOR_BUILD_VERSION%-%GIT_COMMIT_SHORT%.zip FluentTerminal.App\AppPackages\*'
+- cmd: '7z a %APPX_ARTIFACT_NAME% FluentTerminal.App\AppPackages\*'
 - cmd: pushd FluentTerminal.App\AppPackages\FluentTerminal*\Dependencies && dir && xcopy * "../../../../MsiInstaller/Dependencies" /e/i/f && popd
 - cmd: pushd FluentTerminal.App\AppPackages\FluentTerminal*\ && dir && xcopy "*.appxbundle" "../../../MsiInstaller/" /e/i/f && popd && ren MsiInstaller\*.appxbundle FluentTerminal.App.appxbundle
 - cmd: pushd FluentTerminal.App\AppPackages\FluentTerminal*\ && dir && xcopy "*.cer" "../../../MsiInstaller/" /e/i/f && popd && ren MsiInstaller\*.cer FluentTerminal.App.cer
-- cmd: pushd MsiInstaller && powershell.exe -ExecutionPolicy Bypass  -file ".\Generate-AppxMsi.ps1" && popd
+- cmd: pushd MsiInstaller && powershell.exe -ExecutionPolicy Bypass  -file ".\Generate-AppxMsi.ps1" && ren FluentTerminalInstaller.msi %MSI_ARTIFACT_NAME% && popd
 artifacts:
-  - path: 'FluentTerminal-v%APPVEYOR_BUILD_VERSION%-${GIT_COMMIT_SHORT}.zip'
+  - path: '%APPX_ARTIFACT_NAME%'
     name: AppPackage
-  - path: 'MsiInstaller/FluentTerminalInstaller.msi'
+  - path: 'MsiInstaller/%MSI_ARTIFACT_NAME%'
     name: MsiInstaller
 build_script:
   - msbuild /maxcpucount:%NUMBER_OF_PROCESSORS% /t:Build /p:Configuration=Release /p:AppxBundle=Always /p:Platform="x64" /v:q /nologo FluentTerminal.sln
 test_script:
   - dotnet test ./FluentTerminal.App.Services.Test
 deploy:
-  release: 'FluentTerminal-%APPVEYOR_BUILD_VERSION%-${GIT_COMMIT_SHORT}'
+  release: '%APP_BUILD_VERSION%'
   description: 'Build ${APPVEYOR_REPO_COMMIT} on master branch'
   provider: GitHub
   auth_token:
