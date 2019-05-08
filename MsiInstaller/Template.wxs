@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Product Id="*" UpgradeCode="7b0af2d8-d27b-4a07-9be5-88185a9153be"
-           Name="Fluent Terminal Installer" Version="0.0.1" Manufacturer="Example Company Name" Language="1033">
+           Name="Fluent Terminal Installer" Version="0.0.1" Manufacturer="Jump Trading" Language="1033">
     <Package InstallerVersion="200" Compressed="yes" Comments="Windows Installer Package" Platform="x64"/>
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed. Please uninstall it first. Setup will now exit."/>
     <Media Id="1" Cabinet="product.cab" EmbedCab="yes"/>
 
     <Directory Id="TARGETDIR" Name="SourceDir">
