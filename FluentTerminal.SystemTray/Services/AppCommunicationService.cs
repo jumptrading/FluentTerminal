@@ -158,6 +158,11 @@ namespace FluentTerminal.SystemTray.Services
 
                 deferral.Complete();
             }
+            else if (messageType == nameof(ApplicationUpdateRequest))
+            {
+                ApplicationUpdateRequest request = JsonConvert.DeserializeObject<ApplicationUpdateRequest>(messageContent);
+                Utilities.RunApplicationUpdate(request.Url);
+            }
         }
 
         private ValueSet CreateMessage(object content)
