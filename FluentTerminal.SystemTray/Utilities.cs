@@ -7,6 +7,8 @@ using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Windows.Input;
 using FluentTerminal.Models;
+using System.Net;
+using System.Diagnostics;
 
 namespace FluentTerminal.SystemTray
 {
@@ -547,6 +549,24 @@ namespace FluentTerminal.SystemTray
         {
             using (StreamWriter writer = new StreamWriter(path, false))
                 writer.Write(content);
+        }
+
+        internal static void RunApplicationUpdate(string url)
+        {
+            if (string.IsNullOrEmpty(url))
+                return;
+
+            WebClient client = new WebClient();
+            try
+            {
+                string fileName = Path.GetTempPath() + Guid.NewGuid().ToString() + ".msi";
+                client.DownloadFile(url, fileName);
+                Process process = new Process();
+                process.StartInfo.FileName = "msiexec.exe";
+                process.StartInfo.Arguments = $"/i \"{fileName}\"";
+                process.Start();
+            }
+            catch (Exception) { }
         }
     }
 }

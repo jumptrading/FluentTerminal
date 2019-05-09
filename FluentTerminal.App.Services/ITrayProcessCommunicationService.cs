@@ -30,5 +30,7 @@ namespace FluentTerminal.App.Services
         Task<string> GetUserName();
 
         Task SaveTextFileAsync(string path, string content);
+
+        void StartApplicationUpdate(string url);
     }
 }
