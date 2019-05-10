@@ -47,14 +47,6 @@
                 <Button.Flyout>
                     <MenuFlyout>
                         <MenuFlyoutItem
-                            Width="160"
-                            Command="{x:Bind ViewModel.AddTerminalCommand}"
-                            x:Uid="NewTab">
-                            <MenuFlyoutItem.Icon>
-                                <SymbolIcon Symbol="Add" />
-                            </MenuFlyoutItem.Icon>
-                        </MenuFlyoutItem>
-                        <MenuFlyoutItem
                             Width="170"
                             Command="{x:Bind ViewModel.AddLocalShellCommand}"
                             Text="New local shell">
