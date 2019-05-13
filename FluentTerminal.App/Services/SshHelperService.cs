@@ -243,7 +243,9 @@ namespace FluentTerminal.App.Services
             if (!string.IsNullOrEmpty(error))
             {
                 // Happens if the link doesn't contain all the needed data, so we have to prompt user to complete.
-                sshConnectionInfo = (SshConnectionInfoViewModel) await _dialogService.ShowSshConnectionInfoDialogAsync();
+                sshConnectionInfo =
+                    (SshConnectionInfoViewModel) await _dialogService.ShowSshConnectionInfoDialogAsync(
+                        sshConnectionInfo);
 
                 // sshConnectionInfo can be null if user clicks "Cancel".
                 if (sshConnectionInfo == null)
