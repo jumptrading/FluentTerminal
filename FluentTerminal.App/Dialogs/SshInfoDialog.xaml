@@ -23,7 +23,7 @@
     </ContentDialog.Resources>
     <Grid Width="500">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100" />
+            <ColumnDefinition Width="140" />
             <ColumnDefinition Width="22" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="8" />
