@@ -29,6 +29,7 @@ using Windows.ApplicationModel.Background;
 using Windows.ApplicationModel.Core;
 using Windows.Storage;
 using Windows.UI.Core;
+using Windows.UI.Popups;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -42,6 +43,7 @@ namespace FluentTerminal.App
         private readonly ISettingsService _settingsService;
         private readonly ITrayProcessCommunicationService _trayProcessCommunicationService;
         private readonly ISshHelperService _sshHelperService;
+        private readonly IDialogService _dialogService;
         private bool _alreadyLaunched;
         private ApplicationSettings _applicationSettings;
         private readonly IContainer _container;
@@ -105,6 +107,8 @@ namespace FluentTerminal.App
 
             _sshHelperService = _container.Resolve<ISshHelperService>();
 
+            _dialogService = _container.Resolve<IDialogService>();
+
             _applicationSettings = _settingsService.GetApplicationSettings();
 
             JsonConvert.DefaultSettings = () =>
@@ -158,14 +162,80 @@ namespace FluentTerminal.App
         {
             if (args is ProtocolActivatedEventArgs protocolActivated)
             {
-                // TODO: Check what happens if ssh link is invalid?
-                if (_sshHelperService.IsSsh(protocolActivated.Uri))
+                MainViewModel mainViewModel = null;
+
+                if (!_alreadyLaunched)
                 {
-                    ShellProfile profile = await _sshHelperService.GetSshShellProfileAsync(protocolActivated.Uri);
-                    
-                    if (profile != null)
-                        await CreateTerminal(profile, _applicationSettings.NewTerminalLocation);
+                    // App wasn't launched before double clicking a shortcut, so we have to create a window
+                    // in order to be able to communicate with user.
+                    mainViewModel = _container.Resolve<MainViewModel>();
+
+                    await CreateMainView(typeof(MainPage), mainViewModel, true);
                 }
+
+                bool isSsh;
+
+                try
+                {
+                    isSsh = _sshHelperService.IsSsh(protocolActivated.Uri);
+                }
+                catch (Exception ex)
+                {
+                    await new MessageDialog($"Invalid link: {ex.Message}", "Invalid Link").ShowAsync();
+
+                    mainViewModel?.ApplicationView.TryClose();
+
+                    return;
+                }
+
+                if (isSsh)
+                {
+                    ISshConnectionInfo connectionInfo;
+
+                    try
+                    {
+                        connectionInfo = _sshHelperService.ParseSsh(protocolActivated.Uri);
+                    }
+                    catch (Exception ex)
+                    {
+                        await new MessageDialog($"Invalid link: {ex.Message}", "Invalid Link").ShowAsync();
+
+                        mainViewModel?.ApplicationView.TryClose();
+
+                        return;
+                    }
+
+                    string error = connectionInfo.Validate();
+
+                    if (!string.IsNullOrEmpty(error))
+                    {
+                        // Link is valid, but incomplete (i.e. username missing), so we need to show dialog.
+                        connectionInfo =
+                            (SshConnectionInfoViewModel) await _dialogService.ShowSshConnectionInfoDialogAsync(
+                                connectionInfo);
+
+                        if (connectionInfo == null)
+                        {
+                            // User clicked "Cancel" in the dialog.
+                            mainViewModel?.ApplicationView.TryClose();
+
+                            return;
+                        }
+                    }
+
+                    ShellProfile profile = _sshHelperService.CreateShellProfile(connectionInfo);
+
+                    if (mainViewModel == null)
+                        await CreateTerminal(profile, _applicationSettings.NewTerminalLocation);
+                    else
+                        mainViewModel.AddTerminal(profile);
+
+                    return;
+                }
+
+                await new MessageDialog($"Invalid link: {protocolActivated.Uri}", "Invalid Link").ShowAsync();
+
+                mainViewModel?.ApplicationView.TryClose();
 
                 return;
             }

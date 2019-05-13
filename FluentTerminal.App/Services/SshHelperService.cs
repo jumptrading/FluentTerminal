@@ -6,7 +6,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
+using Windows.UI.Core;
 using Windows.UI.Popups;
+using Windows.UI.Xaml;
 using FluentTerminal.App.ViewModels;
 using FluentTerminal.Models;
 using FluentTerminal.Models.Enums;
@@ -55,63 +57,6 @@ namespace FluentTerminal.App.Services
 
             return Path.Combine(system32Folder, @"OpenSSH\ssh.exe");
         });
-
-        private static SshConnectionInfoViewModel ParseSsh(Uri uri)
-        {
-            SshConnectionInfoViewModel vm = new SshConnectionInfoViewModel
-            {
-                Host = uri.Host,
-                UseMosh = MoshUriScheme.Equals(uri.Scheme, StringComparison.OrdinalIgnoreCase)
-            };
-
-            if (uri.Port >= 0)
-                vm.SshPort = (ushort)uri.Port;
-
-            if (!string.IsNullOrEmpty(uri.UserInfo))
-            {
-                string[] parts = uri.UserInfo.Split(';');
-
-                if (parts.Length > 2)
-                    throw new FormatException($"UserInfo part contains {parts.Length} elements.");
-
-                vm.Username = HttpUtility.UrlDecode(parts[0]);
-
-                if (parts.Length > 1)
-                    LoadSshOptionsFromUri(vm, parts[1]);
-            }
-
-            if (string.IsNullOrEmpty(uri.Query))
-                return vm;
-
-            if (!vm.UseMosh)
-                throw new FormatException("Query parameters are not supported in SSH links.");
-
-            string queryString = uri.Query;
-
-            if (queryString.StartsWith("?", StringComparison.Ordinal))
-                queryString = queryString.Substring(1);
-
-            if (string.IsNullOrEmpty(queryString))
-                return vm;
-
-            foreach (SshOptionViewModel option in ParseSshOptionsFromUri(queryString, '&'))
-            {
-                if (ValidMoshPortsNames.Any(n => n.Equals(option.Name, StringComparison.OrdinalIgnoreCase)))
-                {
-                    Match match = MoshRangeRx.Match(option.Value);
-
-                    if (!match.Success)
-                        throw new FormatException($"Invalid mosh ports range '{option.Value}'.");
-
-                    vm.MoshPortFrom = ushort.Parse(match.Groups["from"].Value);
-                    vm.MoshPortTo = ushort.Parse(match.Groups["to"].Value);
-                }
-                else
-                    throw new FormatException($"Unknown query parameter '{option.Name}'.");
-            }
-
-            return vm;
-        }
 
         private static void LoadSshOptionsFromUri(SshConnectionInfoViewModel vm, string optsString)
         {
@@ -182,15 +127,6 @@ namespace FluentTerminal.App.Services
             return sb.ToString();
         }
 
-        private static ShellProfile GetShellProfile(SshConnectionInfoViewModel sshConnectionInfo) =>
-            new ShellProfile
-            {
-                Arguments = GetArgumentsString(sshConnectionInfo),
-                Location = sshConnectionInfo.UseMosh ? MoshExe : SshExeLocationLazy.Value,
-                WorkingDirectory = string.Empty,
-                LineEndingTranslation = sshConnectionInfo.LineEndingStyle
-            };
-
         #endregion Static
 
         #region Fields
@@ -211,48 +147,79 @@ namespace FluentTerminal.App.Services
             SshUriScheme.Equals(uri?.Scheme, StringComparison.OrdinalIgnoreCase) ||
             MoshUriScheme.Equals(uri?.Scheme, StringComparison.OrdinalIgnoreCase);
 
+        public ISshConnectionInfo ParseSsh(Uri uri)
+        {
+            SshConnectionInfoViewModel vm = new SshConnectionInfoViewModel
+            {
+                Host = uri.Host,
+                UseMosh = MoshUriScheme.Equals(uri.Scheme, StringComparison.OrdinalIgnoreCase)
+            };
+
+            if (uri.Port >= 0)
+                vm.SshPort = (ushort)uri.Port;
+
+            if (!string.IsNullOrEmpty(uri.UserInfo))
+            {
+                string[] parts = uri.UserInfo.Split(';');
+
+                if (parts.Length > 2)
+                    throw new FormatException($"UserInfo part contains {parts.Length} elements.");
+
+                vm.Username = HttpUtility.UrlDecode(parts[0]);
+
+                if (parts.Length > 1)
+                    LoadSshOptionsFromUri(vm, parts[1]);
+            }
+
+            if (string.IsNullOrEmpty(uri.Query))
+                return vm;
+
+            if (!vm.UseMosh)
+                throw new FormatException("Query parameters are not supported in SSH links.");
+
+            string queryString = uri.Query;
+
+            if (queryString.StartsWith("?", StringComparison.Ordinal))
+                queryString = queryString.Substring(1);
+
+            if (string.IsNullOrEmpty(queryString))
+                return vm;
+
+            foreach (SshOptionViewModel option in ParseSshOptionsFromUri(queryString, '&'))
+            {
+                if (ValidMoshPortsNames.Any(n => n.Equals(option.Name, StringComparison.OrdinalIgnoreCase)))
+                {
+                    Match match = MoshRangeRx.Match(option.Value);
+
+                    if (!match.Success)
+                        throw new FormatException($"Invalid mosh ports range '{option.Value}'.");
+
+                    vm.MoshPortFrom = ushort.Parse(match.Groups["from"].Value);
+                    vm.MoshPortTo = ushort.Parse(match.Groups["to"].Value);
+                }
+                else
+                    throw new FormatException($"Unknown query parameter '{option.Name}'.");
+            }
+
+            return vm;
+        }
+
+        public ShellProfile CreateShellProfile(ISshConnectionInfo sshConnectionInfo) =>
+            new ShellProfile
+            {
+                Arguments = GetArgumentsString((SshConnectionInfoViewModel) sshConnectionInfo),
+                Location = sshConnectionInfo.UseMosh ? MoshExe : SshExeLocationLazy.Value,
+                WorkingDirectory = string.Empty,
+                LineEndingTranslation = sshConnectionInfo.LineEndingStyle
+            };
+
         public async Task<ShellProfile> GetSshShellProfileAsync()
         {
             SshConnectionInfoViewModel sshConnectionInfo =
                 (SshConnectionInfoViewModel) await _dialogService.ShowSshConnectionInfoDialogAsync();
 
             // sshConnectionInfo can be null if user clicks "Cancel".
-            return sshConnectionInfo == null ? null : GetShellProfile(sshConnectionInfo);
-        }
-
-        public async Task<ShellProfile> GetSshShellProfileAsync(Uri uri)
-        {
-            if (!IsSsh(uri))
-                throw new ArgumentException("Input argument is not a SSH URI.", nameof(uri));
-
-            SshConnectionInfoViewModel sshConnectionInfo;
-
-            try
-            {
-                sshConnectionInfo = ParseSsh(uri);
-            }
-            catch (Exception ex)
-            {
-                await new MessageDialog($"Invalid link: {ex.Message}", "Invalid Link").ShowAsync();
-
-                return null;
-            }
-
-            string error = sshConnectionInfo.Validate();
-
-            if (!string.IsNullOrEmpty(error))
-            {
-                // Happens if the link doesn't contain all the needed data, so we have to prompt user to complete.
-                sshConnectionInfo =
-                    (SshConnectionInfoViewModel) await _dialogService.ShowSshConnectionInfoDialogAsync(
-                        sshConnectionInfo);
-
-                // sshConnectionInfo can be null if user clicks "Cancel".
-                if (sshConnectionInfo == null)
-                    return null;
-            }
-
-            return GetShellProfile(sshConnectionInfo);
+            return sshConnectionInfo == null ? null : CreateShellProfile(sshConnectionInfo);
         }
 
         public string ConvertToUri(ISshConnectionInfo sshConnectionInfo)

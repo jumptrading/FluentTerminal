@@ -1,4 +1,6 @@
-﻿namespace FluentTerminal.App.Services
+﻿using FluentTerminal.Models.Enums;
+
+namespace FluentTerminal.App.Services
 {
     public interface ISshConnectionInfo
     {
@@ -15,6 +17,8 @@
         ushort MoshPortFrom { get; set; }
 
         ushort MoshPortTo { get; set; }
+
+        LineEndingStyle LineEndingStyle { get; set; }
 
         string Validate(bool allowNoUser = false);
     }
