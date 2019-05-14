@@ -6,7 +6,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:FluentTerminal.App.ViewModels"
     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
-    xmlns:converters="using:FluentTerminal.App.Converters"
     xmlns:enums="using:FluentTerminal.Models.Enums"
     Title="SSH Info"
     x:Uid="SshInfoDialog"
@@ -16,11 +15,6 @@
     <ContentDialog.DataContext>
         <vm:SshConnectionInfoViewModel />
     </ContentDialog.DataContext>
-    <ContentDialog.Resources>
-        <ResourceDictionary>
-            <converters:LineEndingStyleConverter x:Key="LineEndingStyleConverter"/>
-        </ResourceDictionary>
-    </ContentDialog.Resources>
     <Grid Width="500">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="140" />
@@ -93,15 +87,14 @@
                            Margin="0 0 8 0"
                            VerticalAlignment="Center"/>
                 <ComboBox Grid.Column="1" Grid.Row="0" 
-                          ItemsSource="{x:Bind converters:LineEndingStyleConverter.LineEndingStyles}" 
-                          SelectedItem="{Binding LineEndingStyle, Mode=TwoWay}"
-                          VerticalAlignment="Center"
                           Grid.ColumnSpan="3"
-                          HorizontalAlignment="Stretch">
+                          Margin="0 0 0 0"
+                          ItemsSource="{x:Bind LineEndingStyles}"
+                          SelectedItem="{Binding LineEndingStyle, Mode=TwoWay}"
+                          VerticalAlignment="Center">
                     <ComboBox.ItemTemplate>
                         <DataTemplate x:DataType="enums:LineEndingStyle">
-                            <TextBlock Text="{x:Bind Converter={StaticResource I18NConverter}, ConverterParameter=LineEndingStyle}" 
-                                       HorizontalAlignment="Stretch"/>
+                            <TextBlock Text="{x:Bind Converter={StaticResource I18NConverter}, ConverterParameter=LineEndingStyle}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>

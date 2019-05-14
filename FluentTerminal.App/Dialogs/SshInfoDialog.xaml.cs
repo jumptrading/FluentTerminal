@@ -29,6 +29,8 @@ URL={0}
         private readonly ISshHelperService _sshHelperService;
         private readonly ITrayProcessCommunicationService _trayProcessCommunicationService;
 
+        public IEnumerable<LineEndingStyle> LineEndingStyles { get; } = (LineEndingStyle[])Enum.GetValues(typeof(LineEndingStyle));
+
         public SshInfoDialog(ISettingsService settingsService, ISshHelperService sshHelperService,
             ITrayProcessCommunicationService trayProcessCommunicationService)
         {
