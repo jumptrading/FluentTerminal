@@ -88,6 +88,7 @@
                     <RowDefinition/>
                 </Grid.RowDefinitions>
                 <TextBlock Grid.Column="0" Grid.Row="0" 
+                           x:Uid="LineEndingModeOnPaste"
                            Text="Line ending on paste:"
                            Margin="0 0 8 0"
                            VerticalAlignment="Center"/>
@@ -95,6 +96,7 @@
                           ItemsSource="{x:Bind converters:LineEndingStyleConverter.LineEndingStyles}" 
                           SelectedItem="{Binding LineEndingStyle, Mode=TwoWay}"
                           VerticalAlignment="Center"
+                          Grid.ColumnSpan="3"
                           HorizontalAlignment="Stretch">
                     <ComboBox.ItemTemplate>
                         <DataTemplate x:DataType="enums:LineEndingStyle">
