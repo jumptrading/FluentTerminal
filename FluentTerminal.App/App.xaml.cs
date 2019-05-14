@@ -166,7 +166,9 @@ namespace FluentTerminal.App
                 {
                     ShellProfile profile = await _sshHelperService.GetSshShellProfileAsync(protocolActivated.Uri);
                     if (profile != null)
+                    {
                         await CreateTerminal(profile, _applicationSettings.NewTerminalLocation);
+                    }
                 }
 
                 return;
@@ -341,8 +343,7 @@ namespace FluentTerminal.App
         {
             await StartSystemTray().ConfigureAwait(true);
 
-            Frame rootFrame = Window.Current.Content as Frame;
-            if (rootFrame == null)
+            if (!(Window.Current.Content is Frame rootFrame))
             {
                 rootFrame = new Frame();
                 Window.Current.Content = rootFrame;
@@ -427,7 +428,9 @@ namespace FluentTerminal.App
                 viewModel.ShowAboutRequested -= OnShowAboutRequested;
                 viewModel.ActivatedMv -= OnMainViewActivated;
                 if (_activeWindowId == viewModel.ApplicationView.Id)
+                {
                     _activeWindowId = 0;
+                }
 
                 _mainViewModels.Remove(viewModel);
             }

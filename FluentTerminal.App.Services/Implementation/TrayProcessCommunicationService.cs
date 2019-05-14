@@ -83,7 +83,9 @@ namespace FluentTerminal.App.Services.Implementation
                 JsonConvert.DeserializeObject<CommonResponse>(responseMessage[MessageKeys.Content]);
 
             if (!response.Success)
+            {
                 throw new Exception(string.IsNullOrEmpty(response.Error) ? "Failed to save the file." : response.Error);
+            }
         }
 
         public void StartApplicationUpdate(string url)

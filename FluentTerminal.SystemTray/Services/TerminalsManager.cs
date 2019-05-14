@@ -52,11 +52,14 @@ namespace FluentTerminal.SystemTray.Services
             string error = request.Profile?.CheckIfMosh();
 
             if (!string.IsNullOrEmpty(error))
-                return new CreateTerminalResponse {
+            {
+                return new CreateTerminalResponse
+                {
                     Error = error,
                     ShellExecutableName = request.Profile.Location,
                     Success = false,
                 };
+            }
 
             ITerminalSession terminal = null;
             try
@@ -122,8 +125,12 @@ namespace FluentTerminal.SystemTray.Services
             environmentVariables["TERM_PROGRAM_VERSION"] = $"{Package.Current.Id.Version.Major}.{Package.Current.Id.Version.Minor}.{Package.Current.Id.Version.Build}.{Package.Current.Id.Version.Revision}";
 
             if (additionalVariables != null)
+            {
                 foreach (var kvp in additionalVariables)
+                {
                     environmentVariables[kvp.Key] = kvp.Value;
+                }
+            }
 
             var builder = new StringBuilder();
 

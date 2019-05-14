@@ -82,22 +82,33 @@ namespace FluentTerminal.App.ViewModels
         public SshConnectionInfoValidationResult Validate(bool allowNoUser = false)
         {
             if (!allowNoUser && string.IsNullOrEmpty(_username))
+            {
                 return SshConnectionInfoValidationResult.UsernameEmpty;
+            }
 
             if (string.IsNullOrEmpty(_host))
+            {
                 return SshConnectionInfoValidationResult.HostEmpty;
+            }
 
             if (_sshPort < 1)
+            {
                 return SshConnectionInfoValidationResult.SshPortZeroOrNegative;
+            }
 
-            if (!_useMosh)
+            if (!_useMosh) {
                 return SshConnectionInfoValidationResult.Valid;
+            }
 
             if (_moshPortFrom < 1)
+            {
                 return SshConnectionInfoValidationResult.MoshPortZeroOrNegative;
+            }
 
             if (_moshPortFrom > _moshPortTo)
+            {
                 return SshConnectionInfoValidationResult.MoshPortRangeInvalid;
+            }
 
             return SshConnectionInfoValidationResult.Valid;
         }
@@ -112,7 +123,9 @@ namespace FluentTerminal.App.ViewModels
             };
 
             foreach (SshOptionViewModel option in SshOptions)
+            {
                 clone.SshOptions.Add(option);
+            }
 
             return clone;
         }

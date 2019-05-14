@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace FluentTerminal.Models.Enums
+﻿namespace FluentTerminal.Models.Enums
 {
     public enum Command
     {
@@ -9,13 +7,8 @@ namespace FluentTerminal.Models.Enums
         PreviousTab,
         NewTab,
         ConfigurableNewTab,
-
-        [Description("New SSH tab")]
         NewSshTab,
-
-        [Description("Change tab title")]
         ChangeTabTitle,
-
         CloseTab,
         NewWindow,
         ConfigurableNewWindow,

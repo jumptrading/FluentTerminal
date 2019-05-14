@@ -48,12 +48,14 @@ namespace FluentTerminal.App.ViewModels
 
             TabThemes = new ObservableCollection<TabTheme>(settingsService.GetTabThemes());
 
-            TerminalThemes = new ObservableCollection<TerminalTheme>();
-            TerminalThemes.Add(new TerminalTheme
+            TerminalThemes = new ObservableCollection<TerminalTheme>
             {
-                Id = Guid.Empty,
-                Name = "Default"
-            });
+                new TerminalTheme
+                {
+                    Id = Guid.Empty,
+                    Name = "Default"
+                }
+            };
             foreach (var theme in _settingsService.GetThemes())
             {
                 TerminalThemes.Add(theme);

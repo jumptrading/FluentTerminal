@@ -80,9 +80,10 @@ URL={0}
             openPicker.FileTypeFilter.Add("*");
 
             StorageFile file = await openPicker.PickSingleFileAsync();
-
             if (file != null)
+            {
                 ((SshConnectionInfoViewModel)DataContext).IdentityFile = file.Path;
+            }
         }
 
         private async void SaveLink_OnClick(object sender, RoutedEventArgs e)
@@ -106,9 +107,10 @@ URL={0}
             savePicker.FileTypeChoices.Add("Shortcut", new List<string> {".url"});
 
             StorageFile file = await savePicker.PickSaveFileAsync();
-
             if (file == null)
+            {
                 return;
+            }
 
             try
             {
@@ -149,7 +151,9 @@ URL={0}
         public async Task<ISshConnectionInfo> GetSshConnectionInfoAsync(ISshConnectionInfo input = null)
         {
             if (input != null)
+            {
                 DataContext = ((SshConnectionInfoViewModel)input).Clone();
+            }
 
             this.Focus(FocusState.Programmatic);
             return await ShowAsync() == ContentDialogResult.Primary ? (SshConnectionInfoViewModel) DataContext : null;

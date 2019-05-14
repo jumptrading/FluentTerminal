@@ -510,7 +510,9 @@ namespace FluentTerminal.SystemTray
         internal static string CheckIfMosh(this ShellProfile profile)
         {
             if (profile?.Location == null)
+            {
                 return null;
+            }
 
             string location = profile.Location.Trim();
 
@@ -520,7 +522,9 @@ namespace FluentTerminal.SystemTray
                 location = GetMoshPath();
 
                 if (string.IsNullOrEmpty(location))
+                {
                     return "mosh.exe not found.";
+                }
 
                 profile.Location = location;
             }
@@ -537,7 +541,9 @@ namespace FluentTerminal.SystemTray
                 string path = Path.Combine(dir.FullName, "MoshExecutables", MoshArchDir, "mosh.exe");
 
                 if (System.IO.File.Exists(path))
+                {
                     return path;
+                }
 
                 dir = dir.Parent;
             }
@@ -550,7 +556,9 @@ namespace FluentTerminal.SystemTray
         internal static void SaveFile(string path, string content)
         {
             using (StreamWriter writer = new StreamWriter(path, false))
+            {
                 writer.Write(content);
+            }
         }
 
         internal static void RunApplicationUpdate(string url)
