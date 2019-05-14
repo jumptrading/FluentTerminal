@@ -1,14 +1,16 @@
-﻿using FluentTerminal.Models.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Windows.Input;
+
+using FluentTerminal.Models.Enums;
 using FluentTerminal.Models;
-using System.Net;
-using System.Diagnostics;
+
 
 namespace FluentTerminal.SystemTray
 {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
-// ReSharper disable InconsistentNaming
 
+// ReSharper disable InconsistentNaming
 namespace FluentTerminal.Models.Enums
 {
     public enum LineEndingStyle

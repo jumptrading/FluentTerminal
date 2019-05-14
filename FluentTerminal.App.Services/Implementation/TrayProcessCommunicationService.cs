@@ -46,8 +46,10 @@ namespace FluentTerminal.App.Services.Implementation
         public async Task<string> GetUserName()
         {
             if (!string.IsNullOrEmpty(_userName))
+            {
                 // Returning the username from cache
                 return _userName;
+            }
 
             GetUserNameResponse response;
 
@@ -89,8 +91,7 @@ namespace FluentTerminal.App.Services.Implementation
             _appServiceConnection.SendMessageAsync(CreateMessage(new ApplicationUpdateRequest { Url = url }));
         }
 
-        public async Task<CreateTerminalResponse> CreateTerminal(int id, TerminalSize size, ShellProfile shellProfile,
-            SessionType sessionType)
+        public async Task<CreateTerminalResponse> CreateTerminal(int id, TerminalSize size, ShellProfile shellProfile, SessionType sessionType)
         {
             var request = new CreateTerminalRequest
             {

@@ -11,6 +11,8 @@ using FluentTerminal.App.Services.Dialogs;
 using FluentTerminal.App.Utilities;
 using FluentTerminal.App.Services;
 using FluentTerminal.App.ViewModels;
+using FluentTerminal.App.Services.Utilities;
+using FluentTerminal.Models.Enums;
 
 namespace FluentTerminal.App.Dialogs
 {
@@ -33,6 +35,8 @@ URL={0}
             _sshHelperService = sshHelperService;
             _trayProcessCommunicationService = trayProcessCommunicationService;
             InitializeComponent();
+            PrimaryButtonText = I18N.Translate("OK");
+            SecondaryButtonText = I18N.Translate("Cancel");
             var currentTheme = settingsService.GetCurrentTheme();
             RequestedTheme = ContrastHelper.GetIdealThemeForBackgroundColor(currentTheme.Colors.Background);
         }
@@ -83,12 +87,11 @@ URL={0}
         {
             SshConnectionInfoViewModel vm = (SshConnectionInfoViewModel) DataContext;
 
-            string error = vm.Validate(true);
+            var validationResult = vm.Validate(true);
 
-            if (!string.IsNullOrEmpty(error))
+            if (validationResult != SshConnectionInfoValidationResult.Valid)
             {
-                await new MessageDialog(error, "Invalid Input").ShowAsync();
-
+                await new MessageDialog(I18N.Translate($"{nameof(SshConnectionInfoValidationResult)}.{validationResult}"), I18N.Translate("InvalidInput")).ShowAsync();
                 return;
             }
 
@@ -105,19 +108,14 @@ URL={0}
             if (file == null)
                 return;
 
-            error = null;
-
             try
             {
                 await _trayProcessCommunicationService.SaveTextFileAsync(file.Path, content);
             }
             catch (Exception ex)
             {
-                error = ex.Message;
+                await new MessageDialog(ex.Message, I18N.Translate("Error")).ShowAsync();
             }
-
-            if (error != null)
-                await new MessageDialog(error, "Error").ShowAsync();
         }
 
         private async void SshInfoDialog_OnPrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
@@ -127,9 +125,7 @@ URL={0}
             if (string.IsNullOrEmpty(vm.Username) || string.IsNullOrEmpty(vm.Host))
             {
                 args.Cancel = true;
-
-                await new MessageDialog("User and host are mandatory fields.", "Invalid Form").ShowAsync();
-
+                await new MessageDialog(I18N.Translate("UserAndHostMandatory"), I18N.Translate("InvalidInput")).ShowAsync();
                 SetupFocus();
                 return;
             }
@@ -137,9 +133,7 @@ URL={0}
             if (vm.SshPort == 0)
             {
                 args.Cancel = true;
-
-                await new MessageDialog("Port cannot be 0.", "Invalid Form").ShowAsync();
-
+                await new MessageDialog(I18N.Translate("PortCannotBeZero"), I18N.Translate("InvalidInput")).ShowAsync();
                 SetupFocus();
                 return;
             }

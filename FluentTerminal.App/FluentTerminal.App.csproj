@@ -117,7 +117,7 @@
     <Compile Include="CommandLineArguments\Target.cs" />
     <Compile Include="Converters\BackgroundToApplicationThemeConverter.cs" />
     <Compile Include="Converters\ColorResourceKeyFallbackConverter.cs" />
-    <Compile Include="Converters\EnumToDescriptionConverter.cs" />
+    <Compile Include="Converters\I18NConverter.cs" />
     <Compile Include="Converters\LineEndingStyleConverter.cs" />
     <Compile Include="Converters\TabColorFallbackConverter.cs" />
     <Compile Include="Converters\EnumValueToVisibiltyConverter.cs" />
@@ -138,6 +138,10 @@
     <Compile Include="Dialogs\ShellProfileSelectionDialog.xaml.cs">
       <DependentUpon>ShellProfileSelectionDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Dialogs\SshInfoDialog.xaml.cs">
+      <DependentUpon>SshInfoDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Services\ApplicationLanguageService.cs" />
     <Compile Include="Services\ClipboardService.cs" />
     <Compile Include="Services\FileSystemService.cs" />
     <Compile Include="Services\SshHelperService.cs" />
@@ -147,6 +151,7 @@
     <Compile Include="Utilities\ContrastHelper.cs" />
     <Compile Include="Utilities\DebouncedAction.cs" />
     <Compile Include="Utilities\JumpListHelper.cs" />
+    <Compile Include="Views\BooleanTemplateSelector.cs" />
     <Compile Include="Views\KeyBindingsView.xaml.cs">
       <DependentUpon>KeyBindingsView.xaml</DependentUpon>
     </Compile>
@@ -183,9 +188,6 @@
     </Compile>
     <Compile Include="Views\SettingsPages\ShellProfileSettings.xaml.cs">
       <DependentUpon>ShellProfileSettings.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Dialogs\SshInfoDialog.xaml.cs">
-      <DependentUpon>SshInfoDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\TabBar.xaml.cs">
       <DependentUpon>TabBar.xaml</DependentUpon>
@@ -261,6 +263,7 @@
     <Content Include="Client\style.css" />
     <Content Include="Client\xterm.css" />
     <Content Include="Win32\FluentTerminal.SystemTray.exe.config" />
+    <PRIResource Include="Strings\de\Resources.resw" />
     <PRIResource Include="Strings\zh-CN\Resources.resw" />
     <PRIResource Include="Strings\en\Resources.resw" />
   </ItemGroup>
@@ -325,6 +328,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Dialogs\SshInfoDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\KeyBindingsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -377,10 +384,6 @@
     <Page Include="Views\SettingsPages\ShellProfileSettings.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Dialogs\SshInfoDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\TabBar.xaml">
       <SubType>Designer</SubType>

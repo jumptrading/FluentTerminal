@@ -8,7 +8,6 @@ using FluentTerminal.App.Services.Adapters;
 using FluentTerminal.App.Services.Dialogs;
 using FluentTerminal.App.Services.EventArgs;
 using FluentTerminal.App.Services.Implementation;
-using FluentTerminal.App.Utilities;
 using FluentTerminal.App.ViewModels;
 using FluentTerminal.App.Views;
 using FluentTerminal.Models;
@@ -32,7 +31,9 @@ using Windows.UI.Core;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using FluentTerminal.App.Utilities;
 using IContainer = Autofac.IContainer;
+using Windows.Globalization;
 
 namespace FluentTerminal.App
 {
@@ -69,6 +70,7 @@ namespace FluentTerminal.App
                 ShellProfiles = new ApplicationDataContainerAdapter(ApplicationData.Current.LocalSettings.CreateContainer(Constants.ShellProfilesContainerName, ApplicationDataCreateDisposition.Always)),
                 Themes = new ApplicationDataContainerAdapter(ApplicationData.Current.RoamingSettings.CreateContainer(Constants.ThemesContainerName, ApplicationDataCreateDisposition.Always))
             };
+
             var builder = new ContainerBuilder();
             builder.RegisterType<SettingsService>().As<ISettingsService>().SingleInstance();
             builder.RegisterType<DefaultValueProvider>().As<IDefaultValueProvider>().SingleInstance();
@@ -94,6 +96,7 @@ namespace FluentTerminal.App
             builder.RegisterType<DispatcherTimerAdapter>().As<IDispatcherTimer>().InstancePerDependency();
             builder.RegisterType<StartupTaskService>().As<IStartupTaskService>().SingleInstance();
             builder.RegisterType<SshHelperService>().As<ISshHelperService>().SingleInstance();
+            builder.RegisterType<ApplicationLanguageService>().As<IApplicationLanguageService>().SingleInstance();
             builder.RegisterInstance(applicationDataContainers);
 
             _container = builder.Build();
@@ -162,7 +165,6 @@ namespace FluentTerminal.App
                 if (_sshHelperService.IsSsh(protocolActivated.Uri))
                 {
                     ShellProfile profile = await _sshHelperService.GetSshShellProfileAsync(protocolActivated.Uri);
-                    
                     if (profile != null)
                         await CreateTerminal(profile, _applicationSettings.NewTerminalLocation);
                 }
@@ -179,9 +181,25 @@ namespace FluentTerminal.App
 
                 _commandLineParser.ParseArguments(SplitArguments(commandLineActivated.Operation.Arguments), typeof(NewVerb), typeof(RunVerb), typeof(SettingsVerb)).WithParsed(async verb =>
                 {
-                    if (verb is SettingsVerb)
+                    if (verb is SettingsVerb settingsVerb)
                     {
-                        await ShowSettings().ConfigureAwait(true);
+                        if (!settingsVerb.Import && !settingsVerb.Export)
+                        {
+                            await ShowSettings().ConfigureAwait(true);
+                        }
+                        else if (settingsVerb.Export)
+                        {
+                            var exportFile = await ApplicationData.Current.LocalFolder.CreateFileAsync("config.json", CreationCollisionOption.OpenIfExists);
+
+                            var settings = _settingsService.ExportSettings();
+                            await FileIO.WriteTextAsync(exportFile, settings);
+                        }
+                        else if (settingsVerb.Import)
+                        {
+                            var file = await ApplicationData.Current.LocalFolder.GetFileAsync("config.json");
+                            var content = await FileIO.ReadTextAsync(file);
+                            _settingsService.ImportSettings(content);
+                        }
                     }
                     else if (verb is NewVerb newVerb)
                     {
@@ -245,26 +263,14 @@ namespace FluentTerminal.App
         {
             if (!_alreadyLaunched)
             {
-                var logDirectory = await ApplicationData.Current.LocalCacheFolder.CreateFolderAsync("Logs", CreationCollisionOption.OpenIfExists);
-                var logFile = Path.Combine(logDirectory.Path, "fluentterminal.app.log");
-                var configFile = await logDirectory.CreateFileAsync("config.json", CreationCollisionOption.OpenIfExists);
-                var configContent = await FileIO.ReadTextAsync(configFile);
+                await InitializeLogger();
+
                 Task.Run(async () => await JumpListHelper.Update(_settingsService.GetShellProfiles()));
 
-                if (string.IsNullOrWhiteSpace(configContent))
-                {
-                    configContent = JsonConvert.SerializeObject(new Logger.Configuration());
-                    await FileIO.WriteTextAsync(configFile, configContent);
-                }
-
-                var config = JsonConvert.DeserializeObject<Logger.Configuration>(configContent) ?? new Logger.Configuration();
-
-                Logger.Instance.Initialize(logFile, config);
-
                 var viewModel = _container.Resolve<MainViewModel>();
-                if(args.Arguments.StartsWith(JumpListHelper.ShellProfileFlag))
+                if (args.Arguments.StartsWith(JumpListHelper.ShellProfileFlag))
                 {
-                    viewModel.AddTerminal(Guid.Parse(args.Arguments.Replace(JumpListHelper.ShellProfileFlag, "")));
+                    viewModel.AddTerminal(Guid.Parse(args.Arguments.Replace(JumpListHelper.ShellProfileFlag, string.Empty)));
                 }
                 else
                 {
@@ -280,9 +286,28 @@ namespace FluentTerminal.App
             else if (args.Arguments.StartsWith(JumpListHelper.ShellProfileFlag))
             {
                 var location = _applicationSettings.NewTerminalLocation;
-                var profile = _settingsService.GetShellProfile(Guid.Parse(args.Arguments.Replace(JumpListHelper.ShellProfileFlag, "")));
+                var profile = _settingsService.GetShellProfile(Guid.Parse(args.Arguments.Replace(JumpListHelper.ShellProfileFlag, string.Empty)));
                 await CreateTerminal(profile, location).ConfigureAwait(true);
             }
+        }
+
+        private static async Task InitializeLogger()
+        {
+            var logDirectory = await ApplicationData.Current.LocalCacheFolder.CreateFolderAsync("Logs", CreationCollisionOption.OpenIfExists);
+            var logFile = Path.Combine(logDirectory.Path, "fluentterminal.app.log");
+            var configFile = await logDirectory.CreateFileAsync("config.json", CreationCollisionOption.OpenIfExists);
+            var configContent = await FileIO.ReadTextAsync(configFile);
+
+
+            if (string.IsNullOrWhiteSpace(configContent))
+            {
+                configContent = JsonConvert.SerializeObject(new Logger.Configuration());
+                await FileIO.WriteTextAsync(configFile, configContent);
+            }
+
+            var config = JsonConvert.DeserializeObject<Logger.Configuration>(configContent) ?? new Logger.Configuration();
+
+            Logger.Instance.Initialize(logFile, config);
         }
 
         protected override void OnBackgroundActivated(BackgroundActivatedEventArgs args)
@@ -403,6 +428,7 @@ namespace FluentTerminal.App
                 viewModel.ActivatedMv -= OnMainViewActivated;
                 if (_activeWindowId == viewModel.ApplicationView.Id)
                     _activeWindowId = 0;
+
                 _mainViewModels.Remove(viewModel);
             }
         }

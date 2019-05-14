@@ -1,5 +1,6 @@
 ﻿using FluentTerminal.App.Services;
 using FluentTerminal.App.Services.EventArgs;
+using FluentTerminal.App.Services.Utilities;
 using FluentTerminal.Models;
 using FluentTerminal.Models.Enums;
 using GalaSoft.MvvmLight;
@@ -9,8 +10,6 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
-using FluentTerminal.App.Services.Implementation;
-using FluentTerminal.App.Services.Utilities;
 
 namespace FluentTerminal.App.ViewModels
 {
@@ -129,7 +128,6 @@ namespace FluentTerminal.App.ViewModels
             ActivatedMv?.Invoke(this, EventArgs.Empty);
         }
 
-
         public RelayCommand AddLocalShellCommand { get; }
         public RelayCommand AddRemoteShellCommand { get; }
 
@@ -237,10 +235,14 @@ namespace FluentTerminal.App.ViewModels
             {
                 // User selected "Cancel"
                 if (Terminals.Count == 0)
+                {
                     await ApplicationView.TryClose();
+                }
             }
             else
+            {
                 await ApplicationView.RunOnDispatcherThread(() => AddTerminal(profile));
+            }
         }
 
         public void AddTerminal()
@@ -347,7 +349,7 @@ namespace FluentTerminal.App.ViewModels
         {
             if (_applicationSettings.ConfirmClosingWindows)
             {
-                var result = await _dialogService.ShowMessageDialogAsnyc(StringsHelper.GetString("PleaseConfirm"), StringsHelper.GetString("ConfirmCloseWindow"), DialogButton.OK, DialogButton.Cancel).ConfigureAwait(false);
+                var result = await _dialogService.ShowMessageDialogAsnyc(I18N.Translate("PleaseConfirm"), I18N.Translate("ConfirmCloseWindow"), DialogButton.OK, DialogButton.Cancel).ConfigureAwait(false);
 
                 if (result == DialogButton.OK)
                 {

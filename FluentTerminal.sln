@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentTerminal.App.Services
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentTerminal.App.Services.Test", "FluentTerminal.App.Services.Test\FluentTerminal.App.Services.Test.csproj", "{B353EAF4-8332-4C89-B986-B0B29F7E21FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentTerminal.App.ViewModels", "FluentTerminal.App.ViewModels\FluentTerminal.App.ViewModels.csproj", "{44E8E225-F46C-47EC-9290-FFA08FCCF1B5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentTerminal.App.ViewModels", "FluentTerminal.App.ViewModels\FluentTerminal.App.ViewModels.csproj", "{44E8E225-F46C-47EC-9290-FFA08FCCF1B5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

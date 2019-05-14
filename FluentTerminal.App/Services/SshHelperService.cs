@@ -238,14 +238,11 @@ namespace FluentTerminal.App.Services
                 return null;
             }
 
-            string error = sshConnectionInfo.Validate();
-
-            if (!string.IsNullOrEmpty(error))
+            var validationResult = sshConnectionInfo.Validate();
+            if (validationResult != SshConnectionInfoValidationResult.Valid)
             {
                 // Happens if the link doesn't contain all the needed data, so we have to prompt user to complete.
-                sshConnectionInfo =
-                    (SshConnectionInfoViewModel) await _dialogService.ShowSshConnectionInfoDialogAsync(
-                        sshConnectionInfo);
+                sshConnectionInfo = (SshConnectionInfoViewModel) await _dialogService.ShowSshConnectionInfoDialogAsync();
 
                 // sshConnectionInfo can be null if user clicks "Cancel".
                 if (sshConnectionInfo == null)
@@ -257,10 +254,9 @@ namespace FluentTerminal.App.Services
 
         public string ConvertToUri(ISshConnectionInfo sshConnectionInfo)
         {
-            string error = sshConnectionInfo.Validate(true);
-
-            if (!string.IsNullOrEmpty(error))
-                throw new ArgumentException(error, nameof(sshConnectionInfo));
+            var validationResult = sshConnectionInfo.Validate(true);
+            if (validationResult != SshConnectionInfoValidationResult.Valid)
+                throw new ArgumentException(validationResult.ToString(), nameof(sshConnectionInfo));
 
             SshConnectionInfoViewModel sshConnectionInfoVm = (SshConnectionInfoViewModel) sshConnectionInfo;
 
@@ -273,7 +269,6 @@ namespace FluentTerminal.App.Services
             if (!string.IsNullOrEmpty(sshConnectionInfoVm.Username))
             {
                 sb.Append(HttpUtility.UrlEncode(sshConnectionInfoVm.Username));
-
                 containsUserInfo = true;
             }
 
@@ -294,9 +289,7 @@ namespace FluentTerminal.App.Services
                 {
                     if (!first)
                         sb.Append(",");
-
                     sb.Append(option);
-
                     first = false;
                 }
 
