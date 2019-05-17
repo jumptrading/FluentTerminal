@@ -18,7 +18,7 @@ before_build:
     [xml]$msiTemplate = Get-Content './MsiInstaller/Template.wxs'
     $msiTemplate.Wix.Product.Version = "$Env:APP_BUILD_VERSION"
     $msiTemplate.Save((Resolve-Path './MsiInstaller/Template.wxs'))
-- cmd: pushd . && cd FluentTerminal.Client && npm install && npm run-script build && popd
+- cmd: pushd . && cd FluentTerminal.Client && npm install && npm run-script build && popd && nuget restore
 after_build:
 - cmd: '7z a %APPX_ARTIFACT_NAME% FluentTerminal.App\AppPackages\*'
 - cmd: pushd FluentTerminal.App\AppPackages\FluentTerminal*\Dependencies && dir && xcopy * "../../../../MsiInstaller/Dependencies" /e/i/f && popd
