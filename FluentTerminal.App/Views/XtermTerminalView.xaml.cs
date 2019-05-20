@@ -53,10 +53,10 @@ namespace FluentTerminal.App.Views
             _webView.NavigationCompleted += _webView_NavigationCompleted;
             _webView.NavigationStarting += _webView_NavigationStarting;
 
-            _copyMenuItem = new MenuFlyoutItem { Text = StringsHelper.GetString("Copy") };
+            _copyMenuItem = new MenuFlyoutItem { Text = I18N.Translate("Command.Copy") };
             _copyMenuItem.Click += Copy_Click;
 
-            _pasteMenuItem = new MenuFlyoutItem { Text = StringsHelper.GetString("Paste") };
+            _pasteMenuItem = new MenuFlyoutItem { Text = I18N.Translate("Command.Paste") };
             _pasteMenuItem.Click += Paste_Click;
 
             _webView.ContextFlyout = new MenuFlyout
@@ -130,16 +130,16 @@ namespace FluentTerminal.App.Views
             var settings = ViewModel.SettingsService.GetApplicationSettings();
             var theme = ViewModel.TerminalTheme;
             var sessionType = SessionType.Unknown;
-            if (settings.AlwaysUseWinPty || !ViewModel.ApplicationView.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 7))
-            {
-                sessionType = SessionType.WinPty;
-            }
-            else
+            if (ViewModel.ShellProfile.UseConPty && ViewModel.ApplicationView.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 7))
             {
                 sessionType = SessionType.ConPty;
             }
+            else
+            {
+                sessionType = SessionType.WinPty;
+            }
             await _navigationCompleted.WaitAsync().ConfigureAwait(true);
-            var size = await CreateXtermView(options, theme.Colors, FlattenKeyBindings(keyBindings, profiles), sessionType).ConfigureAwait(true);
+            var size = await CreateXtermView(options, theme.Colors, FlattenKeyBindings(keyBindings, profiles)).ConfigureAwait(true);
             var port = await ViewModel.TrayProcessCommunicationService.GetAvailablePort().ConfigureAwait(true);
             await CreateWebSocketServer(port.Port).ConfigureAwait(true);
             _connectedEvent.Wait();
@@ -279,12 +279,12 @@ namespace FluentTerminal.App.Views
             await ExecuteScriptAsync($"connectToWebSocket('{webSocketUrl}');").ConfigureAwait(true);
         }
 
-        private async Task<TerminalSize> CreateXtermView(TerminalOptions options, TerminalColors theme, IEnumerable<KeyBinding> keyBindings, SessionType sessionType)
+        private async Task<TerminalSize> CreateXtermView(TerminalOptions options, TerminalColors theme, IEnumerable<KeyBinding> keyBindings)
         {
             var serializedOptions = JsonConvert.SerializeObject(options);
             var serializedTheme = JsonConvert.SerializeObject(theme);
             var serializedKeyBindings = JsonConvert.SerializeObject(keyBindings);
-            var size = await ExecuteScriptAsync($"createTerminal('{serializedOptions}', '{serializedTheme}', '{serializedKeyBindings}', '{sessionType}')").ConfigureAwait(true);
+            var size = await ExecuteScriptAsync($"createTerminal('{serializedOptions}', '{serializedTheme}', '{serializedKeyBindings}')").ConfigureAwait(true);
             return JsonConvert.DeserializeObject<TerminalSize>(size);
         }
 

@@ -205,9 +205,9 @@ namespace FluentTerminal.App
                         return;
                     }
 
-                    string error = connectionInfo.Validate();
+                    SshConnectionInfoValidationResult result = connectionInfo.Validate();
 
-                    if (!string.IsNullOrEmpty(error))
+                    if (result != SshConnectionInfoValidationResult.Valid)
                     {
                         // Link is valid, but incomplete (i.e. username missing), so we need to show dialog.
                         connectionInfo =

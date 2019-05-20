@@ -6,9 +6,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
-using Windows.UI.Core;
-using Windows.UI.Popups;
-using Windows.UI.Xaml;
 using FluentTerminal.App.ViewModels;
 using FluentTerminal.Models;
 using FluentTerminal.Models.Enums;
@@ -224,10 +221,10 @@ namespace FluentTerminal.App.Services
 
         public string ConvertToUri(ISshConnectionInfo sshConnectionInfo)
         {
-            string error = sshConnectionInfo.Validate(true);
+            SshConnectionInfoValidationResult result = sshConnectionInfo.Validate(true);
 
-            if (!string.IsNullOrEmpty(error))
-                throw new ArgumentException(error, nameof(sshConnectionInfo));
+            if (result != SshConnectionInfoValidationResult.Valid)
+                throw new ArgumentException(result.ToString(), nameof(sshConnectionInfo));
 
             SshConnectionInfoViewModel sshConnectionInfoVm = (SshConnectionInfoViewModel) sshConnectionInfo;
 

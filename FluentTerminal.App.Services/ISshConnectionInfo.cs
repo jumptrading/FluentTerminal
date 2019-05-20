@@ -20,6 +20,6 @@ namespace FluentTerminal.App.Services
 
         LineEndingStyle LineEndingStyle { get; set; }
 
-        string Validate(bool allowNoUser = false);
+        SshConnectionInfoValidationResult Validate(bool allowNoUser = false);
     }
 }
