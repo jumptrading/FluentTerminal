@@ -7,6 +7,10 @@ namespace FluentTerminal.App.Services
 {
     public interface IDefaultValueProvider
     {
+        LineEndingStyle DefaultSshLineEndingStyle { get; }
+
+        Guid SshProfileId { get; }
+
         ApplicationSettings GetDefaultApplicationSettings();
 
         ICollection<KeyBinding> GetDefaultKeyBindings(Command command);

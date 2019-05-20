@@ -4,17 +4,15 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:vm="using:FluentTerminal.App.ViewModels"
     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:enums="using:FluentTerminal.Models.Enums"
+    xmlns:vm="using:FluentTerminal.App.ViewModels"
     Title="SSH Info"
     x:Uid="SshInfoDialog"
     PrimaryButtonClick="SshInfoDialog_OnPrimaryButtonClick"
     DefaultButton="Primary"
+    d:DataContext="{d:DesignInstance vm:SshConnectionInfoViewModel, IsDesignTimeCreatable=False}"
     mc:Ignorable="d" Loading="OnLoading">
-    <ContentDialog.DataContext>
-        <vm:SshConnectionInfoViewModel />
-    </ContentDialog.DataContext>
     <Grid Width="500">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="140" />
@@ -32,7 +30,7 @@
         </Grid.RowDefinitions>
         <TextBox x:Name="UserTextBox" Grid.Column="0" Grid.Row="0" x:Uid="UserTextBox"
                  PlaceholderText="user"
-                 Text="{Binding Username, Mode=TwoWay}" />
+                 Text="{Binding Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
         <TextBlock Grid.Column="1" Grid.Row="0"
                    FontSize="22"
                    Text="@" />
@@ -47,9 +45,10 @@
                  Width="76"
                  x:Uid="PortTextBox"
                  PlaceholderText="port"
-                 Text="{Binding SshPort, Mode=TwoWay}" BeforeTextChanging="Port_OnBeforeTextChanging"/>
+                 Text="{Binding SshPort, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                 BeforeTextChanging="Port_OnBeforeTextChanging"/>
         <TextBox Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3"
-                 Text="{Binding IdentityFile, Mode=TwoWay}"
+                 Text="{Binding IdentityFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  x:Uid="IdentityFileTextBox"
                  PlaceholderText="Identity file path"
                  Margin="0 10 0 0" IsReadOnly="True" />
@@ -91,7 +90,8 @@
                           Margin="0 0 0 0"
                           ItemsSource="{x:Bind LineEndingStyles}"
                           SelectedItem="{Binding LineEndingStyle, Mode=TwoWay}"
-                          VerticalAlignment="Center">
+                          VerticalAlignment="Center"
+                          HorizontalAlignment="Stretch">
                     <ComboBox.ItemTemplate>
                         <DataTemplate x:DataType="enums:LineEndingStyle">
                             <TextBlock Text="{x:Bind Converter={StaticResource I18NConverter}, ConverterParameter=LineEndingStyle}" />
@@ -105,7 +105,7 @@
                            VerticalAlignment="Center"
                            Visibility="{Binding UseMosh}"/>
                 <TextBox Grid.Column="1" Grid.Row="1" 
-                         Text="{Binding MoshPortFrom, Mode=TwoWay}" 
+                         Text="{Binding MoshPortFrom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                          Margin="0 8 0 0"
                          BeforeTextChanging="Port_OnBeforeTextChanging"
                          VerticalAlignment="Center"
@@ -116,7 +116,7 @@
                            VerticalAlignment="Center"
                            Visibility="{Binding UseMosh}"/>
                 <TextBox Grid.Column="3" Grid.Row="1" 
-                         Text="{Binding MoshPortTo, Mode=TwoWay}" 
+                         Text="{Binding MoshPortTo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                          BeforeTextChanging="Port_OnBeforeTextChanging"
                          Margin="0 8 0 0"
                          VerticalAlignment="Center"

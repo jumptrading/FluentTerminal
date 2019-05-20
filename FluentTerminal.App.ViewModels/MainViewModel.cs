@@ -21,7 +21,7 @@ namespace FluentTerminal.App.ViewModels
         private readonly IKeyboardCommandService _keyboardCommandService;
         private readonly ISettingsService _settingsService;
         private readonly ITrayProcessCommunicationService _trayProcessCommunicationService;
-        private readonly ISshHelperService _sshHelperService;
+        private readonly IDefaultValueProvider _defaultValueProvider;
         private ApplicationSettings _applicationSettings;
         private string _background;
         private double _backgroundOpacity;
@@ -30,7 +30,7 @@ namespace FluentTerminal.App.ViewModels
         private string _windowTitle;
 
         public MainViewModel(ISettingsService settingsService, ITrayProcessCommunicationService trayProcessCommunicationService, IDialogService dialogService, IKeyboardCommandService keyboardCommandService,
-            IApplicationView applicationView, IDispatcherTimer dispatcherTimer, IClipboardService clipboardService, ISshHelperService sshHelperService)
+            IApplicationView applicationView, IDispatcherTimer dispatcherTimer, IClipboardService clipboardService, IDefaultValueProvider defaultValueProvider)
         {
             _settingsService = settingsService;
             _settingsService.CurrentThemeChanged += OnCurrentThemeChanged;
@@ -44,12 +44,12 @@ namespace FluentTerminal.App.ViewModels
             ApplicationView = applicationView;
             _dispatcherTimer = dispatcherTimer;
             _clipboardService = clipboardService;
-            _sshHelperService = sshHelperService;
+            _defaultValueProvider = defaultValueProvider;
             _keyboardCommandService = keyboardCommandService;
             _keyboardCommandService.RegisterCommandHandler(nameof(Command.NewTab), () => AddTerminal());
-            _keyboardCommandService.RegisterCommandHandler(nameof(Command.NewSshTab), () => AddRemoteTerminal());
-            _keyboardCommandService.RegisterCommandHandler(nameof(Command.ConfigurableNewTab), () => AddConfigurableTerminal());
-            _keyboardCommandService.RegisterCommandHandler(nameof(Command.ChangeTabTitle), () => SelectedTerminal.EditTitle());
+            _keyboardCommandService.RegisterCommandHandler(nameof(Command.NewSshTab), async () => await AddRemoteTerminal());
+            _keyboardCommandService.RegisterCommandHandler(nameof(Command.ConfigurableNewTab), async () => await AddConfigurableTerminal());
+            _keyboardCommandService.RegisterCommandHandler(nameof(Command.ChangeTabTitle), async () => await SelectedTerminal.EditTitle());
             _keyboardCommandService.RegisterCommandHandler(nameof(Command.CloseTab), CloseCurrentTab);
 
             // Add all of the commands for switching to a tab of a given ID, if there's one open there
@@ -57,8 +57,8 @@ namespace FluentTerminal.App.ViewModels
             {
                 var switchCmd = Command.SwitchToTerm1 + i;
                 int tabNumber = i;
-                void handler() => SelectTabNumber(tabNumber);
-                _keyboardCommandService.RegisterCommandHandler(switchCmd.ToString(), handler);
+                void Handler() => SelectTabNumber(tabNumber);
+                _keyboardCommandService.RegisterCommandHandler(switchCmd.ToString(), Handler);
             }
 
             _keyboardCommandService.RegisterCommandHandler(nameof(Command.NextTab), SelectNextTab);
@@ -72,7 +72,7 @@ namespace FluentTerminal.App.ViewModels
 
             foreach (ShellProfile profile in _settingsService.GetShellProfiles())
             {
-                _keyboardCommandService.RegisterCommandHandler(profile.Id.ToString(), () => AddTerminal(profile.Id));
+                _keyboardCommandService.RegisterCommandHandler(profile.Id.ToString(), async () => await AddTerminal(profile.Id));
             }
 
             var currentTheme = _settingsService.GetCurrentTheme();
@@ -82,8 +82,8 @@ namespace FluentTerminal.App.ViewModels
             _applicationSettings = _settingsService.GetApplicationSettings();
             TabsPosition = _applicationSettings.TabsPosition;
 
-            AddLocalShellCommand = new RelayCommand(() => AddTerminal());
-            AddRemoteShellCommand = new RelayCommand(() => AddRemoteTerminal());
+            AddLocalShellCommand = new RelayCommand(async () => await AddTerminal());
+            AddRemoteShellCommand = new RelayCommand(async () => await AddRemoteTerminal());
             ShowAboutCommand = new RelayCommand(ShowAbout);
             ShowSettingsCommand = new RelayCommand(ShowSettings);
 
@@ -104,7 +104,7 @@ namespace FluentTerminal.App.ViewModels
 
         private void OnShellProfileAdded(object sender, ShellProfile e)
         {
-            _keyboardCommandService.RegisterCommandHandler(e.Id.ToString(), () => AddTerminal(e.Id));
+            _keyboardCommandService.RegisterCommandHandler(e.Id.ToString(), async () => await AddTerminal(e.Id));
         }
 
         private void OnTerminalsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -207,29 +207,28 @@ namespace FluentTerminal.App.ViewModels
 
         public IApplicationView ApplicationView { get; }
 
-        public Task AddConfigurableTerminal()
+        public async Task AddConfigurableTerminal()
         {
-            return ApplicationView.RunOnDispatcherThread(async () =>
+            var profile = await _dialogService.ShowProfileSelectionDialogAsync();
+
+            if (profile == null)
             {
-                var profile = await _dialogService.ShowProfileSelectionDialogAsync();
-
-                if (profile == null)
+                if (Terminals.Count == 0)
                 {
-                    if (Terminals.Count == 0)
-                    {
-                        await ApplicationView.TryClose();
-                    }
-
-                    return;
+                    await ApplicationView.TryClose();
                 }
 
-                AddTerminal(profile);
-            });
+                return;
+            }
+
+            await AddTerminal(profile);
         }
 
         private async Task AddRemoteTerminal()
         {
-            ShellProfile profile = await _sshHelperService.GetSshShellProfileAsync();
+            ShellProfile profile = _settingsService.GetShellProfile(_defaultValueProvider.SshProfileId);
+
+            profile = await _dialogService.ShowSshConnectionInfoDialogAsync(profile);
 
             if (profile == null)
             {
@@ -241,25 +240,34 @@ namespace FluentTerminal.App.ViewModels
             }
             else
             {
-                await ApplicationView.RunOnDispatcherThread(() => AddTerminal(profile));
+                await AddTerminal(profile);
             }
         }
 
-        public void AddTerminal()
+        public Task AddTerminal()
         {
             var profile = _settingsService.GetDefaultShellProfile();
-            AddTerminal(profile);
+            return AddTerminal(profile);
         }
 
-        public void AddTerminal(Guid shellProfileId)
+        public async Task AddTerminal(Guid shellProfileId)
         {
             var profile = _settingsService.GetShellProfile(shellProfileId);
-            AddTerminal(profile);
+
+            if (shellProfileId.Equals(_defaultValueProvider.SshProfileId))
+            {
+                profile = await _dialogService.ShowSshConnectionInfoDialogAsync(profile);
+
+                if (profile == null)
+                    return;
+            }
+
+            await AddTerminal(profile);
         }
 
-        public void AddTerminal(ShellProfile profile)
+        public Task AddTerminal(ShellProfile profile)
         {
-            ApplicationView.RunOnDispatcherThread(() =>
+            return ApplicationView.RunOnDispatcherThread(() =>
             {
                 var terminal = new TerminalViewModel(_settingsService, _trayProcessCommunicationService, _dialogService, _keyboardCommandService,
                     _applicationSettings, profile, ApplicationView, _dispatcherTimer, _clipboardService);

@@ -1,4 +1,5 @@
-﻿using FluentTerminal.Models.Enums;
+﻿using FluentTerminal.Models;
+using FluentTerminal.Models.Enums;
 
 namespace FluentTerminal.App.Services
 {
@@ -18,6 +19,12 @@ namespace FluentTerminal.App.Services
 
         ushort MoshPortTo { get; set; }
 
+        LineEndingStyle LineEndingStyle { get; set; }
+
+        void FillShellProfile(ShellProfile profile);
+
         SshConnectionInfoValidationResult Validate(bool allowNoUser = false);
+
+        ISshConnectionInfo Clone();
     }
 }

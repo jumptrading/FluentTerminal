@@ -9,6 +9,12 @@ namespace FluentTerminal.App.Services.Implementation
 {
     public class DefaultValueProvider : IDefaultValueProvider
     {
+        private const string SshProfileIdString = "7161d76a-3753-4852-9e4f-32dc9bcb2a49";
+
+        public LineEndingStyle DefaultSshLineEndingStyle { get; } = LineEndingStyle.ToLF;
+
+        public Guid SshProfileId { get; } = Guid.Parse(SshProfileIdString);
+
         public ApplicationSettings GetDefaultApplicationSettings()
         {
             return new ApplicationSettings
@@ -331,6 +337,7 @@ namespace FluentTerminal.App.Services.Implementation
                 }
             };
         }
+
         public TerminalOptions GetDefaultTerminalOptions()
         {
             return new TerminalOptions
@@ -423,6 +430,29 @@ namespace FluentTerminal.App.Services.Implementation
                             Shift=false,
                             Meta=false,
                             Key=(int)ExtendedVirtualKey.Number3
+                        }
+                    }
+                },
+                new ShellProfile
+                {
+                    Id = SshProfileId,
+                    Name = "SSH",
+                    Arguments = string.Empty,
+                    Location = @"C:\Windows\System32\OpenSSH\ssh.exe",
+                    PreInstalled = true,
+                    WorkingDirectory = string.Empty,
+                    LineEndingTranslation = DefaultSshLineEndingStyle,
+                    UseConPty = ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 7), // Windows 10 1809+
+                    KeyBindings = new[]
+                    {
+                        new KeyBinding
+                        {
+                            Command = SshProfileIdString,
+                            Ctrl = true,
+                            Alt = true,
+                            Shift = false,
+                            Meta = false,
+                            Key = (int) ExtendedVirtualKey.Number4
                         }
                     }
                 }

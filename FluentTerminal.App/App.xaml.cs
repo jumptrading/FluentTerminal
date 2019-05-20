@@ -43,6 +43,7 @@ namespace FluentTerminal.App
         private readonly ISettingsService _settingsService;
         private readonly ITrayProcessCommunicationService _trayProcessCommunicationService;
         private readonly ISshHelperService _sshHelperService;
+        private readonly IDefaultValueProvider _defaultValueProvider;
         private bool _alreadyLaunched;
         private ApplicationSettings _applicationSettings;
         private readonly IContainer _container;
@@ -108,6 +109,8 @@ namespace FluentTerminal.App
 
             _sshHelperService = _container.Resolve<ISshHelperService>();
 
+            _defaultValueProvider = _container.Resolve<IDefaultValueProvider>();
+
             _applicationSettings = _settingsService.GetApplicationSettings();
 
             JsonConvert.DefaultSettings = () =>
@@ -164,7 +167,10 @@ namespace FluentTerminal.App
                 // TODO: Check what happens if ssh link is invalid?
                 if (_sshHelperService.IsSsh(protocolActivated.Uri))
                 {
-                    ShellProfile profile = await _sshHelperService.GetSshShellProfileAsync(protocolActivated.Uri);
+                    ShellProfile profile = _settingsService.GetShellProfile(_defaultValueProvider.SshProfileId);
+                    
+                    profile = await _sshHelperService.FillSshShellProfileAsync(profile, protocolActivated.Uri);
+
                     if (profile != null)
                     {
                         await CreateTerminal(profile, _applicationSettings.NewTerminalLocation);
@@ -455,7 +461,7 @@ namespace FluentTerminal.App
             }
             else
             {
-                viewModel.AddTerminal();
+                await viewModel.AddTerminal();
             }
         }
 

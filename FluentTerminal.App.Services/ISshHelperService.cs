@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using FluentTerminal.Models;
+using FluentTerminal.Models.Enums;
 
 namespace FluentTerminal.App.Services
 {
@@ -8,10 +9,10 @@ namespace FluentTerminal.App.Services
     {
         bool IsSsh(Uri uri);
 
-        Task<ShellProfile> GetSshShellProfileAsync();
-
-        Task<ShellProfile> GetSshShellProfileAsync(Uri uri);
+        Task<ShellProfile> FillSshShellProfileAsync(ShellProfile profile, Uri uri);
 
         string ConvertToUri(ISshConnectionInfo sshConnectionInfo);
+
+        string GetErrorMessage(SshConnectionInfoValidationResult result);
     }
 }

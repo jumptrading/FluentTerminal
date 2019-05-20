@@ -19,5 +19,7 @@ namespace FluentTerminal.App.ViewModels
             get => _value;
             set => Set(ref _value, value);
         }
+
+        internal SshOptionViewModel Clone() => new SshOptionViewModel {_name = _name, _value = _value};
     }
 }
