@@ -8,7 +8,6 @@ using FluentTerminal.App.Services.Adapters;
 using FluentTerminal.App.Services.Dialogs;
 using FluentTerminal.App.Services.EventArgs;
 using FluentTerminal.App.Services.Implementation;
-using FluentTerminal.App.Utilities;
 using FluentTerminal.App.ViewModels;
 using FluentTerminal.App.Views;
 using FluentTerminal.Models;
@@ -33,13 +32,15 @@ using Windows.UI.Popups;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using FluentTerminal.App.Utilities;
 using IContainer = Autofac.IContainer;
 
 namespace FluentTerminal.App
 {
+    // ReSharper disable once RedundantExtendsListEntry
     public sealed partial class App : Application
     {
-        public TaskCompletionSource<int> _trayReady = new TaskCompletionSource<int>();
+        private readonly TaskCompletionSource<int> _trayReady = new TaskCompletionSource<int>();
         private readonly ISettingsService _settingsService;
         private readonly ITrayProcessCommunicationService _trayProcessCommunicationService;
         private readonly ISshHelperService _sshHelperService;
@@ -96,6 +97,7 @@ namespace FluentTerminal.App
             builder.RegisterType<DispatcherTimerAdapter>().As<IDispatcherTimer>().InstancePerDependency();
             builder.RegisterType<StartupTaskService>().As<IStartupTaskService>().SingleInstance();
             builder.RegisterType<SshHelperService>().As<ISshHelperService>().SingleInstance();
+            builder.RegisterType<ApplicationLanguageService>().As<IApplicationLanguageService>().SingleInstance();
             builder.RegisterInstance(applicationDataContainers);
 
             _container = builder.Build();
@@ -211,7 +213,7 @@ namespace FluentTerminal.App
                     {
                         // Link is valid, but incomplete (i.e. username missing), so we need to show dialog.
                         connectionInfo =
-                            (SshConnectionInfoViewModel) await _dialogService.ShowSshConnectionInfoDialogAsync(
+                            (SshConnectionInfoViewModel)await _dialogService.ShowSshConnectionInfoDialogAsync(
                                 connectionInfo);
 
                         if (connectionInfo == null)
@@ -249,9 +251,25 @@ namespace FluentTerminal.App
 
                 _commandLineParser.ParseArguments(SplitArguments(commandLineActivated.Operation.Arguments), typeof(NewVerb), typeof(RunVerb), typeof(SettingsVerb)).WithParsed(async verb =>
                 {
-                    if (verb is SettingsVerb)
+                    if (verb is SettingsVerb settingsVerb)
                     {
-                        await ShowSettings().ConfigureAwait(true);
+                        if (!settingsVerb.Import && !settingsVerb.Export)
+                        {
+                            await ShowSettings().ConfigureAwait(true);
+                        }
+                        else if (settingsVerb.Export)
+                        {
+                            var exportFile = await ApplicationData.Current.LocalFolder.CreateFileAsync("config.json", CreationCollisionOption.OpenIfExists);
+
+                            var settings = _settingsService.ExportSettings();
+                            await FileIO.WriteTextAsync(exportFile, settings);
+                        }
+                        else if (settingsVerb.Import)
+                        {
+                            var file = await ApplicationData.Current.LocalFolder.GetFileAsync("config.json");
+                            var content = await FileIO.ReadTextAsync(file);
+                            _settingsService.ImportSettings(content);
+                        }
                     }
                     else if (verb is NewVerb newVerb)
                     {
@@ -315,26 +333,15 @@ namespace FluentTerminal.App
         {
             if (!_alreadyLaunched)
             {
-                var logDirectory = await ApplicationData.Current.LocalCacheFolder.CreateFolderAsync("Logs", CreationCollisionOption.OpenIfExists);
-                var logFile = Path.Combine(logDirectory.Path, "fluentterminal.app.log");
-                var configFile = await logDirectory.CreateFileAsync("config.json", CreationCollisionOption.OpenIfExists);
-                var configContent = await FileIO.ReadTextAsync(configFile);
+                await InitializeLogger();
+
+                // TODO: Check the reason for such strange using of tasks!
                 Task.Run(async () => await JumpListHelper.Update(_settingsService.GetShellProfiles()));
 
-                if (string.IsNullOrWhiteSpace(configContent))
-                {
-                    configContent = JsonConvert.SerializeObject(new Logger.Configuration());
-                    await FileIO.WriteTextAsync(configFile, configContent);
-                }
-
-                var config = JsonConvert.DeserializeObject<Logger.Configuration>(configContent) ?? new Logger.Configuration();
-
-                Logger.Instance.Initialize(logFile, config);
-
                 var viewModel = _container.Resolve<MainViewModel>();
-                if(args.Arguments.StartsWith(JumpListHelper.ShellProfileFlag))
+                if (args.Arguments.StartsWith(JumpListHelper.ShellProfileFlag))
                 {
-                    viewModel.AddTerminal(Guid.Parse(args.Arguments.Replace(JumpListHelper.ShellProfileFlag, "")));
+                    viewModel.AddTerminal(Guid.Parse(args.Arguments.Replace(JumpListHelper.ShellProfileFlag, string.Empty)));
                 }
                 else
                 {
@@ -350,9 +357,28 @@ namespace FluentTerminal.App
             else if (args.Arguments.StartsWith(JumpListHelper.ShellProfileFlag))
             {
                 var location = _applicationSettings.NewTerminalLocation;
-                var profile = _settingsService.GetShellProfile(Guid.Parse(args.Arguments.Replace(JumpListHelper.ShellProfileFlag, "")));
+                var profile = _settingsService.GetShellProfile(Guid.Parse(args.Arguments.Replace(JumpListHelper.ShellProfileFlag, string.Empty)));
                 await CreateTerminal(profile, location).ConfigureAwait(true);
             }
+        }
+
+        private static async Task InitializeLogger()
+        {
+            var logDirectory = await ApplicationData.Current.LocalCacheFolder.CreateFolderAsync("Logs", CreationCollisionOption.OpenIfExists);
+            var logFile = Path.Combine(logDirectory.Path, "fluentterminal.app.log");
+            var configFile = await logDirectory.CreateFileAsync("config.json", CreationCollisionOption.OpenIfExists);
+            var configContent = await FileIO.ReadTextAsync(configFile);
+
+
+            if (string.IsNullOrWhiteSpace(configContent))
+            {
+                configContent = JsonConvert.SerializeObject(new Logger.Configuration());
+                await FileIO.WriteTextAsync(configFile, configContent);
+            }
+
+            var config = JsonConvert.DeserializeObject<Logger.Configuration>(configContent) ?? new Logger.Configuration();
+
+            Logger.Instance.Initialize(logFile, config);
         }
 
         protected override void OnBackgroundActivated(BackgroundActivatedEventArgs args)
@@ -386,8 +412,7 @@ namespace FluentTerminal.App
         {
             await StartSystemTray().ConfigureAwait(true);
 
-            Frame rootFrame = Window.Current.Content as Frame;
-            if (rootFrame == null)
+            if (!(Window.Current.Content is Frame rootFrame))
             {
                 rootFrame = new Frame();
                 Window.Current.Content = rootFrame;
@@ -426,7 +451,7 @@ namespace FluentTerminal.App
             return viewModel;
         }
 
-        private async Task<TViewModel> CreateSecondaryView<TViewModel>(Type pageType, bool ExtendViewIntoTitleBar)
+        private async Task<TViewModel> CreateSecondaryView<TViewModel>(Type pageType, bool extendViewIntoTitleBar)
         {
             int windowId = 0;
             TViewModel viewModel = default;
@@ -434,7 +459,7 @@ namespace FluentTerminal.App
             {
                 viewModel = _container.Resolve<TViewModel>();
 
-                CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = ExtendViewIntoTitleBar;
+                CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = extendViewIntoTitleBar;
                 var frame = new Frame();
                 frame.Navigate(pageType, viewModel);
                 Window.Current.Content = frame;
@@ -472,7 +497,10 @@ namespace FluentTerminal.App
                 viewModel.ShowAboutRequested -= OnShowAboutRequested;
                 viewModel.ActivatedMv -= OnMainViewActivated;
                 if (_activeWindowId == viewModel.ApplicationView.Id)
+                {
                     _activeWindowId = 0;
+                }
+
                 _mainViewModels.Remove(viewModel);
             }
         }
@@ -534,7 +562,7 @@ namespace FluentTerminal.App
             }
             else if (location == NewTerminalLocation.Tab && _mainViewModels.Count > 0)
             {
-                
+
                 MainViewModel item = _mainViewModels.FirstOrDefault(o => o.ApplicationView.Id == _activeWindowId);
                 if (item != null)
                 {
