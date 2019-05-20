@@ -28,22 +28,24 @@ using Windows.ApplicationModel.Background;
 using Windows.ApplicationModel.Core;
 using Windows.Storage;
 using Windows.UI.Core;
+using Windows.UI.Popups;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using FluentTerminal.App.Utilities;
 using IContainer = Autofac.IContainer;
-using Windows.Globalization;
 
 namespace FluentTerminal.App
 {
+    // ReSharper disable once RedundantExtendsListEntry
     public sealed partial class App : Application
     {
-        public TaskCompletionSource<int> _trayReady = new TaskCompletionSource<int>();
+        private readonly TaskCompletionSource<int> _trayReady = new TaskCompletionSource<int>();
         private readonly ISettingsService _settingsService;
         private readonly ITrayProcessCommunicationService _trayProcessCommunicationService;
         private readonly ISshHelperService _sshHelperService;
         private readonly IDefaultValueProvider _defaultValueProvider;
+        private readonly IDialogService _dialogService;
         private bool _alreadyLaunched;
         private ApplicationSettings _applicationSettings;
         private readonly IContainer _container;
@@ -71,7 +73,6 @@ namespace FluentTerminal.App
                 ShellProfiles = new ApplicationDataContainerAdapter(ApplicationData.Current.LocalSettings.CreateContainer(Constants.ShellProfilesContainerName, ApplicationDataCreateDisposition.Always)),
                 Themes = new ApplicationDataContainerAdapter(ApplicationData.Current.RoamingSettings.CreateContainer(Constants.ThemesContainerName, ApplicationDataCreateDisposition.Always))
             };
-
             var builder = new ContainerBuilder();
             builder.RegisterType<SettingsService>().As<ISettingsService>().SingleInstance();
             builder.RegisterType<DefaultValueProvider>().As<IDefaultValueProvider>().SingleInstance();
@@ -110,6 +111,8 @@ namespace FluentTerminal.App
             _sshHelperService = _container.Resolve<ISshHelperService>();
 
             _defaultValueProvider = _container.Resolve<IDefaultValueProvider>();
+
+            _dialogService = _container.Resolve<IDialogService>();
 
             _applicationSettings = _settingsService.GetApplicationSettings();
 
@@ -164,18 +167,80 @@ namespace FluentTerminal.App
         {
             if (args is ProtocolActivatedEventArgs protocolActivated)
             {
-                // TODO: Check what happens if ssh link is invalid?
-                if (_sshHelperService.IsSsh(protocolActivated.Uri))
-                {
-                    ShellProfile profile = _settingsService.GetShellProfile(_defaultValueProvider.SshProfileId);
-                    
-                    profile = await _sshHelperService.FillSshShellProfileAsync(profile, protocolActivated.Uri);
+                MainViewModel mainViewModel = null;
 
-                    if (profile != null)
-                    {
-                        await CreateTerminal(profile, _applicationSettings.NewTerminalLocation);
-                    }
+                if (!_alreadyLaunched)
+                {
+                    // App wasn't launched before double clicking a shortcut, so we have to create a window
+                    // in order to be able to communicate with user.
+                    mainViewModel = _container.Resolve<MainViewModel>();
+
+                    await CreateMainView(typeof(MainPage), mainViewModel, true);
                 }
+
+                bool isSsh;
+
+                try
+                {
+                    isSsh = _sshHelperService.IsSsh(protocolActivated.Uri);
+                }
+                catch (Exception ex)
+                {
+                    await new MessageDialog($"Invalid link: {ex.Message}", "Invalid Link").ShowAsync();
+
+                    mainViewModel?.ApplicationView.TryClose();
+
+                    return;
+                }
+
+                if (isSsh)
+                {
+                    ISshConnectionInfo connectionInfo;
+
+                    try
+                    {
+                        connectionInfo = _sshHelperService.ParseSsh(protocolActivated.Uri);
+                    }
+                    catch (Exception ex)
+                    {
+                        await new MessageDialog($"Invalid link: {ex.Message}", "Invalid Link").ShowAsync();
+
+                        mainViewModel?.ApplicationView.TryClose();
+
+                        return;
+                    }
+
+                    SshConnectionInfoValidationResult result = connectionInfo.Validate();
+
+                    if (result != SshConnectionInfoValidationResult.Valid)
+                    {
+                        // Link is valid, but incomplete (i.e. username missing), so we need to show dialog.
+                        connectionInfo =
+                            (SshConnectionInfoViewModel)await _dialogService.ShowSshConnectionInfoDialogAsync(
+                                connectionInfo);
+
+                        if (connectionInfo == null)
+                        {
+                            // User clicked "Cancel" in the dialog.
+                            mainViewModel?.ApplicationView.TryClose();
+
+                            return;
+                        }
+                    }
+
+                    ShellProfile profile = _sshHelperService.CreateShellProfile(connectionInfo);
+
+                    if (mainViewModel == null)
+                        await CreateTerminal(profile, _applicationSettings.NewTerminalLocation);
+                    else
+                        mainViewModel.AddTerminal(profile);
+
+                    return;
+                }
+
+                await new MessageDialog($"Invalid link: {protocolActivated.Uri}", "Invalid Link").ShowAsync();
+
+                mainViewModel?.ApplicationView.TryClose();
 
                 return;
             }
@@ -273,6 +338,7 @@ namespace FluentTerminal.App
             {
                 await InitializeLogger();
 
+                // TODO: Check the reason for such strange using of tasks!
                 Task.Run(async () => await JumpListHelper.Update(_settingsService.GetShellProfiles()));
 
                 var viewModel = _container.Resolve<MainViewModel>();
@@ -388,7 +454,7 @@ namespace FluentTerminal.App
             return viewModel;
         }
 
-        private async Task<TViewModel> CreateSecondaryView<TViewModel>(Type pageType, bool ExtendViewIntoTitleBar)
+        private async Task<TViewModel> CreateSecondaryView<TViewModel>(Type pageType, bool extendViewIntoTitleBar)
         {
             int windowId = 0;
             TViewModel viewModel = default;
@@ -396,7 +462,7 @@ namespace FluentTerminal.App
             {
                 viewModel = _container.Resolve<TViewModel>();
 
-                CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = ExtendViewIntoTitleBar;
+                CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = extendViewIntoTitleBar;
                 var frame = new Frame();
                 frame.Navigate(pageType, viewModel);
                 Window.Current.Content = frame;
@@ -499,7 +565,7 @@ namespace FluentTerminal.App
             }
             else if (location == NewTerminalLocation.Tab && _mainViewModels.Count > 0)
             {
-                
+
                 MainViewModel item = _mainViewModels.FirstOrDefault(o => o.ApplicationView.Id == _activeWindowId);
                 if (item != null)
                 {
