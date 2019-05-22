@@ -40,6 +40,6 @@ namespace FluentTerminal.App.Services
         string ExportSettings();
         void ImportSettings(string serializedSettings);
         void SaveAutoUpdateData(string version, string path);
-        IDictionary<string, string> GetAutoUpdateData();
+        ApplicationVersionUpgradeData GetAutoUpdateData();
     }
 }

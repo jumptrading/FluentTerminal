@@ -11,6 +11,7 @@ using System.Net;
 using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
+using FluentTerminal.Models;
 
 namespace FluentTerminal.App.Services.Implementation
 {
@@ -73,9 +74,8 @@ namespace FluentTerminal.App.Services.Implementation
         {
             try
             {
-                IDictionary<string, string> updateData = _settingsService.GetAutoUpdateData();
-                string versionStr = updateData["version"];
-                Version downloaded = new Version(versionStr);
+                ApplicationVersionUpgradeData updateData = _settingsService.GetAutoUpdateData();
+                Version downloaded = updateData.Version;
                 Version current = new Version("0.0.0.0"); // GetCurrentVersion();
                 Version latest = await GetLatestVersionAsync();
 
@@ -83,7 +83,7 @@ namespace FluentTerminal.App.Services.Implementation
                 {
                     _notificationService.ShowNotification("Update will be installed", "Installation of new application version is started.");
 
-                    _trayProcessCommunicationService.StartApplicationUpdate(updateData["path"]);
+                    _trayProcessCommunicationService.RunMSI(updateData.Path);
                 }
                 else if (latest > current)
                 {

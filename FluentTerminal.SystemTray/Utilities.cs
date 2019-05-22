@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Windows.Input;
@@ -561,19 +560,16 @@ namespace FluentTerminal.SystemTray
             }
         }
 
-        internal static void RunApplicationUpdate(string url)
+        internal static void RunMSI(string msiPath)
         {
-            if (string.IsNullOrEmpty(url))
+            if (string.IsNullOrEmpty(msiPath))
                 return;
 
-            WebClient client = new WebClient();
             try
             {
-                //string fileName = Path.GetTempPath() + Guid.NewGuid().ToString() + ".msi";
-                //client.DownloadFile(url, fileName);
                 Process process = new Process();
                 process.StartInfo.FileName = "msiexec.exe";
-                process.StartInfo.Arguments = $"/i \"{url}\"";
+                process.StartInfo.Arguments = $"/i \"{msiPath}\"";
                 process.Start();
             }
             catch (Exception) { }

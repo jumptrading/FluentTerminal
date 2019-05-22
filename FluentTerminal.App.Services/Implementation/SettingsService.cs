@@ -336,23 +336,13 @@ namespace FluentTerminal.App.Services.Implementation
             string test = (string)savedVersion;
         }
 
-        public IDictionary<string, string> GetAutoUpdateData()
+        public ApplicationVersionUpgradeData GetAutoUpdateData()
         {
-            var autoUpdateData = new Dictionary<string, string>();
-
-            try
+            return new ApplicationVersionUpgradeData
             {
-                autoUpdateData.Add("version", _autoUpdate.TryGetValue("version", out object version) && !String.IsNullOrEmpty((string)version) ? (string)version : "0.0.0.0");
-                _autoUpdate.TryGetValue("version", out object savedVersion);
-                string test = (string)savedVersion;
-                autoUpdateData.Add("path", _autoUpdate.TryGetValue("path", out object path) && !String.IsNullOrEmpty((string)path) ? (string)path : String.Empty);
-            }
-            catch(Exception ex)
-            {
-
-            }
-
-            return autoUpdateData;
+                Version = new Version(_autoUpdate.TryGetValue("version", out object version) && !String.IsNullOrEmpty((string)version) ? (string)version : "0.0.0.0"),
+                Path = _autoUpdate.TryGetValue("path", out object path) && !String.IsNullOrEmpty((string)path) ? (string)path : String.Empty
+            };
         }
     }
 }
