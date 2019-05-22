@@ -130,6 +130,20 @@ namespace FluentTerminal.App.ViewModels.Settings
             }
         }
 
+        public bool AutoInstallUpdates
+        {
+            get => _applicationSettings.AutoInstallUpdates;
+            set
+            {
+                if (_applicationSettings.AutoInstallUpdates != value)
+                {
+                    _applicationSettings.AutoInstallUpdates = value;
+                    _settingsService.SaveApplicationSettings(_applicationSettings);
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
         public bool BottomIsSelected
         {
             get => TabsPosition == TabsPosition.Bottom;
@@ -304,6 +318,7 @@ namespace FluentTerminal.App.ViewModels.Settings
                 NewTerminalLocation = defaults.NewTerminalLocation;
                 AlwaysShowTabs = defaults.AlwaysShowTabs;
                 ShowNewOutputIndicator = defaults.ShowNewOutputIndicator;
+                AutoInstallUpdates = defaults.AutoInstallUpdates;
                 EnableTrayIcon = defaults.EnableTrayIcon;
                 ShowCustomTitleInTitlebar = defaults.ShowCustomTitleInTitlebar;
             }

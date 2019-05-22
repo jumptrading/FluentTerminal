@@ -5,6 +5,12 @@ using RestSharp;
 using System.Threading.Tasks;
 using System.Collections;
 using System.Linq;
+using Windows.Networking.BackgroundTransfer;
+using Windows.Storage;
+using System.Net;
+using System.IO;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace FluentTerminal.App.Services.Implementation
 {
@@ -15,6 +21,7 @@ namespace FluentTerminal.App.Services.Implementation
         private readonly INotificationService _notificationService;
         private readonly IDialogService _dialogService;
         private readonly ITrayProcessCommunicationService _trayProcessCommunicationService;
+        private readonly ISettingsService _settingsService;
 
         private async Task<IRestResponse> SendGitHubAPIRequest(string request)
         {
@@ -39,34 +46,68 @@ namespace FluentTerminal.App.Services.Implementation
             return "";
         }
 
-        public UpdateService(INotificationService notificationService, IDialogService dialogService, ITrayProcessCommunicationService trayProcessCommunicationService)
+        public UpdateService(INotificationService notificationService, IDialogService dialogService, ITrayProcessCommunicationService trayProcessCommunicationService, ISettingsService settingsService)
         {
             _notificationService = notificationService;
             _dialogService = dialogService;
             _trayProcessCommunicationService = trayProcessCommunicationService;
+            _settingsService = settingsService;
+        }
+
+        private async void StartDownload(string version, string url)
+        {
+            try
+            {
+                string tempFilePath = Path.GetTempFileName();
+                WebClient webClient = new WebClient();
+                await webClient.DownloadFileTaskAsync(url, tempFilePath);
+                _settingsService.SaveAutoUpdateData(version, tempFilePath);
+            }
+            catch (Exception ex)
+            {
+                //LogException("Download Error", ex);
+            }
         }
 
         public async Task CheckForUpdate(bool notifyNoUpdate = false)
         {
-            var latest = await GetLatestVersionAsync();
-            if (latest > GetCurrentVersion())
+            try
             {
-                _notificationService.ShowNotification("Update available",
-                    "Click to open the releases page.", "https://github.com/jumptrading/FluentTerminal/releases");
+                IDictionary<string, string> updateData = _settingsService.GetAutoUpdateData();
+                string versionStr = updateData["version"];
+                Version downloaded = new Version(versionStr);
+                Version current = new Version("0.0.0.0"); // GetCurrentVersion();
+                Version latest = await GetLatestVersionAsync();
 
-                var installerFileUrl = await GetInstallerURL(latest.ToString(4));
-                if (!string.IsNullOrEmpty(installerFileUrl))
+                if (downloaded > current && downloaded >= latest)
                 {
-                    DialogButton result = await _dialogService.ShowMessageDialogAsnyc("Update is available.", "Application will be closed during update. Press OK to start the update.", new DialogButton[] { DialogButton.OK, DialogButton.Cancel });
-                    if (result == DialogButton.OK)
+                    _notificationService.ShowNotification("Update will be installed", "Installation of new application version is started.");
+
+                    _trayProcessCommunicationService.StartApplicationUpdate(updateData["path"]);
+                }
+                else if (latest > current)
+                {
+                    _notificationService.ShowNotification("Update available",
+                        "Click to open the releases page.", "https://github.com/jumptrading/FluentTerminal/releases");
+
+                    var installerFileUrl = await GetInstallerURL(latest.ToString(4));
+                    if (!string.IsNullOrEmpty(installerFileUrl))
                     {
-                        _trayProcessCommunicationService.StartApplicationUpdate(installerFileUrl);
+                        DialogButton result = await _dialogService.ShowMessageDialogAsnyc("Update is available.", "Application update will be downloaded and installed on next application launch. Press OK to start the download.", new DialogButton[] { DialogButton.OK, DialogButton.Cancel }).ConfigureAwait(true);
+                        if (result == DialogButton.OK)
+                        {
+                            StartDownload(latest.ToString(4), installerFileUrl);
+                        }
                     }
                 }
+                else if (notifyNoUpdate)
+                {
+                    _notificationService.ShowNotification("No update available", "You're up to date!");
+                }
             }
-            else if (notifyNoUpdate)
+            catch(Exception ex)
             {
-                _notificationService.ShowNotification("No update available", "You're up to date!");
+
             }
         }
 

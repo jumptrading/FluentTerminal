@@ -19,6 +19,7 @@ namespace FluentTerminal.App.Services.Implementation
         private readonly IApplicationDataContainer _roamingSettings;
         private readonly IApplicationDataContainer _shellProfiles;
         private readonly IApplicationDataContainer _themes;
+        private readonly IApplicationDataContainer _autoUpdate;
 
         public SettingsService(IDefaultValueProvider defaultValueProvider, ApplicationDataContainers containers)
         {
@@ -29,6 +30,7 @@ namespace FluentTerminal.App.Services.Implementation
             _themes = containers.Themes;
             _keyBindings = containers.KeyBindings;
             _shellProfiles = containers.ShellProfiles;
+            _autoUpdate = containers.AutoUpdate;
 
             foreach (var theme in _defaultValueProvider.GetPreInstalledThemes())
             {
@@ -323,6 +325,34 @@ namespace FluentTerminal.App.Services.Implementation
             {
                 ThemeAdded?.Invoke(this, theme);
             }
+        }
+
+        public void SaveAutoUpdateData(string version, string path)
+        {
+            _autoUpdate.SetValue("version", version);
+            _autoUpdate.SetValue("path", path);
+
+            _autoUpdate.TryGetValue("version", out object savedVersion);
+            string test = (string)savedVersion;
+        }
+
+        public IDictionary<string, string> GetAutoUpdateData()
+        {
+            var autoUpdateData = new Dictionary<string, string>();
+
+            try
+            {
+                autoUpdateData.Add("version", _autoUpdate.TryGetValue("version", out object version) && !String.IsNullOrEmpty((string)version) ? (string)version : "0.0.0.0");
+                _autoUpdate.TryGetValue("version", out object savedVersion);
+                string test = (string)savedVersion;
+                autoUpdateData.Add("path", _autoUpdate.TryGetValue("path", out object path) && !String.IsNullOrEmpty((string)path) ? (string)path : String.Empty);
+            }
+            catch(Exception ex)
+            {
+
+            }
+
+            return autoUpdateData;
         }
     }
 }

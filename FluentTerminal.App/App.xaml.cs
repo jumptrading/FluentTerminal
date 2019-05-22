@@ -45,6 +45,7 @@ namespace FluentTerminal.App
         private readonly ITrayProcessCommunicationService _trayProcessCommunicationService;
         private readonly ISshHelperService _sshHelperService;
         private readonly IDialogService _dialogService;
+        private readonly IUpdateService _updateService;
         private bool _alreadyLaunched;
         private ApplicationSettings _applicationSettings;
         private readonly IContainer _container;
@@ -70,7 +71,8 @@ namespace FluentTerminal.App
                 RoamingSettings = new ApplicationDataContainerAdapter(ApplicationData.Current.RoamingSettings),
                 KeyBindings = new ApplicationDataContainerAdapter(ApplicationData.Current.RoamingSettings.CreateContainer(Constants.KeyBindingsContainerName, ApplicationDataCreateDisposition.Always)),
                 ShellProfiles = new ApplicationDataContainerAdapter(ApplicationData.Current.LocalSettings.CreateContainer(Constants.ShellProfilesContainerName, ApplicationDataCreateDisposition.Always)),
-                Themes = new ApplicationDataContainerAdapter(ApplicationData.Current.RoamingSettings.CreateContainer(Constants.ThemesContainerName, ApplicationDataCreateDisposition.Always))
+                Themes = new ApplicationDataContainerAdapter(ApplicationData.Current.RoamingSettings.CreateContainer(Constants.ThemesContainerName, ApplicationDataCreateDisposition.Always)),
+                AutoUpdate = new ApplicationDataContainerAdapter(ApplicationData.Current.RoamingSettings.CreateContainer(Constants.AutoUpdateContainerName, ApplicationDataCreateDisposition.Always))
             };
             var builder = new ContainerBuilder();
             builder.RegisterType<SettingsService>().As<ISettingsService>().SingleInstance();
@@ -108,6 +110,8 @@ namespace FluentTerminal.App
             _trayProcessCommunicationService = _container.Resolve<ITrayProcessCommunicationService>();
 
             _sshHelperService = _container.Resolve<ISshHelperService>();
+
+            _updateService = _container.Resolve<IUpdateService>();
 
             _dialogService = _container.Resolve<IDialogService>();
 
@@ -349,6 +353,8 @@ namespace FluentTerminal.App
                 }
                 await CreateMainView(typeof(MainPage), viewModel, true).ConfigureAwait(true);
                 Window.Current.Activate();
+
+                _updateService.CheckForUpdate();
             }
             else if (_mainViewModels.Count == 0)
             {

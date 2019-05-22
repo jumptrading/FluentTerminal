@@ -569,11 +569,11 @@ namespace FluentTerminal.SystemTray
             WebClient client = new WebClient();
             try
             {
-                string fileName = Path.GetTempPath() + Guid.NewGuid().ToString() + ".msi";
-                client.DownloadFile(url, fileName);
+                //string fileName = Path.GetTempPath() + Guid.NewGuid().ToString() + ".msi";
+                //client.DownloadFile(url, fileName);
                 Process process = new Process();
                 process.StartInfo.FileName = "msiexec.exe";
-                process.StartInfo.Arguments = $"/i \"{fileName}\"";
+                process.StartInfo.Arguments = $"/i \"{url}\"";
                 process.Start();
             }
             catch (Exception) { }
