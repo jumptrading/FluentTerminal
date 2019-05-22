@@ -55,60 +55,74 @@ namespace FluentTerminal.App.Services.Implementation
             _settingsService = settingsService;
         }
 
-        private async void StartDownload(string version, string url)
+        private async Task<string> DownloadInstaller(string version, string url)
         {
             try
             {
                 string tempFilePath = Path.GetTempFileName();
                 WebClient webClient = new WebClient();
+
+                _notificationService.ShowNotification("New version download is started", $"Installer for version {version} will be downloaded.");
+
                 await webClient.DownloadFileTaskAsync(url, tempFilePath);
+
                 _settingsService.SaveAutoUpdateData(version, tempFilePath);
+
+                _notificationService.ShowNotification("Download successful", $"Installer for version {version} was downloaded.");
+
+                return tempFilePath;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                //LogException("Download Error", ex);
+                Logger.Instance.Error($"Download error for version {version} {url}");
+                return string.Empty;
             }
         }
 
-        public async Task CheckForUpdate(bool notifyNoUpdate = false)
+        private void runInstaller(string version, string msiPath)
+        {
+            _notificationService.ShowNotification("Update is started", $"Version {version} will be installed.");
+
+            _trayProcessCommunicationService.RunMSI(msiPath);
+        }
+
+        public async Task CheckForUpdate(bool runUpdate = false)
         {
             try
             {
                 ApplicationVersionUpgradeData updateData = _settingsService.GetAutoUpdateData();
                 Version downloaded = updateData.Version;
-                Version current = new Version("0.0.0.0"); // GetCurrentVersion();
+                Version current = GetCurrentVersion();
                 Version latest = await GetLatestVersionAsync();
 
                 if (downloaded > current && downloaded >= latest)
                 {
-                    _notificationService.ShowNotification("Update will be installed", "Installation of new application version is started.");
-
-                    _trayProcessCommunicationService.RunMSI(updateData.Path);
+                    if (runUpdate)
+                    {
+                        runInstaller(downloaded.ToString(4), updateData.Path);
+                    }
                 }
                 else if (latest > current)
                 {
-                    _notificationService.ShowNotification("Update available",
-                        "Click to open the releases page.", "https://github.com/jumptrading/FluentTerminal/releases");
-
                     var installerFileUrl = await GetInstallerURL(latest.ToString(4));
                     if (!string.IsNullOrEmpty(installerFileUrl))
                     {
-                        DialogButton result = await _dialogService.ShowMessageDialogAsnyc("Update is available.", "Application update will be downloaded and installed on next application launch. Press OK to start the download.", new DialogButton[] { DialogButton.OK, DialogButton.Cancel }).ConfigureAwait(true);
+                        DialogButton result = _settingsService.GetApplicationSettings().AutoInstallUpdates ? DialogButton.OK :
+                            await _dialogService.ShowMessageDialogAsnyc($"New application build {latest} is available.",
+                            "Application update will be downloaded and installed on next application launch. Press OK to start the download.",
+                            new DialogButton[] { DialogButton.OK, DialogButton.Cancel }).ConfigureAwait(true);
                         if (result == DialogButton.OK)
                         {
-                            StartDownload(latest.ToString(4), installerFileUrl);
+                            string installerFilePath = await DownloadInstaller(latest.ToString(4), installerFileUrl);
+                            if (runUpdate && string.IsNullOrEmpty(installerFilePath))
+                            {
+                                runInstaller(latest.ToString(4), installerFilePath);
+                            }
                         }
                     }
                 }
-                else if (notifyNoUpdate)
-                {
-                    _notificationService.ShowNotification("No update available", "You're up to date!");
-                }
             }
-            catch(Exception ex)
-            {
-
-            }
+            catch (Exception) { }
         }
 
         public Version GetCurrentVersion()

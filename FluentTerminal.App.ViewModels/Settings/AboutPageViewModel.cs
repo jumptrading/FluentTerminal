@@ -20,7 +20,7 @@ namespace FluentTerminal.App.ViewModels.Settings
             _updateService = updateService;
             _applicationView = applicationView;
 
-            CheckForUpdatesCommand = new AsyncCommand(() => CheckForUpdate(true));
+            CheckForUpdatesCommand = new AsyncCommand(() => CheckForUpdate(false));
         }
 
         public IAsyncCommand CheckForUpdatesCommand { get; }

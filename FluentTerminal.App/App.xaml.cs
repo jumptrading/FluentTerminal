@@ -354,7 +354,7 @@ namespace FluentTerminal.App
                 await CreateMainView(typeof(MainPage), viewModel, true).ConfigureAwait(true);
                 Window.Current.Activate();
 
-                _updateService.CheckForUpdate();
+                _updateService.CheckForUpdate(true);
             }
             else if (_mainViewModels.Count == 0)
             {
