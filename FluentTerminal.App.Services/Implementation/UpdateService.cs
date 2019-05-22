@@ -5,12 +5,8 @@ using RestSharp;
 using System.Threading.Tasks;
 using System.Collections;
 using System.Linq;
-using Windows.Networking.BackgroundTransfer;
-using Windows.Storage;
 using System.Net;
 using System.IO;
-using System.Collections.Generic;
-using System.Diagnostics;
 using FluentTerminal.Models;
 
 namespace FluentTerminal.App.Services.Implementation
