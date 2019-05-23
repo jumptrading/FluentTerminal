@@ -70,6 +70,7 @@ namespace FluentTerminal.App.Services.Implementation
             }
             catch (Exception)
             {
+                _notificationService.ShowNotification("Download failed", $"Download failed for installer of version {version}.");
                 Logger.Instance.Error($"Download error for version {version} {url}");
                 return string.Empty;
             }
@@ -110,7 +111,7 @@ namespace FluentTerminal.App.Services.Implementation
                         if (result == DialogButton.OK)
                         {
                             string installerFilePath = await DownloadInstaller(latest.ToString(4), installerFileUrl);
-                            if (runUpdate && string.IsNullOrEmpty(installerFilePath))
+                            if (runUpdate && !string.IsNullOrEmpty(installerFilePath))
                             {
                                 runInstaller(latest.ToString(4), installerFilePath);
                             }
