@@ -34,6 +34,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using FluentTerminal.App.Utilities;
 using IContainer = Autofac.IContainer;
+using System.Threading;
 
 namespace FluentTerminal.App
 {
@@ -55,6 +56,7 @@ namespace FluentTerminal.App
         private IAppServiceConnection _appServiceConnection;
         private BackgroundTaskDeferral _appServiceDeferral;
         private Parser _commandLineParser;
+        private CancellationTokenSource _tokenSource = new CancellationTokenSource();
         private int? _activeWindowId;
 
         public App()
@@ -354,7 +356,7 @@ namespace FluentTerminal.App
                 await CreateMainView(typeof(MainPage), viewModel, true).ConfigureAwait(true);
                 Window.Current.Activate();
 
-                _updateService.CheckForUpdate(true);
+                _ = PeriodicUpdateCheckAsync(new TimeSpan(Constants.CheckForUpdateHoursInterval, 0, 0), _tokenSource.Token);
             }
             else if (_mainViewModels.Count == 0)
             {
@@ -608,6 +610,17 @@ namespace FluentTerminal.App
             var launch = FullTrustProcessLauncher.LaunchFullTrustProcessForCurrentAppAsync("AppLaunchedParameterGroup").AsTask();
             await Task.WhenAll(launch, _trayReady.Task).ConfigureAwait(true);
             _trayProcessCommunicationService.Initialize(_appServiceConnection);
+        }
+
+        private async Task PeriodicUpdateCheckAsync(TimeSpan interval, CancellationToken cancellationToken)
+        {
+            await _updateService.CheckForUpdate(true);
+
+            while (true)
+            {
+                await Task.Delay(interval, cancellationToken);
+                await _updateService.CheckForUpdate(false);
+            }
         }
     }
 }
