@@ -158,10 +158,10 @@ namespace FluentTerminal.SystemTray.Services
 
                 deferral.Complete();
             }
-            else if (messageType == nameof(ApplicationUpdateRequest))
+            else if (messageType == nameof(MSIRunRequest))
             {
-                ApplicationUpdateRequest request = JsonConvert.DeserializeObject<ApplicationUpdateRequest>(messageContent);
-                Utilities.RunApplicationUpdate(request.Url);
+                MSIRunRequest request = JsonConvert.DeserializeObject<MSIRunRequest>(messageContent);
+                Utilities.RunMSI(request.Path);
             }
         }
 

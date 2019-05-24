@@ -39,5 +39,7 @@ namespace FluentTerminal.App.Services
         ShellProfile GetShellProfile(Guid id);
         string ExportSettings();
         void ImportSettings(string serializedSettings);
+        void SaveAutoUpdateData(string version, string path);
+        ApplicationVersionUpgradeData GetAutoUpdateData();
     }
 }

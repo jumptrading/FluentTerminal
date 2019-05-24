@@ -5,6 +5,9 @@ using RestSharp;
 using System.Threading.Tasks;
 using System.Collections;
 using System.Linq;
+using System.Net;
+using System.IO;
+using FluentTerminal.Models;
 
 namespace FluentTerminal.App.Services.Implementation
 {
@@ -15,6 +18,7 @@ namespace FluentTerminal.App.Services.Implementation
         private readonly INotificationService _notificationService;
         private readonly IDialogService _dialogService;
         private readonly ITrayProcessCommunicationService _trayProcessCommunicationService;
+        private readonly ISettingsService _settingsService;
 
         private async Task<IRestResponse> SendGitHubAPIRequest(string request)
         {
@@ -39,35 +43,83 @@ namespace FluentTerminal.App.Services.Implementation
             return "";
         }
 
-        public UpdateService(INotificationService notificationService, IDialogService dialogService, ITrayProcessCommunicationService trayProcessCommunicationService)
+        public UpdateService(INotificationService notificationService, IDialogService dialogService, ITrayProcessCommunicationService trayProcessCommunicationService, ISettingsService settingsService)
         {
             _notificationService = notificationService;
             _dialogService = dialogService;
             _trayProcessCommunicationService = trayProcessCommunicationService;
+            _settingsService = settingsService;
         }
 
-        public async Task CheckForUpdate(bool notifyNoUpdate = false)
+        private async Task<string> DownloadInstaller(string version, string url)
         {
-            var latest = await GetLatestVersionAsync();
-            if (latest > GetCurrentVersion())
+            try
             {
-                _notificationService.ShowNotification("Update available",
-                    "Click to open the releases page.", "https://github.com/jumptrading/FluentTerminal/releases");
+                string tempFilePath = Path.GetTempFileName();
+                WebClient webClient = new WebClient();
 
-                var installerFileUrl = await GetInstallerURL(latest.ToString(4));
-                if (!string.IsNullOrEmpty(installerFileUrl))
+                _notificationService.ShowNotification("New version download is started", $"Installer for version {version} will be downloaded.");
+
+                await webClient.DownloadFileTaskAsync(url, tempFilePath);
+
+                _settingsService.SaveAutoUpdateData(version, tempFilePath);
+
+                _notificationService.ShowNotification("Download successful", $"Installer for version {version} was downloaded.");
+
+                return tempFilePath;
+            }
+            catch (Exception)
+            {
+                _notificationService.ShowNotification("Download failed", $"Download failed for installer of version {version}.");
+                Logger.Instance.Error($"Download error for version {version} {url}");
+                return string.Empty;
+            }
+        }
+
+        private void runInstaller(string version, string msiPath)
+        {
+            _notificationService.ShowNotification("Update is started", $"Version {version} will be installed.");
+
+            _trayProcessCommunicationService.RunMSI(msiPath);
+        }
+
+        public async Task CheckForUpdate(bool runUpdate = false)
+        {
+            try
+            {
+                ApplicationVersionUpgradeData updateData = _settingsService.GetAutoUpdateData();
+                Version downloaded = updateData.Version;
+                Version current = GetCurrentVersion();
+                Version latest = await GetLatestVersionAsync();
+
+                if (downloaded > current && downloaded >= latest)
                 {
-                    DialogButton result = await _dialogService.ShowMessageDialogAsnyc("Update is available.", "Application will be closed during update. Press OK to start the update.", new DialogButton[] { DialogButton.OK, DialogButton.Cancel });
-                    if (result == DialogButton.OK)
+                    if (runUpdate)
                     {
-                        _trayProcessCommunicationService.StartApplicationUpdate(installerFileUrl);
+                        runInstaller(downloaded.ToString(4), updateData.Path);
+                    }
+                }
+                else if (latest > current)
+                {
+                    var installerFileUrl = await GetInstallerURL(latest.ToString(4));
+                    if (!string.IsNullOrEmpty(installerFileUrl))
+                    {
+                        DialogButton result = _settingsService.GetApplicationSettings().AutoInstallUpdates ? DialogButton.OK :
+                            await _dialogService.ShowMessageDialogAsnyc($"New application build {latest} is available.",
+                            "Application update will be downloaded and installed on next application launch. Press OK to start the download.",
+                            new DialogButton[] { DialogButton.OK, DialogButton.Cancel }).ConfigureAwait(true);
+                        if (result == DialogButton.OK)
+                        {
+                            string installerFilePath = await DownloadInstaller(latest.ToString(4), installerFileUrl);
+                            if (runUpdate && !string.IsNullOrEmpty(installerFilePath))
+                            {
+                                runInstaller(latest.ToString(4), installerFilePath);
+                            }
+                        }
                     }
                 }
             }
-            else if (notifyNoUpdate)
-            {
-                _notificationService.ShowNotification("No update available", "You're up to date!");
-            }
+            catch (Exception) { }
         }
 
         public Version GetCurrentVersion()

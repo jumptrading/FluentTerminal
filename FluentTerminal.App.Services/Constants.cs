@@ -5,5 +5,7 @@
         public const string ThemesContainerName = "Themes";
         public const string KeyBindingsContainerName = "KeyBindings";
         public const string ShellProfilesContainerName = "ShellProfiles";
+        public const string AutoUpdateContainerName = "AutoUpdate";
+        public const int CheckForUpdateHoursInterval = 24;
     }
 }

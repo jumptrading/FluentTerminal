@@ -31,6 +31,6 @@ namespace FluentTerminal.App.Services
 
         Task SaveTextFileAsync(string path, string content);
 
-        void StartApplicationUpdate(string url);
+        void RunMSI(string url);
     }
 }
