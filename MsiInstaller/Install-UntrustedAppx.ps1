@@ -1,5 +1,6 @@
 ﻿param(
     [string]$packageName = $null,
+    [string]$installedPackageName = $null,
     [switch]$InstallCert,
     [switch]$EnableSideLoad
 )
@@ -80,4 +81,6 @@ else{
     {
     	Add-AppxPackage -Path "$PSScriptRoot\$packageName.appxbundle" -ForceApplicationShutdown -Verbose
     }
+    # Start installed uwp package
+    explorer.exe shell:AppsFolder\$(get-appxpackage -name $installedPackageName | select -expandproperty PackageFamilyName)!App
 }
