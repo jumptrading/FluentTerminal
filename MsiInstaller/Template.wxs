@@ -34,12 +34,12 @@
     <SetProperty Id="InstallAppx" Before="InstallFiles" Sequence="execute" Value ="&quot;C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe&quot; -ExecutionPolicy Bypass -File &quot;[INSTALLDIR]Install-UntrustedAppx.ps1&quot; FluentTerminal.App" />
     <CustomAction Id="InstallAppx" BinaryKey="WixCA" DllEntry="WixQuietExec64" Execute="deferred" Return="check" Impersonate="yes" />
 
-    <SetProperty Id="UninstallAppx" Before="InstallFiles" Sequence="execute" Value ="&quot;powershell.exe&quot; -ExecutionPolicy Bypass -File &quot;[INSTALLDIR]Uninstall-UntrustedAppx.ps1&quot; FluentTerminal.App" />
+    <SetProperty Id="UninstallAppx" Before="InstallFiles" Sequence="execute" Value ="&quot;powershell.exe&quot; -ExecutionPolicy Bypass -File &quot;[INSTALLDIR]Uninstall-UntrustedAppx.ps1&quot; 53621FSApps.FluentTerminal" />
     <CustomAction Id="UninstallAppx" BinaryKey="WixCA" DllEntry="WixQuietExec64" Execute="deferred" Return="check" Impersonate="yes" />
 
     <InstallExecuteSequence>
       <Custom Action='InstallAppx' After='InstallFiles'>NOT REMOVE</Custom>
-      <Custom Action='UninstallAppx' After='InstallFiles'>REMOVE~=ALL</Custom>
+      <Custom Action='UninstallAppx' After='InstallFiles'>REMOVE="ALL" AND NOT UPGRADINGPRODUCTCODE</Custom>
     </InstallExecuteSequence>
 
   </Product>
