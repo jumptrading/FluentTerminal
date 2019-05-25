@@ -1,11 +1,11 @@
 ﻿param(
-    [string]$packageName = $null
+    [string]$installedPackageName = $null
 )
 
-$PackageFullName = (Get-AppxPackage $packageName).PackageFullName
+$PackageFullName = (Get-AppxPackage $installedPackageName).PackageFullName
 if ($PackageFullName) {
-    Write-Host "Removing package: $packageName"
+    Write-Host "Removing package: $installedPackageName"
     Remove-AppxPackage -package $PackageFullName
 } else {
-    Write-Host "Can't find package: $packageName"
+    Write-Host "Can't find package: $installedPackageName"
 }
