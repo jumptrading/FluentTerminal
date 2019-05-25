@@ -83,10 +83,19 @@ namespace FluentTerminal.App.Services.Implementation
             _trayProcessCommunicationService.RunMSI(msiPath);
         }
 
+        private async Task<DialogButton> PromptStartUpdate(Version newVersion)
+        {
+            return await _dialogService.ShowMessageDialogAsnyc($"New application build {newVersion} is available.",
+                            "Update will be downloaded and installed immediately. All terminal sessions will be closed with potential risk to lose important sessions' data. Press OK to start the update.",
+                            new DialogButton[] { DialogButton.OK, DialogButton.Cancel }).ConfigureAwait(true);
+        }
+
         public async Task CheckForUpdate(bool runUpdate = false)
         {
             try
             {
+                bool autoUpdatesAllowed = _settingsService.GetApplicationSettings().AutoInstallUpdates;
+                bool canRunInstaller = runUpdate || !autoUpdatesAllowed;
                 ApplicationVersionUpgradeData updateData = _settingsService.GetAutoUpdateData();
                 Version downloaded = updateData.Version;
                 Version current = GetCurrentVersion();
@@ -94,7 +103,8 @@ namespace FluentTerminal.App.Services.Implementation
 
                 if (downloaded > current && downloaded >= latest)
                 {
-                    if (runUpdate)
+                    DialogButton result = autoUpdatesAllowed ? DialogButton.OK : await PromptStartUpdate(latest);
+                    if (result == DialogButton.OK && canRunInstaller)
                     {
                         runInstaller(downloaded.ToString(4), updateData.Path);
                     }
@@ -104,14 +114,11 @@ namespace FluentTerminal.App.Services.Implementation
                     var installerFileUrl = await GetInstallerURL(latest.ToString(4));
                     if (!string.IsNullOrEmpty(installerFileUrl))
                     {
-                        DialogButton result = _settingsService.GetApplicationSettings().AutoInstallUpdates ? DialogButton.OK :
-                            await _dialogService.ShowMessageDialogAsnyc($"New application build {latest} is available.",
-                            "Application update will be downloaded and installed on next application launch. Press OK to start the download.",
-                            new DialogButton[] { DialogButton.OK, DialogButton.Cancel }).ConfigureAwait(true);
+                        DialogButton result = autoUpdatesAllowed ? DialogButton.OK : await PromptStartUpdate(latest);
                         if (result == DialogButton.OK)
                         {
                             string installerFilePath = await DownloadInstaller(latest.ToString(4), installerFileUrl);
-                            if (runUpdate && !string.IsNullOrEmpty(installerFilePath))
+                            if (canRunInstaller && !string.IsNullOrEmpty(installerFilePath))
                             {
                                 runInstaller(latest.ToString(4), installerFilePath);
                             }
