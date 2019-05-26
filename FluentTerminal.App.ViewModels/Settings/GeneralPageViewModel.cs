@@ -1,6 +1,5 @@
 ﻿using FluentTerminal.App.Services;
 using FluentTerminal.App.Services.Utilities;
-using FluentTerminal.App.ViewModels.Infrastructure;
 using FluentTerminal.Models;
 using FluentTerminal.Models.Enums;
 using GalaSoft.MvvmLight;
@@ -18,9 +17,6 @@ namespace FluentTerminal.App.ViewModels.Settings
         private readonly ISettingsService _settingsService;
         private readonly IStartupTaskService _startupTaskService;
         private bool _canEnableStartupTask;
-        private bool _editingNewTerminalLocation;
-        private bool _editingTabsPosition;
-        private bool _editingInactiveTabColorMode;
         private bool _startupTaskEnabled;
         private bool _shouldRestartForTrayMessage;
         private string _startupTaskErrorMessage;
@@ -147,7 +143,7 @@ namespace FluentTerminal.App.ViewModels.Settings
         public bool BottomIsSelected
         {
             get => TabsPosition == TabsPosition.Bottom;
-            set => TabsPosition = TabsPosition.Bottom;
+            set { if (value) TabsPosition = TabsPosition.Bottom; }
         }
 
         public bool CanEnableStartupTask
@@ -189,15 +185,11 @@ namespace FluentTerminal.App.ViewModels.Settings
             get => _applicationSettings.NewTerminalLocation;
             set
             {
-                if (_applicationSettings.NewTerminalLocation != value && !_editingNewTerminalLocation)
+                if (_applicationSettings.NewTerminalLocation != value)
                 {
-                    _editingNewTerminalLocation = true;
                     _applicationSettings.NewTerminalLocation = value;
                     _settingsService.SaveApplicationSettings(_applicationSettings);
                     RaisePropertyChanged();
-                    RaisePropertyChanged(nameof(WindowIsSelected));
-                    RaisePropertyChanged(nameof(TabIsSelected));
-                    _editingNewTerminalLocation = false;
                 }
             }
         }
@@ -227,7 +219,7 @@ namespace FluentTerminal.App.ViewModels.Settings
         public bool TabIsSelected
         {
             get => NewTerminalLocation == NewTerminalLocation.Tab;
-            set => NewTerminalLocation = NewTerminalLocation.Tab;
+            set { if (value) NewTerminalLocation = NewTerminalLocation.Tab; }
         }
 
         public TabsPosition TabsPosition
@@ -235,15 +227,11 @@ namespace FluentTerminal.App.ViewModels.Settings
             get => _applicationSettings.TabsPosition;
             set
             {
-                if (_applicationSettings.TabsPosition != value && !_editingTabsPosition)
+                if (_applicationSettings.TabsPosition != value)
                 {
-                    _editingTabsPosition = true;
                     _applicationSettings.TabsPosition = value;
                     _settingsService.SaveApplicationSettings(_applicationSettings);
                     RaisePropertyChanged();
-                    RaisePropertyChanged(nameof(TopIsSelected));
-                    RaisePropertyChanged(nameof(BottomIsSelected));
-                    _editingTabsPosition = false;
                 }
             }
         }
@@ -251,7 +239,7 @@ namespace FluentTerminal.App.ViewModels.Settings
         public bool TopIsSelected
         {
             get => TabsPosition == TabsPosition.Top;
-            set => TabsPosition = TabsPosition.Top;
+            set { if (value) TabsPosition = TabsPosition.Top; }
         }
 
         public bool UnderlineSelectedTab
@@ -271,13 +259,13 @@ namespace FluentTerminal.App.ViewModels.Settings
         public bool BackgroundIsSelected
         {
             get => InactiveTabColorMode == InactiveTabColorMode.Background;
-            set => InactiveTabColorMode = InactiveTabColorMode.Background;
+            set { if (value) InactiveTabColorMode = InactiveTabColorMode.Background; }
         }
 
         public bool UnderlinedIsSelected
         {
             get => InactiveTabColorMode == InactiveTabColorMode.Underlined;
-            set => InactiveTabColorMode = InactiveTabColorMode.Underlined;
+            set { if (value) InactiveTabColorMode = InactiveTabColorMode.Underlined; }
         }
 
         public InactiveTabColorMode InactiveTabColorMode
@@ -285,15 +273,11 @@ namespace FluentTerminal.App.ViewModels.Settings
             get => _applicationSettings.InactiveTabColorMode;
             set
             {
-                if (_applicationSettings.InactiveTabColorMode != value && !_editingInactiveTabColorMode)
+                if (_applicationSettings.InactiveTabColorMode != value)
                 {
-                    _editingInactiveTabColorMode = true;
                     _applicationSettings.InactiveTabColorMode = value;
                     _settingsService.SaveApplicationSettings(_applicationSettings);
                     RaisePropertyChanged();
-                    RaisePropertyChanged(nameof(BackgroundIsSelected));
-                    RaisePropertyChanged(nameof(UnderlinedIsSelected));
-                    _editingInactiveTabColorMode = false;
                 }
             }
         }
@@ -301,7 +285,7 @@ namespace FluentTerminal.App.ViewModels.Settings
         public bool WindowIsSelected
         {
             get => NewTerminalLocation == NewTerminalLocation.Window;
-            set => NewTerminalLocation = NewTerminalLocation.Window;
+            set { if (value) NewTerminalLocation = NewTerminalLocation.Window; }
         }
 
         private async Task RestoreDefaults()
@@ -363,7 +347,7 @@ namespace FluentTerminal.App.ViewModels.Settings
             }
             else
             {
-                _startupTaskService.DisableStartupTask();
+                await _startupTaskService.DisableStartupTask();
                 status = await _startupTaskService.GetStatus();
             }
             SetStartupTaskPropertiesForStatus(status);
