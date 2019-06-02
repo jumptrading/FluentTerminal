@@ -66,7 +66,7 @@ namespace FluentTerminal.App.Services
 
         public string FallbackTitle { get; private set; }
 
-        public int Id { get; }
+        public byte Id { get; }
 
         /// <summary>
         /// To be called by either view or viewmodel
