@@ -7,5 +7,7 @@
         public const string ShellProfilesContainerName = "ShellProfiles";
         public const string AutoUpdateContainerName = "AutoUpdate";
         public const int CheckForUpdateHoursInterval = 24;
+
+        public const byte TerminalBufferRequestIdentifier = 0;
     }
 }
