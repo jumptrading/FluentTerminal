@@ -13,6 +13,8 @@ using FluentTerminal.App.Services;
 using FluentTerminal.App.ViewModels;
 using FluentTerminal.App.Services.Utilities;
 using FluentTerminal.Models.Enums;
+using FluentTerminal.Models;
+using System.Collections.ObjectModel;
 
 namespace FluentTerminal.App.Dialogs
 {
@@ -31,6 +33,11 @@ URL={0}
 
         public IEnumerable<LineEndingStyle> LineEndingStyles { get; } = (LineEndingStyle[])Enum.GetValues(typeof(LineEndingStyle));
 
+        public ObservableCollection<TabTheme> TabThemes { get; }
+
+        public ObservableCollection<TerminalTheme> TerminalThemes { get; }
+
+
         public SshInfoDialog(ISettingsService settingsService, ISshHelperService sshHelperService,
             ITrayProcessCommunicationService trayProcessCommunicationService)
         {
@@ -41,11 +48,28 @@ URL={0}
             SecondaryButtonText = I18N.Translate("Cancel");
             var currentTheme = settingsService.GetCurrentTheme();
             RequestedTheme = ContrastHelper.GetIdealThemeForBackgroundColor(currentTheme.Colors.Background);
+
+            TabThemes = new ObservableCollection<TabTheme>(settingsService.GetTabThemes());
+
+            TerminalThemes = new ObservableCollection<TerminalTheme>
+            {
+                new TerminalTheme
+                {
+                    Id = Guid.Empty,
+                    Name = "Default"
+                }
+            };
+            foreach (var theme in settingsService.GetThemes())
+            {
+                TerminalThemes.Add(theme);
+            }
+
+
         }
 
         private void SetupFocus()
         {
-            SshConnectionInfoViewModel vm = (SshConnectionInfoViewModel)DataContext;
+            SshProfileViewModel vm = (SshProfileViewModel)DataContext;
 
             if (string.IsNullOrEmpty(vm.Username))
             {
@@ -63,7 +87,7 @@ URL={0}
 
         private async void OnLoading(FrameworkElement sender, object args)
         {
-            SshConnectionInfoViewModel vm = (SshConnectionInfoViewModel)DataContext;
+            SshProfileViewModel vm = (SshProfileViewModel)DataContext;
 
             if (!string.IsNullOrEmpty(vm.Username))
                 return;
@@ -82,19 +106,19 @@ URL={0}
             StorageFile file = await openPicker.PickSingleFileAsync();
             if (file != null)
             {
-                ((SshConnectionInfoViewModel)DataContext).IdentityFile = file.Path;
+                ((SshProfileViewModel)DataContext).IdentityFile = file.Path;
             }
         }
 
         private async void SaveLink_OnClick(object sender, RoutedEventArgs e)
         {
-            SshConnectionInfoViewModel vm = (SshConnectionInfoViewModel) DataContext;
+            SshProfileViewModel vm = (SshProfileViewModel) DataContext;
 
             var validationResult = vm.Validate(true);
 
             if (validationResult != SshConnectionInfoValidationResult.Valid)
             {
-                await new MessageDialog(I18N.Translate($"{nameof(SshConnectionInfoValidationResult)}.{validationResult}"), I18N.Translate("InvalidInput")).ShowAsync();
+                await new MessageDialog(validationResult.GetErrorString(Environment.NewLine), I18N.Translate("InvalidInput")).ShowAsync();
                 return;
             }
 
@@ -124,39 +148,27 @@ URL={0}
 
         private async void SshInfoDialog_OnPrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
-            SshConnectionInfoViewModel vm = (SshConnectionInfoViewModel)DataContext;
+            var result = ((ISshConnectionInfo) DataContext).Validate();
 
-            if (string.IsNullOrEmpty(vm.Username) || string.IsNullOrEmpty(vm.Host))
+            if (result != SshConnectionInfoValidationResult.Valid)
             {
                 args.Cancel = true;
-                await new MessageDialog(I18N.Translate("UserAndHostMandatory"), I18N.Translate("InvalidInput")).ShowAsync();
-                SetupFocus();
-                return;
-            }
 
-            if (vm.SshPort == 0)
-            {
-                args.Cancel = true;
-                await new MessageDialog(I18N.Translate("PortCannotBeZero"), I18N.Translate("InvalidInput")).ShowAsync();
-                SetupFocus();
-                return;
-            }
+                await new MessageDialog(result.GetErrorString(Environment.NewLine), I18N.Translate("InvalidInput")).ShowAsync();
 
-            args.Cancel = false;
+                SetupFocus();
+            }
         }
 
         private void Port_OnBeforeTextChanging(TextBox sender, TextBoxBeforeTextChangingEventArgs args) =>
             args.Cancel = string.IsNullOrEmpty(args.NewText) || args.NewText.Any(c => !char.IsDigit(c));
 
-        public async Task<ISshConnectionInfo> GetSshConnectionInfoAsync(ISshConnectionInfo input = null)
+        public async Task<ISshConnectionInfo> GetSshConnectionInfoAsync(ISshConnectionInfo input)
         {
-            if (input != null)
-            {
-                DataContext = ((SshConnectionInfoViewModel)input).Clone();
-            }
+            DataContext = input;
 
-            this.Focus(FocusState.Programmatic);
-            return await ShowAsync() == ContentDialogResult.Primary ? (SshConnectionInfoViewModel) DataContext : null;
+            Focus(FocusState.Programmatic);
+            return await ShowAsync() == ContentDialogResult.Primary ? (SshProfileViewModel) DataContext : null;
         }
     }
 }

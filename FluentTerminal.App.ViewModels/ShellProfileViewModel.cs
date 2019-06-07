@@ -319,7 +319,7 @@ namespace FluentTerminal.App.ViewModels
                     KeyBindings = KeyBindings.KeyBindings.Select(x => x.Model).ToList()
                 };
 
-                if (!_fallbackProfile.Equals(changedProfile))
+                if (!_fallbackProfile.EqualTo(changedProfile))
                 {
                     var result = await _dialogService.ShowMessageDialogAsnyc(I18N.Translate("PleaseConfirm"), I18N.Translate("ConfirmDiscardChanges"), DialogButton.OK, DialogButton.Cancel).ConfigureAwait(true);
 
