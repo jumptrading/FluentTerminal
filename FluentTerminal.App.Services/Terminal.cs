@@ -34,7 +34,6 @@ namespace FluentTerminal.App.Services
             {
                 Closed?.Invoke(this, System.EventArgs.Empty);
             }
-            _exited = true;
         }
 
         public event EventHandler<int> Exited;

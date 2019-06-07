@@ -44,7 +44,7 @@ namespace FluentTerminal.App
         private readonly TaskCompletionSource<int> _trayReady = new TaskCompletionSource<int>();
         private readonly ISettingsService _settingsService;
         private readonly ITrayProcessCommunicationService _trayProcessCommunicationService;
-        private readonly ISshHelperService _sshHelperService;
+        private readonly Lazy<ISshHelperService> _sshHelperService;
         private readonly IDialogService _dialogService;
         private readonly IUpdateService _updateService;
         private bool _alreadyLaunched;
@@ -75,6 +75,7 @@ namespace FluentTerminal.App
                 KeyBindings = new ApplicationDataContainerAdapter(ApplicationData.Current.RoamingSettings.CreateContainer(Constants.KeyBindingsContainerName, ApplicationDataCreateDisposition.Always)),
                 ShellProfiles = new ApplicationDataContainerAdapter(ApplicationData.Current.LocalSettings.CreateContainer(Constants.ShellProfilesContainerName, ApplicationDataCreateDisposition.Always)),
                 Themes = new ApplicationDataContainerAdapter(ApplicationData.Current.RoamingSettings.CreateContainer(Constants.ThemesContainerName, ApplicationDataCreateDisposition.Always)),
+                SshProfiles = new ApplicationDataContainerAdapter(ApplicationData.Current.RoamingSettings.CreateContainer(Constants.SshProfilesContainerName, ApplicationDataCreateDisposition.Always)),
                 AutoUpdate = new ApplicationDataContainerAdapter(ApplicationData.Current.RoamingSettings.CreateContainer(Constants.AutoUpdateContainerName, ApplicationDataCreateDisposition.Always))
             };
             var builder = new ContainerBuilder();
@@ -94,6 +95,7 @@ namespace FluentTerminal.App
             builder.RegisterType<FileSystemService>().As<IFileSystemService>().SingleInstance();
             builder.RegisterType<SystemFontService>().As<ISystemFontService>().SingleInstance();
             builder.RegisterType<ShellProfileSelectionDialog>().As<IShellProfileSelectionDialog>().InstancePerDependency();
+            builder.RegisterType<SshProfileSelectionDialog>().As<ISshProfileSelectionDialog>().InstancePerDependency();
             builder.RegisterType<CreateKeyBindingDialog>().As<ICreateKeyBindingDialog>().InstancePerDependency();
             builder.RegisterType<InputDialog>().As<IInputDialog>().InstancePerDependency();
             builder.RegisterType<MessageDialogAdapter>().As<IMessageDialog>().InstancePerDependency();
@@ -112,7 +114,7 @@ namespace FluentTerminal.App
 
             _trayProcessCommunicationService = _container.Resolve<ITrayProcessCommunicationService>();
 
-            _sshHelperService = _container.Resolve<ISshHelperService>();
+            _sshHelperService = new Lazy<ISshHelperService>(() => _container.Resolve<ISshHelperService>());
 
             _updateService = _container.Resolve<IUpdateService>();
 
@@ -186,7 +188,7 @@ namespace FluentTerminal.App
 
                 try
                 {
-                    isSsh = _sshHelperService.IsSsh(protocolActivated.Uri);
+                    isSsh = _sshHelperService.Value.IsSsh(protocolActivated.Uri);
                 }
                 catch (Exception ex)
                 {
@@ -199,11 +201,11 @@ namespace FluentTerminal.App
 
                 if (isSsh)
                 {
-                    ISshConnectionInfo connectionInfo;
+                    SshProfile connectionInfo;
 
                     try
                     {
-                        connectionInfo = _sshHelperService.ParseSsh(protocolActivated.Uri);
+                        connectionInfo = (SshProfile) _sshHelperService.Value.ParseSsh(protocolActivated.Uri);
                     }
                     catch (Exception ex)
                     {
@@ -220,8 +222,7 @@ namespace FluentTerminal.App
                     {
                         // Link is valid, but incomplete (i.e. username missing), so we need to show dialog.
                         connectionInfo =
-                            (SshConnectionInfoViewModel)await _dialogService.ShowSshConnectionInfoDialogAsync(
-                                connectionInfo);
+                            (SshProfile) await _dialogService.ShowSshConnectionInfoDialogAsync(connectionInfo);
 
                         if (connectionInfo == null)
                         {
@@ -232,12 +233,10 @@ namespace FluentTerminal.App
                         }
                     }
 
-                    ShellProfile profile = _sshHelperService.CreateShellProfile(connectionInfo);
-
                     if (mainViewModel == null)
-                        await CreateTerminal(profile, _applicationSettings.NewTerminalLocation);
+                        await CreateTerminal(connectionInfo, _applicationSettings.NewTerminalLocation);
                     else
-                        mainViewModel.AddTerminal(profile);
+                        await mainViewModel.AddTerminalAsync(connectionInfo);
 
                     return;
                 }
@@ -354,11 +353,11 @@ namespace FluentTerminal.App
                 var viewModel = _container.Resolve<MainViewModel>();
                 if (args.Arguments.StartsWith(JumpListHelper.ShellProfileFlag))
                 {
-                    viewModel.AddTerminal(Guid.Parse(args.Arguments.Replace(JumpListHelper.ShellProfileFlag, string.Empty)));
+                    await viewModel.AddTerminalAsync(Guid.Parse(args.Arguments.Replace(JumpListHelper.ShellProfileFlag, string.Empty)));
                 }
                 else
                 {
-                    viewModel.AddTerminal();
+                    await viewModel.AddTerminalAsync();
                 }
                 await CreateMainView(typeof(MainPage), viewModel, true).ConfigureAwait(true);
                 Window.Current.Activate();
@@ -421,6 +420,7 @@ namespace FluentTerminal.App
             _appServiceDeferral = null;
             _appServiceConnection = null;
 
+            // ReSharper disable once ArrangeStaticMemberQualifier
             Application.Current.Exit();
         }
 
@@ -532,15 +532,48 @@ namespace FluentTerminal.App
 
         private async void OnNewWindowRequested(object sender, NewWindowRequestedEventArgs e)
         {
+            ShellProfile profile = null;
+
+            if (e.ShowSelection == ProfileSelection.ShowProfileSelection)
+            {
+                profile = await _dialogService.ShowProfileSelectionDialogAsync();
+
+                if (profile == null)
+                {
+                    // Nothing to do if user cancels.
+                    return;
+                }
+            }
+            else if (e.ShowSelection == ProfileSelection.ShowSshProfileSelection)
+            {
+                profile = await _sshHelperService.Value.GetSavedSshProfileAsync();
+
+                if (profile == null)
+                {
+                    // Nothing to do if user cancels.
+                    return;
+                }
+            }
+            else if (e.ShowSelection == ProfileSelection.ShowNewSshTab)
+            {
+                profile = await _sshHelperService.Value.GetSshProfileAsync(new SshProfile());
+
+                if (profile == null)
+                {
+                    // Nothing to do if user cancels.
+                    return;
+                }
+            }
+
             var viewModel = await CreateNewTerminalWindow().ConfigureAwait(true);
 
-            if (e.ShowProfileSelection)
+            if (profile == null)
             {
-                await viewModel.AddConfigurableTerminal().ConfigureAwait(true);
+                await viewModel.AddTerminalAsync();
             }
             else
             {
-                viewModel.AddTerminal();
+                await viewModel.AddTerminalAsync(profile);
             }
         }
 
@@ -573,7 +606,7 @@ namespace FluentTerminal.App
             if (!_alreadyLaunched)
             {
                 var viewModel = _container.Resolve<MainViewModel>();
-                viewModel.AddTerminal(profile);
+                await viewModel.AddTerminalAsync(profile);
                 await CreateMainView(typeof(MainPage), viewModel, true).ConfigureAwait(true);
             }
             else if (location == NewTerminalLocation.Tab && _mainViewModels.Count > 0)
@@ -582,17 +615,17 @@ namespace FluentTerminal.App
                 MainViewModel item = _mainViewModels.FirstOrDefault(o => o.ApplicationView.Id == _activeWindowId);
                 if (item != null)
                 {
-                    item.AddTerminal(profile);
+                    await item.AddTerminalAsync(profile);
                 }
                 else
                 {
-                    _mainViewModels.Last().AddTerminal(profile);
+                    await _mainViewModels.Last().AddTerminalAsync(profile);
                 }
             }
             else
             {
                 var viewModel = await CreateNewTerminalWindow().ConfigureAwait(true);
-                viewModel.AddTerminal(profile);
+                await viewModel.AddTerminalAsync(profile);
             }
         }
 

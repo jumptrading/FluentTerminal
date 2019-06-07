@@ -13,6 +13,7 @@ namespace FluentTerminal.App.Services.Implementation
     {
         public const string CurrentThemeKey = "CurrentTheme";
         public const string DefaultShellProfileKey = "DefaultShellProfile";
+        public const string DefaultSshProfileKey = "DefaultSshProfile";
 
         private const string AutoUpdateVersionKey = "Version";
         private const string AutoUpdatePathKey = "Path";
@@ -24,6 +25,7 @@ namespace FluentTerminal.App.Services.Implementation
         private readonly IApplicationDataContainer _localSettings;
         private readonly IApplicationDataContainer _roamingSettings;
         private readonly IApplicationDataContainer _shellProfiles;
+        private readonly IApplicationDataContainer _sshProfiles;
         private readonly IApplicationDataContainer _themes;
         private readonly IApplicationDataContainer _autoUpdate;
 
@@ -36,6 +38,7 @@ namespace FluentTerminal.App.Services.Implementation
             _themes = containers.Themes;
             _keyBindings = containers.KeyBindings;
             _shellProfiles = containers.ShellProfiles;
+            _sshProfiles = containers.SshProfiles;
             _autoUpdate = containers.AutoUpdate;
 
             foreach (var theme in _defaultValueProvider.GetPreInstalledThemes())
@@ -63,7 +66,8 @@ namespace FluentTerminal.App.Services.Implementation
                 KeyBindings = GetCommandKeyBindings(),
                 TerminalOptions = GetTerminalOptions(),
                 Themes = new List<TerminalTheme>(),
-                Profiles = new List<ShellProfile>()
+                Profiles = new List<ShellProfile>(),
+                SshProfiles = new List<SshProfile>()
             };
 
             foreach (var theme in GetThemes().Where(x => !x.PreInstalled))
@@ -74,6 +78,11 @@ namespace FluentTerminal.App.Services.Implementation
             foreach (var profile in GetShellProfiles().Where(x => !x.PreInstalled))
             {
                 config.Profiles.Add(profile);
+            }
+
+            foreach (var profile in GetSshProfiles())
+            {
+                config.SshProfiles.Add(profile);
             }
 
             return JsonConvert.SerializeObject(config);
@@ -87,6 +96,7 @@ namespace FluentTerminal.App.Services.Implementation
                 KeyBindings = new Dictionary<string, ICollection<KeyBinding>>(),
                 Themes = new List<TerminalTheme>(),
                 Profiles = new List<ShellProfile>(),
+                SshProfiles = new List<SshProfile>(),
                 TerminalOptions = GetTerminalOptions()
             };
 
@@ -115,7 +125,7 @@ namespace FluentTerminal.App.Services.Implementation
             foreach (var profile in config.Profiles.Where(x => !x.PreInstalled))
             {
                 var existingProfile = GetShellProfile(profile.Id);
-                var isNew = existingProfile.Equals(default(ShellProfile));
+                var isNew = existingProfile.EqualTo(default(ShellProfile));
 
                 // You can only edit certain parts of preinstalled profiles
                 if (!isNew && existingProfile.PreInstalled)
@@ -132,6 +142,14 @@ namespace FluentTerminal.App.Services.Implementation
                 SaveShellProfile(profile, isNew);
             }
 
+            foreach (var profile in config.SshProfiles)
+            {
+                var existingProfile = GetSshProfile(profile.Id);
+                var isNew = existingProfile.EqualTo(default(SshProfile));
+
+                SaveSshProfile(profile, isNew);
+            }
+
             SaveTerminalOptions(config.TerminalOptions);
         }
 
@@ -146,6 +164,9 @@ namespace FluentTerminal.App.Services.Implementation
         public event EventHandler<ShellProfile> ShellProfileAdded;
         public event EventHandler<Guid> ShellProfileDeleted;
 
+        public event EventHandler<SshProfile> SshProfileAdded;
+        public event EventHandler<Guid> SshProfileDeleted;
+
         public event EventHandler<TerminalOptions> TerminalOptionsChanged;
 
         public void DeleteShellProfile(Guid id)
@@ -153,6 +174,14 @@ namespace FluentTerminal.App.Services.Implementation
             _shellProfiles.Delete(id.ToString());
             ShellProfileDeleted?.Invoke(this, id);
         }
+
+        public void DeleteSshProfile(Guid id)
+        {
+            _sshProfiles.Delete(id.ToString());
+            SshProfileDeleted?.Invoke(this, id);
+            KeyBindingsChanged?.Invoke(this, System.EventArgs.Empty);
+        }
+
 
         public void DeleteTheme(Guid id)
         {
@@ -209,10 +238,21 @@ namespace FluentTerminal.App.Services.Implementation
             }
             return profile;
         }
+        public SshProfile GetDefaultSshProfile()
+        {
+            var id = GetDefaultSshProfileId();
+            var profile = _sshProfiles.ReadValueFromJson(id.ToString(), default(SshProfile));
+
+            return profile;
+        }
 
         public ShellProfile GetShellProfile(Guid id)
         {
             return _shellProfiles.ReadValueFromJson(id.ToString(), default(ShellProfile));
+        }
+        public SshProfile GetSshProfile(Guid id)
+        {
+            return _sshProfiles.ReadValueFromJson(id.ToString(), default(SshProfile));
         }
 
         public Guid GetDefaultShellProfileId()
@@ -222,6 +262,14 @@ namespace FluentTerminal.App.Services.Implementation
                 return (Guid)value;
             }
             return _defaultValueProvider.GetDefaultShellProfileId();
+        }
+        public Guid GetDefaultSshProfileId()
+        {
+            if (_localSettings.TryGetValue(DefaultSshProfileKey, out object value))
+            {
+                return (Guid)value;
+            }
+            return System.Guid.Empty;
         }
 
         public IDictionary<string, ICollection<KeyBinding>> GetCommandKeyBindings()
@@ -238,6 +286,14 @@ namespace FluentTerminal.App.Services.Implementation
         public IEnumerable<ShellProfile> GetShellProfiles()
         {
             return _shellProfiles.GetAll().Select(x => JsonConvert.DeserializeObject<ShellProfile>((string)x)).ToList();
+        }
+        public IEnumerable<SshProfile> GetSshProfiles()
+        {
+            if (_sshProfiles == null)
+                return new List<SshProfile>();
+            else
+                return _sshProfiles.GetAll()
+                    .Select(x => JsonConvert.DeserializeObject<SshProfile>((string) x)).ToList();
         }
 
         public IEnumerable<TabTheme> GetTabThemes()
@@ -287,6 +343,10 @@ namespace FluentTerminal.App.Services.Implementation
         {
             _localSettings.SetValue(DefaultShellProfileKey, id);
         }
+        public void SaveDefaultSshProfileId(Guid id)
+        {
+            _localSettings.SetValue(DefaultSshProfileKey, id);
+        }
 
         public void SaveKeyBindings(string command, ICollection<KeyBinding> keyBindings)
         {
@@ -309,6 +369,18 @@ namespace FluentTerminal.App.Services.Implementation
             if (newShell)
             {
                 ShellProfileAdded?.Invoke(this, shellProfile);
+            }
+        }
+        public void SaveSshProfile(SshProfile sshProfile, bool newShell = false)
+        {
+            _sshProfiles.WriteValueAsJson(sshProfile.Id.ToString(), sshProfile);
+
+            // When saving the shell profile, we also need to update keybindings for everywhere.
+            KeyBindingsChanged?.Invoke(this, System.EventArgs.Empty);
+
+            if (newShell)
+            {
+                SshProfileAdded?.Invoke(this, sshProfile);
             }
         }
 
