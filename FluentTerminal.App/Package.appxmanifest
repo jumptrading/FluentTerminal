@@ -4,7 +4,7 @@
   <mp:PhoneIdentity PhoneProductId="f7225014-f405-4342-ad2e-ebf6ac60ea2c" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>Fluent Terminal</DisplayName>
-    <PublisherDisplayName>FS Apps</PublisherDisplayName>
+    <PublisherDisplayName>Jump Trading</PublisherDisplayName>
     <Logo>Assets\AppIcons\StoreLogo.png</Logo>
   </Properties>
   <Dependencies>

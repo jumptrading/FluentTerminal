@@ -24,6 +24,7 @@ namespace FluentTerminal.App.Services.Implementation
                 MouseRightClickAction = MouseAction.ContextMenu,
                 AlwaysShowTabs = false,
                 ShowNewOutputIndicator = false,
+                AutoInstallUpdates = true,
                 EnableTrayIcon = true,
                 ShowCustomTitleInTitlebar = true
             };

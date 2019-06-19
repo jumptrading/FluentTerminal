@@ -109,6 +109,9 @@ namespace FluentTerminal.SystemTray.Services
                 case SaveTextFileRequest.Identifier:
                     await HandleSaveTextFileRequest(args);
                     break;
+                case MSIRunRequest.Identifier:
+                    await HandleMSIRunRequest(args);
+                    break;
                 default:
                     Logger.Instance.Error("Received unknown message type: {messageType}", messageType);
                     break;
@@ -190,6 +193,13 @@ namespace FluentTerminal.SystemTray.Services
             await args.Request.SendResponseAsync(CreateMessage(response));
 
             deferral.Complete();
+        }
+
+        private async Task HandleMSIRunRequest(AppServiceRequestReceivedEventArgs args)
+        {
+            var messageContent = (string)args.Request.Message[MessageKeys.Content];
+            var request = JsonConvert.DeserializeObject<SaveTextFileRequest>(messageContent);
+            Utilities.RunMSI(request.Path);
         }
 
         private ValueSet CreateMessage(IMessage content)

@@ -48,5 +48,7 @@ namespace FluentTerminal.App.Services
         SshProfile GetSshProfile(Guid id);
         string ExportSettings();
         void ImportSettings(string serializedSettings);
+        void SaveAutoUpdateData(string version, string path);
+        ApplicationVersionUpgradeData GetAutoUpdateData();
     }
 }

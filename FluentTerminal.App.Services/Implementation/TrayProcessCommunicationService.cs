@@ -86,6 +86,11 @@ namespace FluentTerminal.App.Services.Implementation
             }
         }
 
+        public void RunMSI(string path)
+        {
+            _appServiceConnection.SendMessageAsync(CreateMessage(new MSIRunRequest {Path = path}));
+        }
+
         public async Task<CreateTerminalResponse> CreateTerminal(byte id, TerminalSize size, ShellProfile shellProfile, SessionType sessionType)
         {
             var request = new CreateTerminalRequest

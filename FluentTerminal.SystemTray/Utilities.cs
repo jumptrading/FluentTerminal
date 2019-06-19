@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Windows.Input;
@@ -566,6 +568,21 @@ namespace FluentTerminal.SystemTray
             {
                 writer.Write(content);
             }
+        }
+
+        internal static void RunMSI(string msiPath)
+        {
+            if (string.IsNullOrEmpty(msiPath))
+                return;
+
+            try
+            {
+                Process process = new Process();
+                process.StartInfo.FileName = "msiexec.exe";
+                process.StartInfo.Arguments = $"/i \"{msiPath}\"";
+                process.Start();
+            }
+            catch (Exception) { }
         }
     }
 }
