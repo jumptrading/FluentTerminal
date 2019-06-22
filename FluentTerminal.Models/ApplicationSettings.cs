@@ -18,5 +18,6 @@ namespace FluentTerminal.Models
         public bool AutoInstallUpdates { get; set; }
         public bool EnableTrayIcon { get; set; }
         public bool ShowCustomTitleInTitlebar { get; set; }
+        public bool UseMoshByDefault { get; set; }
     }
 }

@@ -134,6 +134,18 @@ namespace FluentTerminal.App.ViewModels.Settings
                 if (_applicationSettings.AutoInstallUpdates != value)
                 {
                     _applicationSettings.AutoInstallUpdates = value;
+                }
+            }
+        }
+
+        public bool UseMoshByDefault
+        {
+            get => _applicationSettings.UseMoshByDefault;
+            set
+            {
+                if (_applicationSettings.UseMoshByDefault != value)
+                {
+                    _applicationSettings.UseMoshByDefault = value;
                     _settingsService.SaveApplicationSettings(_applicationSettings);
                     RaisePropertyChanged();
                 }
@@ -305,6 +317,7 @@ namespace FluentTerminal.App.ViewModels.Settings
                 AutoInstallUpdates = defaults.AutoInstallUpdates;
                 EnableTrayIcon = defaults.EnableTrayIcon;
                 ShowCustomTitleInTitlebar = defaults.ShowCustomTitleInTitlebar;
+                UseMoshByDefault = defaults.UseMoshByDefault;
             }
         }
 

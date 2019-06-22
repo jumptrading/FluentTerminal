@@ -166,6 +166,12 @@
                     Margin="{StaticResource ItemMargin}"
                     Header="Automatically download and install updates on next launch of application"
                     IsOn="{x:Bind ViewModel.AutoInstallUpdates, Mode=TwoWay}" />
+
+                <ToggleSwitch
+                    x:Uid="UseMoshByDefault"
+                    Margin="{StaticResource ItemMargin}"
+                    Header="Default to Mosh for SSH connections"
+                    IsOn="{x:Bind ViewModel.UseMoshByDefault, Mode=TwoWay}" />
             </StackPanel>
         </ScrollViewer>
     </Grid>
