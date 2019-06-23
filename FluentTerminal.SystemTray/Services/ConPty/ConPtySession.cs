@@ -103,6 +103,8 @@ namespace FluentTerminal.SystemTray.Services.ConPty
             _terminal.WriteToPseudoConsole(data);
         }
 
+        public void Mute(bool value) { }
+
         #region IDisposable Support
 
         private bool disposedValue = false;

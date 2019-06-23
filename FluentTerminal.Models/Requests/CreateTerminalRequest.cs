@@ -12,5 +12,6 @@ namespace FluentTerminal.Models.Requests
         public TerminalSize Size { get; set; }
         public ShellProfile Profile { get; set; }
         public SessionType SessionType { get; set; }
+        public bool Muted { get; set; }
     }
 }

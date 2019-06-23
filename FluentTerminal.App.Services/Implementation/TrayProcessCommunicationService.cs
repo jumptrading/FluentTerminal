@@ -93,7 +93,8 @@ namespace FluentTerminal.App.Services.Implementation
                 Id = id,
                 Size = size,
                 Profile = shellProfile,
-                SessionType = sessionType
+                SessionType = sessionType,
+                Muted = true
             };
 
             Logger.Instance.Debug("Sending CreateTerminalRequest: {@request}", request);

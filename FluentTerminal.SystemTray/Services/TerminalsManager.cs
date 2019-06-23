@@ -56,6 +56,7 @@ namespace FluentTerminal.SystemTray.Services
                     terminal = new ConPtySession();
                 }
                 terminal.Start(request, this);
+                terminal.Mute(request.Muted);
             }
             catch (Exception e)
             {
