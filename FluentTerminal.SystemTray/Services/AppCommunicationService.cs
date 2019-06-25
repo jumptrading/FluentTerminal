@@ -7,6 +7,8 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.AppService;
 using Windows.Foundation.Collections;
 using System;
+using System.IO;
+using System.Linq;
 using FluentTerminal.Models.Responses;
 using FluentTerminal.App.Services;
 
@@ -112,6 +114,12 @@ namespace FluentTerminal.SystemTray.Services
                 case MSIRunRequest.Identifier:
                     await HandleMSIRunRequest(args);
                     break;
+                case GetSshConfigFolderRequest.Identifier:
+                    await HandleGetSshConfigFolderRequest(args);
+                    break;
+                case CheckFileExistsRequest.Identifier:
+                    await HandleCheckFileExistsRequest(args);
+                    break;
                 default:
                     Logger.Instance.Error("Received unknown message type: {messageType}", messageType);
                     break;
@@ -200,6 +208,68 @@ namespace FluentTerminal.SystemTray.Services
             var messageContent = (string)args.Request.Message[MessageKeys.Content];
             var request = JsonConvert.DeserializeObject<MSIRunRequest>(messageContent);
             Utilities.RunMSI(request.Path);
+        }
+
+        private async Task HandleGetSshConfigFolderRequest(AppServiceRequestReceivedEventArgs args)
+        {
+            var deferral = args.GetDeferral();
+            var messageContent = (string)args.Request.Message[MessageKeys.Content];
+            var request = JsonConvert.DeserializeObject<GetSshConfigFolderRequest>(messageContent);
+            var response = new GetSshConfigFolderResponse();
+
+            try
+            {
+                var sshDir = new DirectoryInfo(
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh"));
+
+                if (sshDir.Exists)
+                {
+                    response.Path = sshDir.FullName;
+
+                    if (request.IncludeContent)
+                    {
+                        response.Files = sshDir.GetFiles().Select(fi => fi.Name).ToArray();
+                    }
+                }
+
+                response.Success = true;
+            }
+            catch (Exception e)
+            {
+                response.Success = false;
+                response.Error = e.Message;
+            }
+
+            await args.Request.SendResponseAsync(CreateMessage(response));
+
+            deferral.Complete();
+        }
+
+        private async Task HandleCheckFileExistsRequest(AppServiceRequestReceivedEventArgs args)
+        {
+            var deferral = args.GetDeferral();
+            var messageContent = (string)args.Request.Message[MessageKeys.Content];
+            var request = JsonConvert.DeserializeObject<CheckFileExistsRequest>(messageContent);
+            var response = new CommonResponse();
+
+            try
+            {
+                response.Success = System.IO.File.Exists(request.Path);
+
+                if (!response.Success)
+                {
+                    response.Error = "File not found.";
+                }
+            }
+            catch (Exception e)
+            {
+                response.Success = false;
+                response.Error = e.Message;
+            }
+
+            await args.Request.SendResponseAsync(CreateMessage(response));
+
+            deferral.Complete();
         }
 
         private ValueSet CreateMessage(IMessage content)

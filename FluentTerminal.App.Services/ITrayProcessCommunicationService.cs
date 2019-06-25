@@ -31,5 +31,10 @@ namespace FluentTerminal.App.Services
         Task SaveTextFileAsync(string path, string content);
 
         void RunMSI(string path);
+        Task<string> GetSshConfigDirAsync();
+
+        Task<string[]> GetFilesFromSshConfigDirAsync();
+
+        Task<bool> CheckFileExistsAsync(string path);
     }
 }
