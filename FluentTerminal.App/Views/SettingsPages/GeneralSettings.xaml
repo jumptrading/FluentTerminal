@@ -178,6 +178,12 @@
                     Margin="{StaticResource ItemMargin}"
                     Header="Use Windows username when opening SSH URLs that don't specify one"
                     IsOn="{x:Bind ViewModel.AutoFallbackToWindowsUsernameInLinks, Mode=TwoWay}" />
+
+                <ToggleSwitch
+                    x:Uid="MuteTerminalBeeps"
+                    Margin="{StaticResource ItemMargin}"
+                    Header="Mute terminal beeps"
+                    IsOn="{x:Bind ViewModel.MuteTerminalBeeps, Mode=TwoWay}" />
             </StackPanel>
         </ScrollViewer>
     </Grid>

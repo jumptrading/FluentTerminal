@@ -86,6 +86,11 @@ namespace FluentTerminal.App.Services.Implementation
             }
         }
 
+        public void MuteTerminal(bool mute)
+        {
+            _appServiceConnection.SendMessageAsync(CreateMessage(new MuteTerminalRequest { Mute = mute }));
+        }
+
         public void RunMSI(string path)
         {
             _appServiceConnection.SendMessageAsync(CreateMessage(new MSIRunRequest {Path = path}));

@@ -109,6 +109,9 @@ namespace FluentTerminal.SystemTray.Services
                 case SaveTextFileRequest.Identifier:
                     await HandleSaveTextFileRequest(args);
                     break;
+                case MuteTerminalRequest.Identifier:
+                    await HandleMuteTerminalRequest(args);
+                    break;
                 case MSIRunRequest.Identifier:
                     await HandleMSIRunRequest(args);
                     break;
@@ -193,6 +196,13 @@ namespace FluentTerminal.SystemTray.Services
             await args.Request.SendResponseAsync(CreateMessage(response));
 
             deferral.Complete();
+        }
+
+        private async Task HandleMuteTerminalRequest(AppServiceRequestReceivedEventArgs args)
+        {
+            var messageContent = (string)args.Request.Message[MessageKeys.Content];
+            var request = JsonConvert.DeserializeObject<MuteTerminalRequest>(messageContent);
+            Utilities.MuteTerminal(request.Mute);
         }
 
         private async Task HandleMSIRunRequest(AppServiceRequestReceivedEventArgs args)

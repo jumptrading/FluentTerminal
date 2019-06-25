@@ -375,6 +375,8 @@ namespace FluentTerminal.App
                 await CreateMainView(typeof(MainPage), viewModel, true).ConfigureAwait(true);
                 Window.Current.Activate();
 
+                _trayProcessCommunicationService.MuteTerminal(_applicationSettings.MuteTerminalBeeps);
+
                 _ = PeriodicUpdateCheckAsync(new TimeSpan(Constants.CheckForUpdateHoursInterval, 0, 0), _tokenSource.Token);
             }
             else if (_mainViewModels.Count == 0)
