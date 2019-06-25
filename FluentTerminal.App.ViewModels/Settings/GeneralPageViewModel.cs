@@ -152,6 +152,20 @@ namespace FluentTerminal.App.ViewModels.Settings
             }
         }
 
+        public bool AutoFallbackToWindowsUsernameInLinks
+        {
+            get => _applicationSettings.AutoFallbackToWindowsUsernameInLinks;
+            set
+            {
+                if (_applicationSettings.AutoFallbackToWindowsUsernameInLinks != value)
+                {
+                    _applicationSettings.AutoFallbackToWindowsUsernameInLinks = value;
+                    _settingsService.SaveApplicationSettings(_applicationSettings);
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
         public bool BottomIsSelected
         {
             get => TabsPosition == TabsPosition.Bottom;
@@ -318,6 +332,7 @@ namespace FluentTerminal.App.ViewModels.Settings
                 EnableTrayIcon = defaults.EnableTrayIcon;
                 ShowCustomTitleInTitlebar = defaults.ShowCustomTitleInTitlebar;
                 UseMoshByDefault = defaults.UseMoshByDefault;
+                AutoFallbackToWindowsUsernameInLinks = defaults.AutoFallbackToWindowsUsernameInLinks;
             }
         }
 
