@@ -134,6 +134,8 @@ namespace FluentTerminal.App.ViewModels.Settings
                 if (_applicationSettings.AutoInstallUpdates != value)
                 {
                     _applicationSettings.AutoInstallUpdates = value;
+                    _settingsService.SaveApplicationSettings(_applicationSettings);
+                    RaisePropertyChanged();
                 }
             }
         }

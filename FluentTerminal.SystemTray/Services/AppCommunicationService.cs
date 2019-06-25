@@ -198,7 +198,7 @@ namespace FluentTerminal.SystemTray.Services
         private async Task HandleMSIRunRequest(AppServiceRequestReceivedEventArgs args)
         {
             var messageContent = (string)args.Request.Message[MessageKeys.Content];
-            var request = JsonConvert.DeserializeObject<SaveTextFileRequest>(messageContent);
+            var request = JsonConvert.DeserializeObject<MSIRunRequest>(messageContent);
             Utilities.RunMSI(request.Path);
         }
 
