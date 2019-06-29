@@ -91,6 +91,58 @@ namespace FluentTerminal.App.Services.Implementation
             _appServiceConnection.SendMessageAsync(CreateMessage(new MSIRunRequest {Path = path}));
         }
 
+        private static string _sshConfigDir;
+
+        public async Task<string> GetSshConfigDirAsync()
+        {
+            if (string.IsNullOrEmpty(_sshConfigDir))
+            {
+                var response = await GetSshConfigFolderAsync(false);
+
+                if (response?.Success ?? false)
+                {
+                    _sshConfigDir = response.Path;
+                }
+            }
+
+            return _sshConfigDir;
+        }
+
+        public async Task<string[]> GetFilesFromSshConfigDirAsync()
+        {
+            var response = await GetSshConfigFolderAsync(false);
+
+            if (response == null || !response.Success)
+            {
+                return null;
+            }
+
+            if (string.IsNullOrEmpty(_sshConfigDir))
+            {
+                _sshConfigDir = response.Path;
+            }
+
+            return response.Files;
+        }
+
+        private async Task<GetSshConfigFolderResponse> GetSshConfigFolderAsync(bool includeContent)
+        {
+            var responseMessage =
+                await _appServiceConnection.SendMessageAsync(CreateMessage(new GetSshConfigFolderRequest
+                    {IncludeContent = includeContent}));
+
+            return JsonConvert.DeserializeObject<GetSshConfigFolderResponse>(
+                (string) responseMessage[MessageKeys.Content]);
+        }
+
+        public async Task<bool> CheckFileExistsAsync(string path)
+        {
+            var responseMessage =
+                await _appServiceConnection.SendMessageAsync(CreateMessage(new CheckFileExistsRequest {Path = path}));
+
+            return JsonConvert.DeserializeObject<CommonResponse>((string) responseMessage[MessageKeys.Content]).Success;
+        }
+
         public async Task<CreateTerminalResponse> CreateTerminal(byte id, TerminalSize size, ShellProfile shellProfile, SessionType sessionType)
         {
             var request = new CreateTerminalRequest
