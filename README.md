@@ -7,6 +7,7 @@ A Terminal Emulator based on UWP and web technologies.
 ## Features
 
 - Terminal for PowerShell, CMD, WSL or custom shells
+- Built-in support for SSH and [Mosh](https://mosh.org/) connections
 - Supports tabs and multiple windows
 - Theming and appearance configuration
 - Import/Export themes
@@ -25,7 +26,7 @@ A Terminal Emulator based on UWP and web technologies.
 ## Up Next
 
 - ~~Launch shell profile with a custom defined keybinding~~
-- Copy&Paste options
+- Copy & Paste options
 - Improved tabs
 - Split screen support
 
