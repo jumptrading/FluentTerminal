@@ -267,7 +267,6 @@
     <Content Include="Assets\AppIcons\Wide310x150Logo.scale-200_altform-lightunplated.png" />
     <Content Include="Assets\AppIcons\Wide310x150Logo.scale-400_altform-lightunplated.png" />
     <Content Include="Assets\settingsicons.ttf" />
-    <None Include="Package.StoreAssociation.xml" />
     <Content Include="Win32\Autofac.dll" />
     <Content Include="Win32\FluentTerminal.App.Services.dll" />
     <Content Include="Win32\FluentTerminal.App.Services.pdb" />
