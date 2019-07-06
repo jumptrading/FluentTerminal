@@ -126,20 +126,6 @@ namespace FluentTerminal.App.ViewModels.Settings
             }
         }
 
-        public bool AutoInstallUpdates
-        {
-            get => _applicationSettings.AutoInstallUpdates;
-            set
-            {
-                if (_applicationSettings.AutoInstallUpdates != value)
-                {
-                    _applicationSettings.AutoInstallUpdates = value;
-                    _settingsService.SaveApplicationSettings(_applicationSettings);
-                    RaisePropertyChanged();
-                }
-            }
-        }
-
         public bool UseMoshByDefault
         {
             get => _applicationSettings.UseMoshByDefault;
@@ -162,6 +148,20 @@ namespace FluentTerminal.App.ViewModels.Settings
                 if (_applicationSettings.AutoFallbackToWindowsUsernameInLinks != value)
                 {
                     _applicationSettings.AutoFallbackToWindowsUsernameInLinks = value;
+                    _settingsService.SaveApplicationSettings(_applicationSettings);
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
+        public bool UseQuickSshConnectByDefault
+        {
+            get => _applicationSettings.UseQuickSshConnectByDefault;
+            set
+            {
+                if (_applicationSettings.UseQuickSshConnectByDefault != value)
+                {
+                    _applicationSettings.UseQuickSshConnectByDefault = value;
                     _settingsService.SaveApplicationSettings(_applicationSettings);
                     RaisePropertyChanged();
                 }
@@ -344,7 +344,6 @@ namespace FluentTerminal.App.ViewModels.Settings
                 NewTerminalLocation = defaults.NewTerminalLocation;
                 AlwaysShowTabs = defaults.AlwaysShowTabs;
                 ShowNewOutputIndicator = defaults.ShowNewOutputIndicator;
-                AutoInstallUpdates = defaults.AutoInstallUpdates;
                 EnableTrayIcon = defaults.EnableTrayIcon;
                 ShowCustomTitleInTitlebar = defaults.ShowCustomTitleInTitlebar;
                 UseMoshByDefault = defaults.UseMoshByDefault;
