@@ -9,5 +9,8 @@
         public const string AutoUpdateContainerName = "AutoUpdate";
         public const int CheckForUpdateHoursInterval = 24;
         public const byte TerminalBufferRequestIdentifier = 0;
+        public const string SshCommandName = "ssh";
+        public const string MoshCommandName = "mosh";
+        public const string ExecutedCommandsContainerName = "HistoryContainer";
     }
 }

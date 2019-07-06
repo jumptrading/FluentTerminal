@@ -162,12 +162,6 @@
                     IsOn="{x:Bind ViewModel.ShowNewOutputIndicator, Mode=TwoWay}" />
 
                 <ToggleSwitch
-                    x:Uid="AutoInstallUpdates"
-                    Margin="{StaticResource ItemMargin}"
-                    Header="Automatically download and install updates on next launch of application"
-                    IsOn="{x:Bind ViewModel.AutoInstallUpdates, Mode=TwoWay}" />
-
-                <ToggleSwitch
                     x:Uid="UseMoshByDefault"
                     Margin="{StaticResource ItemMargin}"
                     Header="Default to Mosh for SSH connections"
@@ -178,6 +172,12 @@
                     Margin="{StaticResource ItemMargin}"
                     Header="Use Windows username when opening SSH URLs that don't specify one"
                     IsOn="{x:Bind ViewModel.AutoFallbackToWindowsUsernameInLinks, Mode=TwoWay}" />
+
+                <ToggleSwitch
+                    x:Uid="QuickSshDefault"
+                    Margin="{StaticResource ItemMargin}"
+                    Header="Use quick SSH by default"
+                    IsOn="{x:Bind ViewModel.UseQuickSshConnectByDefault, Mode=TwoWay}" />
 
                 <ToggleSwitch
                     x:Uid="RTrimCopiedLines"
