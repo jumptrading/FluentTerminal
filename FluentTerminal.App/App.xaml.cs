@@ -214,9 +214,9 @@ namespace FluentTerminal.App
 
                     try
                     {
-                        vm = SshConnectViewModel.ParseUri(protocolActivated.Uri, _settingsService,
-                            applicationView, _trayProcessCommunicationService,
-                            _container.Resolve<IFileSystemService>());
+                        vm = SshConnectViewModel.ParseUri(protocolActivated.Uri, _settingsService, applicationView,
+                            _trayProcessCommunicationService, _container.Resolve<IFileSystemService>(),
+                            _container.Resolve<ApplicationDataContainers>().HistoryContainer);
                     }
                     catch (Exception ex)
                     {

@@ -26,6 +26,7 @@ namespace FluentTerminal.App.Services.Implementation
                 ShowNewOutputIndicator = false,
                 EnableTrayIcon = true,
                 ShowCustomTitleInTitlebar = true,
+                AutoInstallUpdates = true,
                 UseMoshByDefault = true,
                 AutoFallbackToWindowsUsernameInLinks = true,
                 UseQuickSshConnectByDefault = false,
