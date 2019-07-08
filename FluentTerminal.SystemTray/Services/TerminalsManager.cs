@@ -1,4 +1,5 @@
-﻿using FluentTerminal.Models;
+﻿using FluentTerminal.App.Services;
+using FluentTerminal.Models;
 using FluentTerminal.Models.Enums;
 using FluentTerminal.Models.Requests;
 using FluentTerminal.Models.Responses;
@@ -8,21 +9,55 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using Windows.ApplicationModel;
 
 namespace FluentTerminal.SystemTray.Services
 {
+    public struct TerminalSessionInfo
+    {
+        public DateTime StartTime { get; set; }
+        public string ProfileName { get; set; }
+        public ITerminalSession Session { get; set; }
+    }
+
     public class TerminalsManager
     {
-        private readonly Dictionary<byte, ITerminalSession> _terminals = new Dictionary<byte, ITerminalSession>();
+        private readonly Dictionary<byte, TerminalSessionInfo> _terminals = new Dictionary<byte, TerminalSessionInfo>();
 
         public event EventHandler<TerminalOutput> DisplayOutputRequested;
 
         public event EventHandler<TerminalExitStatus> TerminalExited;
 
+        private readonly ISettingsService _settingsService;
+
+        private static readonly Regex EscapeSequencePattern = new Regex(@"((\x9B|\x1B\[)[0-?]*[ -\/]*[@-~])|((\x9D|\x1B\]).*\x07)", RegexOptions.Compiled);
+
+        public TerminalsManager(ISettingsService settingsService)
+        {
+            _settingsService = settingsService;
+        }
+
         public void DisplayTerminalOutput(byte terminalId, byte[] output)
         {
+            if (_settingsService.GetApplicationSettings().EnableLogging && Directory.Exists(_settingsService.GetApplicationSettings().LogDirectoryPath))
+            {
+                var logOutput = output;
+                if (_settingsService.GetApplicationSettings().PrintableOutputOnly)
+                {
+                    string strOutput = System.Text.Encoding.UTF8.GetString(logOutput);
+                    strOutput = EscapeSequencePattern.Replace(strOutput, "");
+                    logOutput = Encoding.UTF8.GetBytes(strOutput);
+                }
+
+                var logFileStream = System.IO.File.Open(_settingsService.GetApplicationSettings().LogDirectoryPath + @"\" + 
+                    _terminals[terminalId].StartTime.ToString("yyyyMMddhhmmssfff") + "_" + _terminals[terminalId].ProfileName + ".log", System.IO.FileMode.Append);
+                logFileStream.Write(logOutput, 0, logOutput.Length);
+                logFileStream.Close();
+            }
+
             DisplayOutputRequested?.Invoke(this, new TerminalOutput
             {
                 TerminalId = terminalId,
@@ -37,7 +72,7 @@ namespace FluentTerminal.SystemTray.Services
                 // App terminated without cleaning up, removing orphaned sessions
                 foreach (var item in _terminals.Values)
                 {
-                    item.Dispose();
+                    item.Session.Dispose();
                 }
                 _terminals.Clear();
             }
@@ -63,7 +98,7 @@ namespace FluentTerminal.SystemTray.Services
             }
 
             terminal.ConnectionClosed += OnTerminalConnectionClosed;
-            _terminals.Add(terminal.Id, terminal);
+            _terminals.Add(terminal.Id, new TerminalSessionInfo { ProfileName = String.IsNullOrEmpty(request.Profile.Name) ? terminal.ShellExecutableName : request.Profile.Name, StartTime = DateTime.Now, Session = terminal });
             return new CreateTerminalResponse
             {
                 Success = true,
@@ -73,17 +108,17 @@ namespace FluentTerminal.SystemTray.Services
 
         public void Write(byte id, byte[] data)
         {
-            if (_terminals.TryGetValue(id, out ITerminalSession terminal))
+            if (_terminals.TryGetValue(id, out TerminalSessionInfo sessionInfo))
             {
-                terminal.Write(data);
+                sessionInfo.Session.Write(data);
             }
         }
 
         public void ResizeTerminal(byte id, TerminalSize size)
         {
-            if (_terminals.TryGetValue(id, out ITerminalSession terminal))
+            if (_terminals.TryGetValue(id, out TerminalSessionInfo sessionInfo))
             {
-                terminal.Resize(size);
+                sessionInfo.Session.Resize(size);
             }
             else
             {
@@ -93,10 +128,10 @@ namespace FluentTerminal.SystemTray.Services
 
         public void CloseTerminal(byte id)
         {
-            if (_terminals.TryGetValue(id, out ITerminalSession terminal))
+            if (_terminals.TryGetValue(id, out TerminalSessionInfo sessionInfo))
             {
-                _terminals.Remove(terminal.Id);
-                terminal.Close();
+                _terminals.Remove(sessionInfo.Session.Id);
+                sessionInfo.Session.Close();
             }
         }
 

@@ -21,5 +21,8 @@ namespace FluentTerminal.Models
         public bool UseMoshByDefault { get; set; }
         public bool AutoFallbackToWindowsUsernameInLinks { get; set; }
         public bool RTrimCopiedLines { get; set; }
+        public bool EnableLogging { get; set; }
+        public bool PrintableOutputOnly { get; set; }
+        public string LogDirectoryPath { get; set; }
     }
 }

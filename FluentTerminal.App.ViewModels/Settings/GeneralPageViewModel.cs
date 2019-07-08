@@ -182,6 +182,48 @@ namespace FluentTerminal.App.ViewModels.Settings
             }
         }
 
+        public bool EnableLogging
+        {
+            get => _applicationSettings.EnableLogging;
+            set
+            {
+                if (_applicationSettings.EnableLogging != value)
+                {
+                    _applicationSettings.EnableLogging = value;
+                    _settingsService.SaveApplicationSettings(_applicationSettings);
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
+        public bool PrintableOutputOnly
+        {
+            get => _applicationSettings.PrintableOutputOnly;
+            set
+            {
+                if (_applicationSettings.PrintableOutputOnly != value)
+                {
+                    _applicationSettings.PrintableOutputOnly = value;
+                    _settingsService.SaveApplicationSettings(_applicationSettings);
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
+        public string LogDirectoryPath
+        {
+            get => _applicationSettings.LogDirectoryPath;
+            set
+            {
+                if (_applicationSettings.LogDirectoryPath != value)
+                {
+                    _applicationSettings.LogDirectoryPath = value;
+                    _settingsService.SaveApplicationSettings(_applicationSettings);
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
         public bool BottomIsSelected
         {
             get => TabsPosition == TabsPosition.Bottom;
@@ -349,6 +391,9 @@ namespace FluentTerminal.App.ViewModels.Settings
                 ShowCustomTitleInTitlebar = defaults.ShowCustomTitleInTitlebar;
                 UseMoshByDefault = defaults.UseMoshByDefault;
                 AutoFallbackToWindowsUsernameInLinks = defaults.AutoFallbackToWindowsUsernameInLinks;
+                EnableLogging = defaults.EnableLogging;
+                PrintableOutputOnly = defaults.PrintableOutputOnly;
+                LogDirectoryPath = defaults.LogDirectoryPath;
             }
         }
 
