@@ -584,5 +584,49 @@ namespace FluentTerminal.SystemTray
             }
             catch (Exception) { }
         }
+
+        internal static void MuteTerminal(bool mute)
+        {
+            bool? deviceMuted = VolumeControl.GetDefaultAudioEndpointMute();
+            if (deviceMuted != true)
+            {
+                VolumeControl.SetDefaultAudioEndpointMute(true);
+            }
+
+            Process cmdProcess = new Process();
+            cmdProcess.StartInfo.FileName = "cmd.exe";
+            cmdProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            cmdProcess.StartInfo.Arguments = "/k \x07";
+            cmdProcess.Start();
+
+            bool wasConhostMuted = false;
+            int attempt = 0;
+            while (wasConhostMuted == false && attempt++ < 2 && !cmdProcess.HasExited)
+            {
+                cmdProcess.WaitForExit(1500);
+
+                foreach (Process conhost in Process.GetProcessesByName("conhost"))
+                {
+                    try
+                    {
+                        bool? isMuted = null;
+                        isMuted = VolumeControl.GetAudioSessionMute(conhost.Id);
+                        if (isMuted != null && isMuted != mute)
+                        {
+                            VolumeControl.SetAudioSessionMute(conhost.Id, mute);
+                            wasConhostMuted = true;
+                            Logger.Instance.Debug($"Mute state for conhost process with id={conhost.Id} was set to {mute}.");
+                        }
+                    }
+                    catch (Exception) { }
+                }
+            }
+
+            cmdProcess.Kill();
+            if (deviceMuted != true)
+            {
+                VolumeControl.SetDefaultAudioEndpointMute(false);
+            }
+        }
     }
 }
