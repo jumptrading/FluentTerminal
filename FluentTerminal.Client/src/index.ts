@@ -95,6 +95,9 @@ window.createTerminal = (options, theme, keyBindings) => {
   }
 
   term.attachCustomKeyEventHandler(function (e) {
+    if (e.type != "keydown"){
+      return true;
+    }
     for (var i = 0; i < window.keyBindings.length; i++) {
       var keyBinding = window.keyBindings[i];
       if (keyBinding.ctrl == e.ctrlKey
