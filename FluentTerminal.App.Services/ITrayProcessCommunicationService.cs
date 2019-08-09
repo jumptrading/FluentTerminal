@@ -33,6 +33,7 @@ namespace FluentTerminal.App.Services
         Task SaveTextFileAsync(string path, string content);
 
         void RunMSI(string path);
+
         Task<string> GetSshConfigDirAsync();
 
         Task<string[]> GetFilesFromSshConfigDirAsync();
@@ -42,5 +43,7 @@ namespace FluentTerminal.App.Services
         void MuteTerminal(bool mute);
 
         void UpdateSettings(ApplicationSettings settings);
+
+        Task<string> GetCommandPathAsync(string command);
     }
 }

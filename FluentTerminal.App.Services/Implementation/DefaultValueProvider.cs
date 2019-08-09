@@ -3,7 +3,6 @@ using FluentTerminal.Models;
 using FluentTerminal.Models.Enums;
 using System;
 using System.Collections.Generic;
-using Windows.ApplicationModel;
 using Windows.Foundation.Metadata;
 using Windows.Storage;
 
@@ -33,11 +32,9 @@ namespace FluentTerminal.App.Services.Implementation
                 CopyOnSelect = false,
                 MouseMiddleClickAction = MouseAction.None,
                 MouseRightClickAction = MouseAction.ContextMenu,
-                AlwaysShowTabs = true,
                 ShowNewOutputIndicator = false,
                 EnableTrayIcon = true,
                 ShowCustomTitleInTitlebar = true,
-                AutoInstallUpdates = true,
                 UseMoshByDefault = true,
                 AutoFallbackToWindowsUsernameInLinks = true,
                 UseQuickSshConnectByDefault = false,
@@ -150,6 +147,30 @@ namespace FluentTerminal.App.Services.Implementation
                             Ctrl = true,
                             Alt = true,
                             Key = (int)ExtendedVirtualKey.Y
+                        }
+                    };
+
+                case Command.NewCustomCommandTab:
+                    return new List<KeyBinding>
+                    {
+                        new KeyBinding
+                        {
+                            Command = nameof(Command.NewCustomCommandTab),
+                            Ctrl = true,
+                            Shift = true,
+                            Key = (int)ExtendedVirtualKey.Q
+                        }
+                    };
+
+                case Command.NewCustomCommandWindow:
+                    return new List<KeyBinding>
+                    {
+                        new KeyBinding
+                        {
+                            Command = nameof(Command.NewCustomCommandWindow),
+                            Ctrl = true,
+                            Alt = true,
+                            Key = (int)ExtendedVirtualKey.Q
                         }
                     };
 
