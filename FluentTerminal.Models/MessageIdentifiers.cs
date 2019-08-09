@@ -21,5 +21,6 @@
         GetCommandPathRequest = 17,
         PauseTerminalOutputRequest = 18,
         PauseTerminalOutputResponse = 19,
+        MSIRunRequest = 20,
     }
 }

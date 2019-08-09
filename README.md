@@ -1,8 +1,6 @@
 # Fluent Terminal
 
-[![Build status](https://fs-apps.visualstudio.com/FluentTerminal/_apis/build/status/FluentTerminal-Universal%20Windows%20Platform-CI)](https://fs-apps.visualstudio.com/FluentTerminal/_build/latest?definitionId=3)
-[![SonarCloud](https://sonarcloud.io/api/project_badges/measure?project=FluentTerminal&metric=alert_status)](https://sonarcloud.io/dashboard?id=FluentTerminal)
-[![Gitter chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/FluentTerminal)
+[![Build status](https://ci.appveyor.com/api/projects/status/github/jumptrading/FluentTerminal?branch=master&svg=true)](https://ci.appveyor.com/project/daviesalex/fluentterminal)
 
 A Terminal Emulator based on UWP and web technologies.
 
@@ -61,7 +59,10 @@ A Terminal Emulator based on UWP and web technologies.
 
 ![Install Certificate into Local Machine](Screenshots/install-certificate_local-machine.png)
 
-- double click the *.appxbundle
+- double click the *.appxbundle to sideload the app with `App Installer` or execute in PowerShell with admin rights:
+```powershell
+Add-AppxPackage -Path FluentTerminal.App_x.x.xx.0_x86_x64.appxbundle
+```
 - **Optional:** Install Context menu integration from [here](https://github.com/felixse/FluentTerminal/tree/master/Explorer%20Context%20Menu%20Integration)
 
 ## How to set up a development environment

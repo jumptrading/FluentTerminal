@@ -113,6 +113,9 @@ namespace FluentTerminal.SystemTray.Services
                 case MessageIdentifiers.SaveTextFileRequest:
                     await HandleSaveTextFileRequest(args);
                     break;
+                case MessageIdentifiers.MSIRunRequest:
+                    await HandleMSIRunRequest(args);
+                    break;
                 case MessageIdentifiers.GetSshConfigFolderRequest:
                     await HandleGetSshConfigFolderRequest(args);
                     break;
@@ -212,6 +215,13 @@ namespace FluentTerminal.SystemTray.Services
             await args.Request.SendResponseAsync(CreateMessage(response));
 
             deferral.Complete();
+        }
+
+        private async Task HandleMSIRunRequest(AppServiceRequestReceivedEventArgs args)
+        {
+            var messageContent = (string)args.Request.Message[MessageKeys.Content];
+            var request = JsonConvert.DeserializeObject<MSIRunRequest>(messageContent);
+            Utilities.RunMSI(request.Path);
         }
 
         private async Task HandleGetSshConfigFolderRequest(AppServiceRequestReceivedEventArgs args)

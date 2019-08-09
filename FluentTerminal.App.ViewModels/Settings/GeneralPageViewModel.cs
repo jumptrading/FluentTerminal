@@ -114,6 +114,20 @@ namespace FluentTerminal.App.ViewModels.Settings
             }
         }
 
+        public bool AutoInstallUpdates
+        {
+            get => _applicationSettings.AutoInstallUpdates;
+            set
+            {
+                if (_applicationSettings.AutoInstallUpdates != value)
+                {
+                    _applicationSettings.AutoInstallUpdates = value;
+                    _settingsService.SaveApplicationSettings(_applicationSettings);
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
         public bool UseMoshByDefault
         {
             get => _applicationSettings.UseMoshByDefault;
@@ -388,6 +402,7 @@ namespace FluentTerminal.App.ViewModels.Settings
                 InactiveTabColorMode = defaults.InactiveTabColorMode;
                 NewTerminalLocation = defaults.NewTerminalLocation;
                 ShowNewOutputIndicator = defaults.ShowNewOutputIndicator;
+                AutoInstallUpdates = defaults.AutoInstallUpdates;
                 EnableTrayIcon = defaults.EnableTrayIcon;
                 ShowCustomTitleInTitlebar = defaults.ShowCustomTitleInTitlebar;
                 UseMoshByDefault = defaults.UseMoshByDefault;

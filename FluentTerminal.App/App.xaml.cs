@@ -34,6 +34,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using FluentTerminal.App.Utilities;
 using IContainer = Autofac.IContainer;
+using System.Threading;
 using FluentTerminal.App.Services.Utilities;
 using FluentTerminal.App.ViewModels.Profiles;
 
@@ -46,6 +47,7 @@ namespace FluentTerminal.App
         private readonly ISettingsService _settingsService;
         private readonly ITrayProcessCommunicationService _trayProcessCommunicationService;
         private readonly IDialogService _dialogService;
+        private readonly IUpdateService _updateService;
         private bool _alreadyLaunched;
         private bool _isLaunching;
         private ApplicationSettings _applicationSettings;
@@ -56,6 +58,7 @@ namespace FluentTerminal.App
         private IAppServiceConnection _appServiceConnection;
         private BackgroundTaskDeferral _appServiceDeferral;
         private Parser _commandLineParser;
+        private CancellationTokenSource _tokenSource = new CancellationTokenSource();
         private int? _activeWindowId;
 
         public App()
@@ -74,7 +77,8 @@ namespace FluentTerminal.App
                 ShellProfiles = new ApplicationDataContainerAdapter(ApplicationData.Current.LocalSettings.CreateContainer(Constants.ShellProfilesContainerName, ApplicationDataCreateDisposition.Always)),
                 Themes = new ApplicationDataContainerAdapter(ApplicationData.Current.RoamingSettings.CreateContainer(Constants.ThemesContainerName, ApplicationDataCreateDisposition.Always)),
                 SshProfiles = new ApplicationDataContainerAdapter(ApplicationData.Current.RoamingSettings.CreateContainer(Constants.SshProfilesContainerName, ApplicationDataCreateDisposition.Always)), 
-                HistoryContainer = new ApplicationDataContainerAdapter(ApplicationData.Current.RoamingSettings.CreateContainer(Constants.ExecutedCommandsContainerName, ApplicationDataCreateDisposition.Always))
+                HistoryContainer = new ApplicationDataContainerAdapter(ApplicationData.Current.RoamingSettings.CreateContainer(Constants.ExecutedCommandsContainerName, ApplicationDataCreateDisposition.Always)),
+                AutoUpdate = new ApplicationDataContainerAdapter(ApplicationData.Current.RoamingSettings.CreateContainer(Constants.AutoUpdateContainerName, ApplicationDataCreateDisposition.Always))
             };
             var builder = new ContainerBuilder();
             builder.RegisterType<SettingsService>().As<ISettingsService>().SingleInstance();
@@ -111,6 +115,8 @@ namespace FluentTerminal.App
             _settingsService.ApplicationSettingsChanged += OnApplicationSettingsChanged;
 
             _trayProcessCommunicationService = _container.Resolve<ITrayProcessCommunicationService>();
+
+            _updateService = _container.Resolve<IUpdateService>();
 
             _dialogService = _container.Resolve<IDialogService>();
 
@@ -432,6 +438,8 @@ namespace FluentTerminal.App
                 }
                 await CreateMainView(typeof(MainPage), viewModel, true).ConfigureAwait(true);
                 Window.Current.Activate();
+
+                _ = PeriodicUpdateCheckAsync(new TimeSpan(Constants.CheckForUpdateHoursInterval, 0, 0), _tokenSource.Token);
             }
             else if (_mainViewModels.Count == 0)
             {
@@ -746,6 +754,17 @@ namespace FluentTerminal.App
             var launch = FullTrustProcessLauncher.LaunchFullTrustProcessForCurrentAppAsync("AppLaunchedParameterGroup").AsTask();
             await Task.WhenAll(launch, _trayReady.Task).ConfigureAwait(true);
             _trayProcessCommunicationService.Initialize(_appServiceConnection);
+        }
+
+        private async Task PeriodicUpdateCheckAsync(TimeSpan interval, CancellationToken cancellationToken)
+        {
+            await _updateService.CheckForUpdate(true);
+
+            while (true)
+            {
+                await Task.Delay(interval, cancellationToken);
+                await _updateService.CheckForUpdate(false);
+            }
         }
     }
 }

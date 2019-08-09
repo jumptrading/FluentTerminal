@@ -86,6 +86,11 @@ namespace FluentTerminal.App.Services.Implementation
             }
         }
 
+        public void RunMSI(string path)
+        {
+            _appServiceConnection.SendMessageAsync(CreateMessage(new MSIRunRequest {Path = path}));
+        }
+
         private static string _sshConfigDir;
 
         public async Task<string> GetSshConfigDirAsync()

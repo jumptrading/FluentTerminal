@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 
 namespace FluentTerminal.App.Services.Implementation
@@ -14,6 +15,11 @@ namespace FluentTerminal.App.Services.Implementation
         public const string DefaultShellProfileKey = "DefaultShellProfile";
         public const string DefaultSshProfileKey = "DefaultSshProfile";
 
+        private const string AutoUpdateVersionKey = "Version";
+        private const string AutoUpdatePathKey = "Path";
+
+        private const string AutoUpdateDefaultVersion = "0.0.0.0";
+
         private readonly IDefaultValueProvider _defaultValueProvider;
         private readonly IApplicationDataContainer _keyBindings;
         private readonly IApplicationDataContainer _localSettings;
@@ -21,6 +27,7 @@ namespace FluentTerminal.App.Services.Implementation
         private readonly IApplicationDataContainer _shellProfiles;
         private readonly IApplicationDataContainer _sshProfiles;
         private readonly IApplicationDataContainer _themes;
+        private readonly IApplicationDataContainer _autoUpdate;
 
         public SettingsService(IDefaultValueProvider defaultValueProvider, ApplicationDataContainers containers)
         {
@@ -32,7 +39,7 @@ namespace FluentTerminal.App.Services.Implementation
             _keyBindings = containers.KeyBindings;
             _shellProfiles = containers.ShellProfiles;
             _sshProfiles = containers.SshProfiles;
-
+            _autoUpdate = containers.AutoUpdate;
 
             foreach (var theme in _defaultValueProvider.GetPreInstalledThemes())
             {
@@ -401,6 +408,34 @@ namespace FluentTerminal.App.Services.Implementation
             {
                 ThemeAdded?.Invoke(this, theme);
             }
+        }
+
+        private void ValidateAutoUpdateData()
+        {
+            if (_autoUpdate.TryGetValue("path", out object path) && !String.IsNullOrEmpty((string)path))
+            {
+                if (!System.IO.File.Exists((string)path))
+                {
+                    _autoUpdate.SetValue(AutoUpdateVersionKey, AutoUpdateDefaultVersion);
+                    _autoUpdate.SetValue(AutoUpdatePathKey, string.Empty);
+                }
+            }
+        }
+
+        public void SaveAutoUpdateData(string version, string path)
+        {
+            _autoUpdate.SetValue(AutoUpdateVersionKey, version);
+            _autoUpdate.SetValue(AutoUpdatePathKey, path);
+        }
+
+        public ApplicationVersionUpgradeData GetAutoUpdateData()
+        {
+            ValidateAutoUpdateData();
+            return new ApplicationVersionUpgradeData
+            {
+                Version = new Version(_autoUpdate.TryGetValue(AutoUpdateVersionKey, out object version) && !String.IsNullOrEmpty((string)version) ? (string)version : AutoUpdateDefaultVersion),
+                Path = _autoUpdate.TryGetValue(AutoUpdatePathKey, out object path) && !String.IsNullOrEmpty((string)path) ? (string)path : String.Empty
+            };
         }
     }
 }

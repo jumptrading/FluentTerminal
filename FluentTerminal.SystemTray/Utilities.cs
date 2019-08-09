@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -503,20 +504,37 @@ namespace FluentTerminal.SystemTray
 
         public static string ResolveLocation(string location)
         {
-            if (string.IsNullOrWhiteSpace(location))
+            switch (location?.ToLower())
             {
-                return location;
+                case Constants.SshCommandName:
+                    return GetSshPath();
+                case Constants.MoshCommandName:
+                    return GetMoshPath();
+                default:
+                    return location;
+            }
+        }
+
+        private static string GetSshPath()
+        {
+            //
+            // See https://stackoverflow.com/a/25919981
+            //
+
+            string path;
+
+            if (Environment.Is64BitOperatingSystem && !Environment.Is64BitProcess)
+            {
+                path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), @"Sysnative");
+            }
+            else
+            {
+                path = Environment.GetFolderPath(Environment.SpecialFolder.System);
             }
 
-            location = location.Trim();
+            path = Path.Combine(path, @"OpenSSH\ssh.exe");
 
-            if (location.Equals(Constants.MoshCommandName, StringComparison.OrdinalIgnoreCase) ||
-                location.Equals($"{Constants.MoshCommandName}.exe", StringComparison.OrdinalIgnoreCase))
-            {
-                return GetMoshPath();
-            }
-
-            return location;
+            return System.IO.File.Exists(path) ? path : null;
         }
 
 #if X64
@@ -552,6 +570,21 @@ namespace FluentTerminal.SystemTray
             {
                 writer.Write(content);
             }
+        }
+
+        internal static void RunMSI(string msiPath)
+        {
+            if (string.IsNullOrEmpty(msiPath))
+                return;
+
+            try
+            {
+                Process process = new Process();
+                process.StartInfo.FileName = "msiexec.exe";
+                process.StartInfo.Arguments = $"/i \"{msiPath}\"";
+                process.Start();
+            }
+            catch (Exception) { }
         }
 
         private static bool? MuteProcess(int id, bool mute, bool force = false)
