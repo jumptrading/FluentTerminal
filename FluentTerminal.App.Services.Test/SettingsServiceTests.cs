@@ -633,7 +633,14 @@ namespace FluentTerminal.App.Services.Test
         [Fact]
         public void GetShellProfiles_Default_CallsGetAllOnShellProfilesContainer()
         {
-            var shellProfiles = _fixture.CreateMany<ShellProfile>(3);
+            var shellProfiles = _fixture.CreateMany<ShellProfile>(3).ToList();
+
+            foreach (var shellProfile in shellProfiles)
+            {
+                // Setting Tag property to null because it isn't serialized
+                shellProfile.Tag = null;
+            }
+
             var defaultValueProvider = Mock.Of<IDefaultValueProvider>();
             var shellProfilesContainer = new Mock<IApplicationDataContainer>();
             shellProfilesContainer.Setup(x => x.GetAll()).Returns(shellProfiles.Select(JsonConvert.SerializeObject));
