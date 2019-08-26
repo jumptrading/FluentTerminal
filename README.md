@@ -1,6 +1,11 @@
-# Fluent Terminal <img align="left" src="./FluentTerminal.App/Assets/AppIconsDark/Square44x44Logo.altform-unplated_targetsize-48_altform-lightunplated.png">
+<p align="center">
+  <img alt="fluentterminal logo" src="./FluentTerminal.App/Assets/AppIconsDark/Square44x44Logo.altform-unplated_targetsize-256_altform-lightunplated.png" width="100px" />
+  <h1 align="center">Fluent Terminal</h1>
+</p>
 
 [![Build status](https://ci.appveyor.com/api/projects/status/github/jumptrading/FluentTerminal?branch=master&svg=true)](https://ci.appveyor.com/project/daviesalex/fluentterminal)
+[![Gitter chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/FluentTerminal)
+[![Release](https://img.shields.io/github/release/jumptrading/FluentTerminal.svg?label=Release)](https://github.com/jumptrading/FluentTerminal/releases)
 
 A Terminal Emulator based on UWP and web technologies.
 
