@@ -1,4 +1,4 @@
-# Fluent Terminal
+# Fluent Terminal <img align="left" src="./FluentTerminal.App/Assets/AppIconsDark/Square44x44Logo.altform-unplated_targetsize-48_altform-lightunplated.png">
 
 [![Build status](https://ci.appveyor.com/api/projects/status/github/jumptrading/FluentTerminal?branch=master&svg=true)](https://ci.appveyor.com/project/daviesalex/fluentterminal)
 
