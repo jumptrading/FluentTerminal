@@ -1,6 +1,12 @@
-# Fluent Terminal
+<p align="center">
+  <img alt="fluentterminal logo" src="./FluentTerminal.App/Assets/AppIconsDark/Square44x44Logo.altform-unplated_targetsize-256_altform-lightunplated.png" width="100px" />
+  <h1 align="center">Fluent Terminal</h1>
+</p>
 
 [![Build status](https://ci.appveyor.com/api/projects/status/github/jumptrading/FluentTerminal?branch=master&svg=true)](https://ci.appveyor.com/project/daviesalex/fluentterminal)
+[![Gitter chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/FluentTerminal)
+[![Release](https://img.shields.io/github/release/jumptrading/FluentTerminal.svg?label=Release)](https://github.com/jumptrading/FluentTerminal/releases)
+[![Contributors](https://img.shields.io/github/contributors/felixse/FluentTerminal?label=Contributors)](https://github.com/felixse/FluentTerminal/graphs/contributors)
 
 A Terminal Emulator based on UWP and web technologies.
 
@@ -22,6 +28,17 @@ A Terminal Emulator based on UWP and web technologies.
 
 ![Terminal window](Screenshots/terminal.jpg)
 ![Settings window](Screenshots/settings.jpg)
+
+## Laguages
+- English
+- German
+- Spanish
+- French
+- Simplified Chinese
+
+Sign up to [POEditor](https://poeditor.com/join/project/TfKNIt826z) to help with existing translations or add a new language
+
+
 
 ## Up Next
 
