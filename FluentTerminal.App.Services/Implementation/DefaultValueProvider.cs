@@ -12,14 +12,13 @@ namespace FluentTerminal.App.Services.Implementation
     {
         public ApplicationSettings GetDefaultApplicationSettings()
         {
-            var logDirectoryPath = String.Empty;
+            var logDirectoryPath = string.Empty;
             try
             {
                 // Accessing ApplicationData.Current during run of unit tests causes
                 // "System.InvalidOperationException : The process has no package identity" exception.
                 logDirectoryPath = ApplicationData.Current.LocalCacheFolder.Path;
-            }
-            catch (InvalidOperationException) { }
+            } catch (InvalidOperationException) { }
 
             return new ApplicationSettings
             {
@@ -359,9 +358,9 @@ namespace FluentTerminal.App.Services.Implementation
                     }
                 };
 
+                default:
+                    throw new InvalidOperationException($"Default keybindings for Command '{command}' are missing");
             }
-
-            return null;
         }
 
         public Guid GetDefaultShellProfileId()
@@ -453,12 +452,17 @@ namespace FluentTerminal.App.Services.Implementation
                 {
                     Id = GetDefaultShellProfileId(),
                     Name = "Powershell",
+                    MigrationVersion = ShellProfile.CurrentMigrationVersion,
                     Arguments = string.Empty,
                     Location = @"C:\windows\system32\WindowsPowerShell\v1.0\powershell.exe",
                     PreInstalled = true,
                     WorkingDirectory = string.Empty,
                     LineEndingTranslation = LineEndingStyle.DoNotModify,
                     UseConPty = ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 8), // Windows 10 1903+
+                    EnvironmentVariables = new Dictionary<string, string>
+                    {
+                        ["TERM"] = "xterm-256color"
+                    },
                     KeyBindings = new []
                     {
                         new KeyBinding
@@ -476,12 +480,17 @@ namespace FluentTerminal.App.Services.Implementation
                 {
                     Id = Guid.Parse("ab942a61-7673-4755-9bd8-765aff91d9a3"),
                     Name = "CMD",
+                    MigrationVersion = ShellProfile.CurrentMigrationVersion,
                     Arguments = string.Empty,
                     Location = @"C:\Windows\System32\cmd.exe",
                     PreInstalled = true,
                     WorkingDirectory = string.Empty,
                     LineEndingTranslation = LineEndingStyle.DoNotModify,
                     UseConPty = ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 7), // Windows 10 1809+
+                    EnvironmentVariables = new Dictionary<string, string>
+                    {
+                        ["TERM"] = "xterm-256color"
+                    },
                     KeyBindings = new []
                     {
                         new KeyBinding
@@ -499,12 +508,17 @@ namespace FluentTerminal.App.Services.Implementation
                 {
                     Id= Guid.Parse("e5785ad6-584f-40cb-bdcd-d5b3b3953e7f"),
                     Name = "WSL",
+                    MigrationVersion = ShellProfile.CurrentMigrationVersion,
                     Arguments = string.Empty,
                     Location = @"C:\windows\system32\wsl.exe",
                     PreInstalled = true,
                     WorkingDirectory = string.Empty,
                     LineEndingTranslation = LineEndingStyle.ToLF,
                     UseConPty = ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 7), // Windows 10 1809+
+                    EnvironmentVariables = new Dictionary<string, string>
+                    {
+                        ["TERM"] = "xterm-256color"
+                    },
                     KeyBindings = new []
                     {
                         new KeyBinding

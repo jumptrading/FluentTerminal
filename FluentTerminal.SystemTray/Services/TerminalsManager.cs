@@ -67,7 +67,10 @@ namespace FluentTerminal.SystemTray.Services
                         logFileStream.Write(logOutput, 0, logOutput.Length);
                     }
                 }
-                catch (Exception) { }
+                catch (Exception e)
+                {
+                    Logger.Instance.Debug("DisplayTerminalOutput failed. Exception: {0}", e);
+                }
             }
 
             DisplayOutputRequested?.Invoke(this, new TerminalOutput
@@ -119,7 +122,7 @@ namespace FluentTerminal.SystemTray.Services
                 {
                     terminal = new WinPtySession();
                 }
-                else if (request.SessionType == SessionType.ConPty)
+                else
                 {
                     terminal = new ConPtySession();
                 }
@@ -189,7 +192,6 @@ namespace FluentTerminal.SystemTray.Services
         public string GetDefaultEnvironmentVariableString(Dictionary<string, string> additionalVariables)
         {
             var environmentVariables = Environment.GetEnvironmentVariables();
-            environmentVariables["TERM"] = "xterm-256color";
             environmentVariables["TERM_PROGRAM"] = "FluentTerminal";
             environmentVariables["TERM_PROGRAM_VERSION"] = $"{Package.Current.Id.Version.Major}.{Package.Current.Id.Version.Minor}.{Package.Current.Id.Version.Build}.{Package.Current.Id.Version.Revision}";
 
