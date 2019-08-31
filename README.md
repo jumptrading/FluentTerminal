@@ -5,6 +5,7 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/github/jumptrading/FluentTerminal?branch=master&svg=true)](https://ci.appveyor.com/project/daviesalex/fluentterminal)
 [![Gitter chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/FluentTerminal)
+[![Downloads](https://img.shields.io/github/downloads/jumptrading/FluentTerminal/total.svg?label=Downloads)](https://github.com/jumptrading/FluentTerminal/releases/)
 [![Release](https://img.shields.io/github/release/jumptrading/FluentTerminal.svg?label=Release)](https://github.com/jumptrading/FluentTerminal/releases)
 [![Contributors](https://img.shields.io/github/contributors/felixse/FluentTerminal?label=Contributors)](https://github.com/felixse/FluentTerminal/graphs/contributors)
 
