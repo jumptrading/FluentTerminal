@@ -60,12 +60,12 @@
     <DefaultLanguage>en-US</DefaultLanguage>
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
     <EntryPointProjectUniqueName>..\FluentTerminal.App\FluentTerminal.App.csproj</EntryPointProjectUniqueName>
-    <PackageCertificateThumbprint>62480A9647EF884112544DE9A2FD03D0FCE13F4D</PackageCertificateThumbprint>
     <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <GenerateTestArtifacts>True</GenerateTestArtifacts>
     <AppxBundlePlatforms>x64</AppxBundlePlatforms>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
+    <PackageCertificateThumbprint>6D2DA58B0999B7EBE47E9709E0C49C3D08588472</PackageCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <AppxBundle>Always</AppxBundle>
@@ -194,7 +194,6 @@
     <Content Include="Images\AppIcons\Wide310x150Logo.scale-200_altform-lightunplated.png" />
     <Content Include="Images\AppIcons\Wide310x150Logo.scale-400.png" />
     <Content Include="Images\AppIcons\Wide310x150Logo.scale-400_altform-lightunplated.png" />
-    <None Include="Package.StoreAssociation.xml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FluentTerminal.App\FluentTerminal.App.csproj" />
