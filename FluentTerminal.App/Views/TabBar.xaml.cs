@@ -189,6 +189,7 @@ namespace FluentTerminal.App.Views
                     TabDraggingCompleted?.Invoke(sender, model);
                 }
 
+                Logger.Instance.Debug($"{this.GetType().ToString()}::ListView_DragItemsCompleted. Restore receiving terminal output for terminal {model.Terminal.Id}");
                 model.TrayProcessCommunicationService.PauseTerminalOutput(model.Terminal.Id, false);
             }
         }
