@@ -51,6 +51,7 @@ namespace FluentTerminal.App.Views
 
         public XtermTerminalView()
         {
+            Logger.Instance.Debug($"{this.GetType().ToString()}::XtermTerminalView call started");
             InitializeComponent();
             StartMediatorTask();
 
@@ -103,6 +104,7 @@ namespace FluentTerminal.App.Views
             _connectedEvent = new ManualResetEventSlim(false);
 
             _webView.Navigate(new Uri("ms-appx-web:///Client/index.html"));
+            Logger.Instance.Debug($"{this.GetType().ToString()}::XtermTerminalView call ended");
         }
 
         public TerminalViewModel ViewModel { get; private set; }
@@ -154,6 +156,7 @@ namespace FluentTerminal.App.Views
 
         public async Task Initialize(TerminalViewModel viewModel)
         {
+            Logger.Instance.Debug($"{this.GetType().ToString()}::Initialize call started");
             ViewModel = viewModel;
             ViewModel.Terminal.OutputReceived += Terminal_OutputReceived;
             ViewModel.Terminal.RegisterSelectedTextCallback(() => ExecuteScriptAsync("term.getSelection()"));
@@ -182,6 +185,7 @@ namespace FluentTerminal.App.Views
             {
                 await ViewModel.DialogService.ShowMessageDialogAsnyc("Error", response.Error, DialogButton.OK).ConfigureAwait(true);
                 ViewModel.Terminal.ReportLauchFailed();
+                Logger.Instance.Debug($"{this.GetType().ToString()}::Initialize call ended with ERROR");
                 return;
             }
 
@@ -191,10 +195,14 @@ namespace FluentTerminal.App.Views
             }
 
             _webView.Focus(FocusState.Programmatic);
+            Logger.Instance.Debug($"{this.GetType().ToString()}::Initialize call ended");
         }
 
         public void DisposalPrepare()
         {
+            Logger.Instance.Debug($"{this.GetType().ToString()}::DisposalPrepare call started");
+            Logger.Instance.Debug($"{this.GetType().ToString()}::DisposalPrepare ViewModel={ViewModel}," +
+                $"ViewModel?.Terminal={ViewModel.Terminal}, ViewModel?.Terminal?.Id={ViewModel?.Terminal?.Id}");
             if (_terminalBridge != null)
             {
                 _terminalBridge.DisposalPrepare();
@@ -204,6 +212,7 @@ namespace FluentTerminal.App.Views
             _sizeChanged.Stop();
             _unblockOutput.Stop();
             ViewModel = null;
+            Logger.Instance.Debug($"{this.GetType().ToString()}::DisposalPrepare call ended");
         }
 
         void IxtermEventListener.OnKeyboardCommand(string command)
@@ -351,6 +360,7 @@ namespace FluentTerminal.App.Views
             _mediatorTaskCTSource = new CancellationTokenSource();
             Task.Factory.StartNew(async () =>
             {
+                Logger.Instance.Debug($"{this.GetType().ToString()}::StartMediatorTask async Task call started");
                 try
                 {
                     _mediatorTaskCTSource.Token.ThrowIfCancellationRequested();
@@ -368,17 +378,22 @@ namespace FluentTerminal.App.Views
                     }
                 }
                 catch (OperationCanceledException) { }
+                Logger.Instance.Debug($"{this.GetType().ToString()}::StartMediatorTask async Task call ended");
             }, TaskCreationOptions.LongRunning);
         }
 
         private async void Terminal_Closed(object sender, EventArgs e)
         {
+            Logger.Instance.Debug($"{this.GetType().ToString()}::Terminal_Closed call started");
+            Logger.Instance.Debug($"{this.GetType().ToString()}::Terminal_Closed ViewModel={ViewModel}," +
+                $"ViewModel?.Terminal={ViewModel.Terminal}, ViewModel?.Terminal?.Id={ViewModel?.Terminal?.Id}");
             ViewModel.Terminal.Closed -= Terminal_Closed;
             ViewModel.Terminal.OutputReceived -= Terminal_OutputReceived;
             ViewModel.Terminal.RegisterSelectedTextCallback(null);
             _mediatorTaskCTSource.Cancel();
             await ViewModel.ApplicationView.RunOnDispatcherThread(() =>
             {
+                Logger.Instance.Debug($"{this.GetType().ToString()}::Terminal_Closed RunOnDispatcherThread call started");
                 _webView.NavigationCompleted -= _webView_NavigationCompleted;
                 _webView.NavigationStarting -= _webView_NavigationStarting;
                 _webView.NewWindowRequested -= _webView_NewWindowRequested;
@@ -397,7 +412,9 @@ namespace FluentTerminal.App.Views
                         converter.RemoveTerminal(ViewModel);
                     }
                 }
+                Logger.Instance.Debug($"{this.GetType().ToString()}::Terminal_Closed RunOnDispatcherThread call finished");
             });
+            Logger.Instance.Debug($"{this.GetType().ToString()}::Terminal_Closed call finished");
         }
 
         private void Terminal_OutputReceived(object sender, byte[] e)

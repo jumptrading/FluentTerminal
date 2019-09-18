@@ -60,11 +60,11 @@
     <DefaultLanguage>en-US</DefaultLanguage>
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
     <EntryPointProjectUniqueName>..\FluentTerminal.App\FluentTerminal.App.csproj</EntryPointProjectUniqueName>
-    <PackageCertificateThumbprint>62480A9647EF884112544DE9A2FD03D0FCE13F4D</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>6D2DA58B0999B7EBE47E9709E0C49C3D08588472</PackageCertificateThumbprint>
     <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <GenerateTestArtifacts>True</GenerateTestArtifacts>
-    <AppxBundlePlatforms>x86|x64</AppxBundlePlatforms>
+    <AppxBundlePlatforms>x64</AppxBundlePlatforms>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
   </PropertyGroup>
