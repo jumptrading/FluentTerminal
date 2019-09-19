@@ -499,6 +499,7 @@ namespace FluentTerminal.App.ViewModels
 
         private void Terminal_Closed(object sender, EventArgs e)
         {
+            Logger.Instance.Debug($"{this.GetType().ToString()}::Terminal_Closed. On terminal with Id {Terminal?.Id} call started");
             ApplicationView.RunOnDispatcherThread(() => Closed?.Invoke(this, EventArgs.Empty));
 
             Terminal.KeyboardCommandReceived -= Terminal_KeyboardCommandReceived;
@@ -507,6 +508,7 @@ namespace FluentTerminal.App.ViewModels
             Terminal.TitleChanged -= Terminal_TitleChanged;
             Terminal.Exited -= Terminal_Exited;
             Terminal.Closed -= Terminal_Closed;
+            Logger.Instance.Debug($"{this.GetType().ToString()}::Terminal_Closed. On terminal with Id {Terminal?.Id} call ended");
         }
 
         private async void Terminal_KeyboardCommandReceived(object sender, string e)

@@ -553,8 +553,10 @@ namespace FluentTerminal.App.ViewModels
 
         private async void OnTerminalClosed(object sender, EventArgs e)
         {
+            Logger.Instance.Debug($"{this.GetType().ToString()}::OnTerminalClosed call started.");
             if (sender is TerminalViewModel terminal)
             {
+                Logger.Instance.Debug($"{this.GetType().ToString()}::OnTerminalClosed for terminal with id:{terminal?.Terminal?.Id}.");
                 if (SelectedTerminal == terminal)
                 {
                     SelectedTerminal = Terminals.LastOrDefault(t => t != terminal);
@@ -576,6 +578,8 @@ namespace FluentTerminal.App.ViewModels
                     await ApplicationView.TryClose();
                 }
             }
+            Logger.Instance.Debug($"{this.GetType().ToString()}::OnTerminalClosed call ended.");
+
         }
 
         private async void OnTerminalOptionsChanged(TerminalOptionsChangedMessage message)
