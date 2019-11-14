@@ -38,6 +38,8 @@ using FluentTerminal.App.Services.Utilities;
 using FluentTerminal.App.ViewModels.Profiles;
 using FluentTerminal.Models.Messages;
 using GalaSoft.MvvmLight.Messaging;
+using Windows.ApplicationModel.ExtendedExecution.Foreground;
+using Windows.ApplicationModel.ExtendedExecution;
 
 namespace FluentTerminal.App
 {
@@ -454,11 +456,40 @@ namespace FluentTerminal.App
             }
         }
 
+        // https://docs.microsoft.com/en-us/windows/uwp/launch-resume/run-in-the-background-indefinetly#run-while-minimized
+        private ExtendedExecutionForegroundSession _sessionRef;
+
         protected override async void OnLaunched(LaunchActivatedEventArgs args)
         {
             if (_isLaunching)
             {
                 return;
+            }
+
+            try
+            {
+                if (_sessionRef == null)
+                {
+                    _sessionRef = new ExtendedExecutionForegroundSession();
+                    _sessionRef.Reason = ExtendedExecutionForegroundReason.Unconstrained;
+                    ExtendedExecutionForegroundResult result = await _sessionRef.RequestExtensionAsync();
+                    switch (result)
+                    {
+                        case ExtendedExecutionForegroundResult.Allowed:
+                        break;
+
+                        default:
+                        case ExtendedExecutionForegroundResult.Denied:
+                            new MessageDialog(
+                                "Unexpected thing happened: Unconstrained foreground application running is denied. Please let devs know that you have seen this message",
+                            "Alert").ShowAsync();
+                            break;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Instance.Error($"!!!Exception: {e.Message}");
             }
 
             _isLaunching = true;
