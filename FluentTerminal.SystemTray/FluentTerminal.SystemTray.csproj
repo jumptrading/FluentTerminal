@@ -116,6 +116,9 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CygwinPtyClr">
+      <HintPath>..\Dependencies\CygwinPty\CygwinPtyClr.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Management" />
@@ -169,6 +172,7 @@
     <Compile Include="Services\ConPty\PseudoConsole.cs" />
     <Compile Include="Services\ConPty\PseudoConsolePipe.cs" />
     <Compile Include="Services\ConPty\Terminal.cs" />
+    <Compile Include="Services\CygwinPty\CygwinPtySession.cs" />
     <Compile Include="Services\ITerminalSession.cs" />
     <Compile Include="Services\ToggleWindowService.cs" />
     <Compile Include="Services\TerminalsManager.cs" />
@@ -231,7 +235,36 @@
       <Name>FluentTerminal.Models</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup Condition="'$(Platform)' == 'x64'">
+    <ContentWithTargetPath Include="..\Dependencies\CygwinPty\x64\cyggcc_s-seh-1.dll">
+      <Link>BinDeps\CygwinPty\cyggcc_s-seh-1.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>CygwinPty\cyggcc_s-seh-1.dll</TargetPath>
+    </ContentWithTargetPath>
+  </ItemGroup>
+  <ItemGroup Condition="'$(Platform)' != 'x64'">
+    <ContentWithTargetPath Include="..\Dependencies\CygwinPty\x86\cyggcc_s-1.dll">
+      <Link>BinDeps\CygwinPty\cyggcc_s-1.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>CygwinPty\cyggcc_s-1.dll</TargetPath>
+    </ContentWithTargetPath>
+  </ItemGroup>
   <ItemGroup>
+    <ContentWithTargetPath Include="..\Dependencies\CygwinPty\$(Platform)\cygstdc++-6.dll">
+      <Link>BinDeps\CygwinPty\cygstdc++-6.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>CygwinPty\cygstdc++-6.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\Dependencies\CygwinPty\$(Platform)\cygwin1.dll">
+      <Link>BinDeps\CygwinPty\cygwin1.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>CygwinPty\cygwin1.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\Dependencies\CygwinPty\$(Platform)\CygwinPtyNative.exe">
+      <Link>BinDeps\CygwinPty\CygwinPtyNative.exe</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>CygwinPty\CygwinPtyNative.exe</TargetPath>
+    </ContentWithTargetPath>
     <Content Include="..\Dependencies\MoshExecutables\$(Platform)\mosh-client.exe">
       <Link>mosh-client.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -250,6 +283,7 @@
       <Link>winpty.dll</Link>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

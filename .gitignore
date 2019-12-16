@@ -293,4 +293,5 @@ __pycache__/
 *.odx.cs
 *.xsd.cs
 
-!FluentTerminal.App/MoshExecutables/*
+!Dependencies/CygwinPty/x86/*
+!Dependencies/CygwinPty/x64/*
