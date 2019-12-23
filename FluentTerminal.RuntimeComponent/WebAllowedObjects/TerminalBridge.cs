@@ -29,6 +29,12 @@ namespace FluentTerminal.RuntimeComponent.WebAllowedObjects
             _terminalEventListener?.OnInput(message);
         }
 
+        // This method won't be called because it's currently commented out in index.ts. But I suggest leaving it here in case that we decide to use it.
+        public void KeyReceived(string key, string code, bool ctrlKey, bool shiftKey, bool altKey, bool metaKey, string locale, int location, bool repeat)
+        {
+            System.Diagnostics.Trace.Write($"{nameof(key)}='{key}'; {nameof(code)}='{code}'; {nameof(ctrlKey)}={ctrlKey}; {nameof(shiftKey)}={shiftKey}; {nameof(altKey)}={altKey}; {nameof(metaKey)}={metaKey}; {nameof(locale)}='{locale}'; {nameof(location)}={location}; {nameof(repeat)}={repeat}");
+        }
+
         public void Initialized()
         {
             _terminalEventListener.OnInitialized();

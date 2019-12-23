@@ -70,7 +70,7 @@ window.createTerminal = (options, theme, keyBindings) => {
     scrollback: options.scrollBackLimit,
     allowTransparency: true,
     theme: theme,
-    windowsMode: true,
+    windowsMode: options.windowsMode,
     wordSeparator: DecodeSpecialChars(options.wordSeparator)
   };
 
@@ -139,6 +139,20 @@ window.createTerminal = (options, theme, keyBindings) => {
   term.onData(data => {
     window.terminalBridge.inputReceived(data);
   });
+
+  // This event currently isn't used, but I suggest leaving it here in case that we decide to use it.
+  /*term.onKey(e => {
+      window.terminalBridge.keyReceived(
+          e.domEvent.key,
+          e.domEvent.code,
+          e.domEvent.ctrlKey,
+          e.domEvent.shiftKey,
+          e.domEvent.altKey,
+          e.domEvent.metaKey,
+          e.domEvent.locale,
+          e.domEvent.location,
+          e.domEvent.repeat);
+  });*/
 
   term.onResize(({ cols, rows }) => {
     window.terminalBridge.notifySizeChanged(cols, rows);
@@ -225,6 +239,7 @@ window.changeOptions = (options) => {
   term.setOption('fontWeight', options.fontWeight);
   term.setOption('fontWeightBold', convertBoldText(options.fontWeight));
   term.setOption('scrollback', options.scrollBackLimit);
+  term.setOption('windowsMode', options.windowsMode);
   term.setOption('wordSeparator', DecodeSpecialChars(options.wordSeparator));
   setScrollBarStyle(options.scrollBarStyle);
   setPadding(options.padding);

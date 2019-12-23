@@ -123,7 +123,7 @@ namespace FluentTerminal.SystemTray.Services
             {
                 if (request.SessionType == SessionType.WinPty)
                 {
-                    terminal = new CygwinPtySession();
+                    terminal = new WinPtySession();
                 }
                 else
                 {

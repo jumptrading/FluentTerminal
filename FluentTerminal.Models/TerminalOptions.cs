@@ -26,6 +26,8 @@ namespace FluentTerminal.Models
 
         public bool ShowTextCopied { get; set; }
 
+        public bool WindowsMode { get; set; } = true;
+
         public string WordSeparator { get; set; }
     }
 }
