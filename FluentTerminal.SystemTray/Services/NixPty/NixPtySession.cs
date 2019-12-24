@@ -7,7 +7,7 @@ using PtyClr;
 
 namespace FluentTerminal.SystemTray.Services.NixPty
 {
-    public class NixPtySession : ITerminalSession
+    public sealed class NixPtySession : ITerminalSession
     {
         private readonly Pty _terminal;
 

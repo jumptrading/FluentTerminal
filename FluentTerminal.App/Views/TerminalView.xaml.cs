@@ -82,7 +82,9 @@ namespace FluentTerminal.App.Views
 
         private void OnTerminalOptionsChanged(TerminalOptionsChangedMessage message)
         {
-            _terminalView.ChangeOptions(message.TerminalOptions);
+            var options = message.TerminalOptions.Clone();
+            options.WindowsMode = ViewModel?.ShellProfile?.UseConPty ?? true;
+            _terminalView.ChangeOptions(options);
         }
 
         private void OnSearchStarted(object sender, EventArgs e)

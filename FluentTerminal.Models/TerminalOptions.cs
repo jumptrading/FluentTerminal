@@ -29,5 +29,22 @@ namespace FluentTerminal.Models
         public bool WindowsMode { get; set; } = true;
 
         public string WordSeparator { get; set; }
+
+        public TerminalOptions Clone() => new TerminalOptions
+        {
+            FontFamily = FontFamily,
+            FontSize = FontSize,
+            FontWeight = FontWeight,
+            CursorStyle = CursorStyle,
+            CursorBlink = CursorBlink,
+            BellStyle = BellStyle,
+            ScrollBarStyle = ScrollBarStyle,
+            BackgroundOpacity = BackgroundOpacity,
+            Padding = Padding,
+            ScrollBackLimit = ScrollBackLimit,
+            ShowTextCopied = ShowTextCopied,
+            WindowsMode = WindowsMode,
+            WordSeparator = WordSeparator
+        };
     }
 }
