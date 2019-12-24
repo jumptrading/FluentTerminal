@@ -14,7 +14,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Windows.ApplicationModel;
 using FluentTerminal.Models.Messages;
-using FluentTerminal.SystemTray.Services.CygwinPty;
+using FluentTerminal.SystemTray.Services.NixPty;
 using GalaSoft.MvvmLight.Messaging;
 
 namespace FluentTerminal.SystemTray.Services
@@ -123,7 +123,7 @@ namespace FluentTerminal.SystemTray.Services
             {
                 if (request.SessionType == SessionType.WinPty)
                 {
-                    terminal = new WinPtySession();
+                    terminal = new NixPtySession(PtyClr.PtyBuild.Cygwin);
                 }
                 else
                 {
