@@ -12,8 +12,8 @@ namespace FluentTerminal.SystemTray.Services.NixPty
         private readonly Pty _terminal;
 
         private TerminalsManager _terminalsManager;
-        private bool _paused;
-        private bool _exited;
+        private volatile bool _paused;
+        private volatile bool _exited;
 
         public byte Id { get; private set; }
 
@@ -21,7 +21,7 @@ namespace FluentTerminal.SystemTray.Services.NixPty
 
         public event EventHandler<int> ConnectionClosed;
 
-        internal NixPtySession(PtyBuild ptyBuild) => _terminal = new Pty(ptyBuild);
+        internal NixPtySession(PtyBuild ptyBuild) => _terminal = new Pty(ptyBuild, false, false);
 
         private void TerminalCorrupt(object sender, EventArgs e) => Close();
 
@@ -46,7 +46,15 @@ namespace FluentTerminal.SystemTray.Services.NixPty
 
         public void Write(byte[] data)
         {
-            _terminal.WriteInput(data);
+            try
+            {
+                _terminal.WriteInput(data);
+            }
+            catch
+            {
+                // Terminal is corrupt.
+                Close();
+            }
         }
 
         public void Start(CreateTerminalRequest request, TerminalsManager terminalsManager)
