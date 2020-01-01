@@ -1,0 +1,23 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@master
+    
+    - name: Build client
+      working-directory: ./FluentTerminal.Client
+      run: |
+        npm install
+        npm run build
+
+    - name: Setup MSBuild.exe
+      uses: warrenbuckley/Setup-MSBuild@v1
+    
+    - name: MSBuild
+      run: msbuild FluentTerminal.sln -t:build /p:Configuration=Debug /p:AppxBundle=Never /p:AppxBundlePlatforms='x64' /p:UapAppxPackageBuildMode=StoreUpload -restore
