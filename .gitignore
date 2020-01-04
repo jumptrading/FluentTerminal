@@ -293,5 +293,6 @@ __pycache__/
 *.odx.cs
 *.xsd.cs
 
-!Dependencies/CygwinPty/x86/*
-!Dependencies/CygwinPty/x64/*
+!Dependencies/*
+!Dependencies/*/*
+!Dependencies/*/*/*
