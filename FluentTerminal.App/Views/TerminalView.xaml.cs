@@ -9,6 +9,7 @@ using FluentTerminal.Models;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
 using FluentTerminal.App.Utilities;
+using FluentTerminal.Models.Enums;
 
 namespace FluentTerminal.App.Views
 {
@@ -83,7 +84,8 @@ namespace FluentTerminal.App.Views
         private void OnTerminalOptionsChanged(TerminalOptionsChangedMessage message)
         {
             var options = message.TerminalOptions.Clone();
-            options.WindowsMode = ViewModel?.ShellProfile?.UseConPty ?? true;
+            options.WindowsMode = !(ViewModel?.ShellProfile?.SessionType is { } sessionType &&
+                                    (sessionType == SessionType.CygwinPty || sessionType == SessionType.Msys2Pty));
             _terminalView.ChangeOptions(options);
         }
 

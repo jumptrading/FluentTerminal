@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using Windows.Foundation.Metadata;
 using Windows.UI.Core;
 using FluentTerminal.App.Services;
 using FluentTerminal.Models;
@@ -19,13 +20,6 @@ namespace FluentTerminal.App.ViewModels.Profiles
     /// </summary>
     public abstract class ProfileProviderViewModelBase : ViewModelBase
     {
-        #region Static
-
-        private static readonly LineEndingStyle[] LineEndingStylesArray =
-            Enum.GetValues(typeof(LineEndingStyle)).Cast<LineEndingStyle>().ToArray();
-
-        #endregion Static
-
         #region Fields
 
         protected readonly ISettingsService SettingsService;
@@ -69,7 +63,7 @@ namespace FluentTerminal.App.ViewModels.Profiles
         public ObservableCollection<TerminalTheme> TerminalThemes { get; }
 
         public ObservableCollection<LineEndingStyle> LineEndingStyles { get; } =
-            new ObservableCollection<LineEndingStyle>(LineEndingStylesArray);
+            new ObservableCollection<LineEndingStyle>(Enum.GetValues(typeof(LineEndingStyle)).Cast<LineEndingStyle>());
 
         private LineEndingStyle _lineEndingTranslation;
 
@@ -165,12 +159,15 @@ namespace FluentTerminal.App.ViewModels.Profiles
             }
         }
 
-        private bool _useConPty;
+        public ObservableCollection<SessionType> SessionTypes { get; } =
+            new ObservableCollection<SessionType>(Enum.GetValues(typeof(SessionType)).Cast<SessionType>());
 
-        public bool UseConPty
+        private SessionType _sessionType = SessionType.ConPty;
+
+        public SessionType SessionType
         {
-            get => _useConPty;
-            set => Set(ref _useConPty, value);
+            get => _sessionType;
+            set => Set(ref _sessionType, value);
         }
 
         #endregion Properties
@@ -178,13 +175,23 @@ namespace FluentTerminal.App.ViewModels.Profiles
         #region Constructor
 
         protected ProfileProviderViewModelBase(ISettingsService settingsService, IApplicationView applicationView,
-            bool strictProfileType, ShellProfile original = null)
+            bool strictProfileType, ShellProfile original = null, bool isSshProfile = false)
         {
             SettingsService = settingsService;
             ApplicationView = applicationView;
             _strictProfileType = strictProfileType;
 
-            _model = original ?? new ShellProfile();
+            if (original == null)
+            {
+                _model = isSshProfile ? new SshProfile() : new ShellProfile();
+                _model.SessionType = ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 7)
+                    ? SessionType.ConPty
+                    : SessionType.WinPty;
+            }
+            else
+            {
+                _model = original;
+            }
 
             TabThemes = new ObservableCollection<TabTheme>(settingsService.GetTabThemes());
 
@@ -234,7 +241,7 @@ namespace FluentTerminal.App.ViewModels.Profiles
         private void Initialize(ShellProfile profile)
         {
             LineEndingTranslation = profile.LineEndingTranslation;
-            UseConPty = profile.UseConPty;
+            SessionType = profile.SessionType;
             TerminalThemeId = profile.TerminalThemeId;
             TabThemeId = profile.TabThemeId;
         }
@@ -247,7 +254,7 @@ namespace FluentTerminal.App.ViewModels.Profiles
         protected virtual Task CopyToProfileAsync(ShellProfile profile)
         {
             profile.LineEndingTranslation = _lineEndingTranslation;
-            profile.UseConPty = _useConPty;
+            profile.SessionType = _sessionType;
             profile.TerminalThemeId = _terminalThemeId;
             profile.TabThemeId = _tabThemeId;
             return Task.CompletedTask;
@@ -265,7 +272,7 @@ namespace FluentTerminal.App.ViewModels.Profiles
         public virtual bool HasChanges()
         {
             return Model.LineEndingTranslation != _lineEndingTranslation ||
-                   Model.UseConPty != _useConPty ||
+                   Model.SessionType != _sessionType ||
                    !Model.TerminalThemeId.Equals(_terminalThemeId) ||
                    Model.TabThemeId != _tabThemeId;
         }
@@ -342,7 +349,7 @@ URL={0}
         public string GetBaseQueryString()
         {
             var queryString =
-                $"{UseConPtyQueryStringName}={_useConPty}&{LineEndingQueryStringName}={_lineEndingTranslation}";
+                $"{UseConPtyQueryStringName}={_sessionType}&{LineEndingQueryStringName}={_lineEndingTranslation}";
 
             if (_tabThemeId != TabThemes.First().Id)
             {
@@ -367,9 +374,9 @@ URL={0}
             var keyValue = queryStringParams.FirstOrDefault(t =>
                 UseConPtyQueryStringName.Equals(t.Item1, StringComparison.OrdinalIgnoreCase));
 
-            if (!string.IsNullOrEmpty(keyValue?.Item2) && bool.TryParse(keyValue.Item2?.ToLower(), out bool useConPty))
+            if (!string.IsNullOrEmpty(keyValue?.Item2) && Enum.TryParse(keyValue.Item2, true, out SessionType sessionType))
             {
-                UseConPty = useConPty;
+                SessionType = sessionType;
             }
 
             keyValue = queryStringParams.FirstOrDefault(t =>

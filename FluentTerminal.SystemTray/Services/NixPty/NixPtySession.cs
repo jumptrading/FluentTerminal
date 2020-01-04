@@ -21,7 +21,7 @@ namespace FluentTerminal.SystemTray.Services.NixPty
 
         public event EventHandler<int> ConnectionClosed;
 
-        internal NixPtySession(PtyBuild ptyBuild) => _terminal = new Pty(ptyBuild, false, false);
+        internal NixPtySession(PtyBuild ptyBuild) => _terminal = new Pty(ptyBuild);
 
         private void TerminalCorrupt(object sender, EventArgs e) => Close();
 

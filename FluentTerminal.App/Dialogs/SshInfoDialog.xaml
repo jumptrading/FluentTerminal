@@ -226,13 +226,23 @@
                         SelectedItem="{x:Bind ViewModel.SelectedTerminalTheme, Mode=TwoWay}" />
 
                     <!--  Row  -->
-                    <CheckBox
+                    <TextBlock
+                        x:Uid="SessionType"
                         Grid.Row="4"
                         Grid.Column="0"
-                        Grid.ColumnSpan="4"
+                        Margin="0,8,8,0"
+                        VerticalAlignment="Center"
+                        Text="Pty engine:" />
+                    <ComboBox
+                        Grid.Row="4"
+                        Grid.Column="1"
+                        Grid.ColumnSpan="3"
                         Margin="0,8,0,0"
-                        Content="{x:Bind Converter={StaticResource I18NConverter}, ConverterParameter=UseConPty}"
-                        IsChecked="{x:Bind ViewModel.UseConPty, Mode=TwoWay}" />
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Center"
+                        ItemsSource="{x:Bind ViewModel.SessionTypes}"
+                        SelectedItem="{x:Bind ViewModel.SessionType, Mode=TwoWay}">
+                    </ComboBox>
 
                 </Grid>
             </controls:Expander>

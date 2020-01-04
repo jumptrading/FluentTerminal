@@ -105,7 +105,8 @@ namespace FluentTerminal.App.ViewModels
             SettingsService = settingsService;
 
             _terminalOptions = SettingsService.GetTerminalOptions().Clone();
-            _terminalOptions.WindowsMode = shellProfile.UseConPty;
+            _terminalOptions.WindowsMode = !(shellProfile.SessionType == SessionType.ConPty ||
+                                             shellProfile.SessionType == SessionType.Msys2Pty);
 
             TrayProcessCommunicationService = trayProcessCommunicationService;
 
@@ -478,7 +479,8 @@ namespace FluentTerminal.App.ViewModels
         private void OnTerminalOptionsChanged(TerminalOptionsChangedMessage message)
         {
             _terminalOptions = message.TerminalOptions.Clone();
-            _terminalOptions.WindowsMode = ShellProfile.UseConPty;
+            _terminalOptions.WindowsMode = !(ShellProfile.SessionType == SessionType.ConPty ||
+                                             ShellProfile.SessionType == SessionType.Msys2Pty);
             ApplicationView.ExecuteOnUiThreadAsync(() => RaisePropertyChanged(nameof(BackgroundOpacity)), CoreDispatcherPriority.Low);
         }
 

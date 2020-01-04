@@ -41,8 +41,7 @@ namespace FluentTerminal.App.Services.Implementation
                 MuteTerminalBeeps = true,
                 EnableLogging = false,
                 PrintableOutputOnly = true,
-                LogDirectoryPath = logDirectoryPath,
-                UseConPty = true
+                LogDirectoryPath = logDirectoryPath
             };
         }
 
@@ -437,7 +436,8 @@ namespace FluentTerminal.App.Services.Implementation
                     PreInstalled = true,
                     WorkingDirectory = string.Empty,
                     LineEndingTranslation = LineEndingStyle.DoNotModify,
-                    UseConPty = ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 8), // Windows 10 1903+
+                    SessionType = ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 8) // Windows 10 1903+
+                        ? SessionType.ConPty : SessionType.WinPty,
                     EnvironmentVariables = new Dictionary<string, string>
                     {
                         ["TERM"] = "xterm-256color"
@@ -465,7 +465,8 @@ namespace FluentTerminal.App.Services.Implementation
                     PreInstalled = true,
                     WorkingDirectory = string.Empty,
                     LineEndingTranslation = LineEndingStyle.DoNotModify,
-                    UseConPty = ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 7), // Windows 10 1809+
+                    SessionType = ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 7) // Windows 10 1809+
+                        ? SessionType.ConPty : SessionType.WinPty,
                     EnvironmentVariables = new Dictionary<string, string>
                     {
                         ["TERM"] = "xterm-256color"
@@ -493,7 +494,8 @@ namespace FluentTerminal.App.Services.Implementation
                     PreInstalled = true,
                     WorkingDirectory = string.Empty,
                     LineEndingTranslation = LineEndingStyle.ToLF,
-                    UseConPty = ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 7), // Windows 10 1809+
+                    SessionType = ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 7) // Windows 10 1809+
+                        ? SessionType.ConPty : SessionType.WinPty,
                     EnvironmentVariables = new Dictionary<string, string>
                     {
                         ["TERM"] = "xterm-256color"

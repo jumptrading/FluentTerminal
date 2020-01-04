@@ -37,15 +37,10 @@ namespace FluentTerminal.Models
         public SshProfile()
         {
             LineEndingTranslation = LineEndingStyle.ToLF;
-            UseConPty = ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 7); // Windows 10 1809+
-        }
-
-        public bool RequestConPty
-        {
-            set
-            {
-                UseConPty = UseConPty && value;
-            }
+            SessionType =
+                ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 7) // Windows 10 1809+
+                    ? SessionType.ConPty
+                    : SessionType.WinPty;
         }
 
         protected SshProfile(SshProfile other) : base(other)

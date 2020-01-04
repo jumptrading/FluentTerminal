@@ -121,13 +121,21 @@ namespace FluentTerminal.SystemTray.Services
             ITerminalSession terminal = null;
             try
             {
-                if (request.SessionType == SessionType.WinPty)
+                switch (request.SessionType)
                 {
-                    terminal = new NixPtySession(PtyClr.PtyBuild.Cygwin);
-                }
-                else
-                {
-                    terminal = new ConPtySession();
+                    case SessionType.WinPty:
+                        terminal = new WinPtySession();
+                        break;
+                    case SessionType.CygwinPty:
+                        terminal = new NixPtySession(PtyClr.PtyBuild.Cygwin);
+                        break;
+                    case SessionType.Msys2Pty:
+                        terminal = new NixPtySession(PtyClr.PtyBuild.Msys2);
+                        break;
+                    case SessionType.ConPty:
+                    default:
+                        terminal = new ConPtySession();
+                        break;
                 }
                 terminal.Start(request, this);
             }

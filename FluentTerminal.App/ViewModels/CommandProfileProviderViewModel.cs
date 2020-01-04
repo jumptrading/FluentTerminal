@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
-using Windows.Foundation.Metadata;
 using FluentTerminal.App.Services;
 using FluentTerminal.App.Services.Utilities;
 using FluentTerminal.App.ViewModels.Profiles;
@@ -106,12 +105,7 @@ namespace FluentTerminal.App.ViewModels
 
         public CommandProfileProviderViewModel(ISettingsService settingsService, IApplicationView applicationView,
             ITrayProcessCommunicationService trayProcessCommunicationService, ICommandHistoryService historyService,
-            ShellProfile original = null) : base(settingsService, applicationView, false,
-            original ?? new ShellProfile
-            {
-                UseConPty = settingsService.GetApplicationSettings().UseConPty &&
-                            ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 7)
-            })
+            ShellProfile original = null) : base(settingsService, applicationView, false, original)
         {
             _trayProcessCommunicationService = trayProcessCommunicationService;
             _historyService = historyService;

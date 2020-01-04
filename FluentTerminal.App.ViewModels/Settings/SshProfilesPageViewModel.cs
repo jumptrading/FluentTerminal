@@ -75,8 +75,7 @@ namespace FluentTerminal.App.ViewModels.Settings
                 PreInstalled = false,
                 Name = "New SSH profile",
                 KeyBindings = new List<KeyBinding>(),
-                UseMosh = _settingsService.GetApplicationSettings().UseMoshByDefault,
-                RequestConPty = _settingsService.GetApplicationSettings().UseConPty
+                UseMosh = _settingsService.GetApplicationSettings().UseMoshByDefault
             };
 
             AddSshProfile(shellProfile);

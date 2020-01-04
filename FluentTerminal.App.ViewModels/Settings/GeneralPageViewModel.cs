@@ -217,20 +217,6 @@ namespace FluentTerminal.App.ViewModels.Settings
             }
         }
 
-        public bool UseConPty
-        {
-            get => _applicationSettings.UseConPty;
-            set
-            {
-                if (_applicationSettings.UseConPty != value)
-                {
-                    _applicationSettings.UseConPty = value;
-                    _settingsService.SaveApplicationSettings(_applicationSettings);
-                    RaisePropertyChanged();
-                }
-            }
-        }
-
         public bool BottomIsSelected
         {
             get => TabsPosition == TabsPosition.Bottom;
@@ -411,7 +397,6 @@ namespace FluentTerminal.App.ViewModels.Settings
                 EnableLogging = defaults.EnableLogging;
                 PrintableOutputOnly = defaults.PrintableOutputOnly;
                 LogDirectoryPath = defaults.LogDirectoryPath;
-                UseConPty = defaults.UseConPty;
             }
         }
 

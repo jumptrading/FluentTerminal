@@ -285,11 +285,13 @@
                                     ItemsSource="{x:Bind ProfileVm.TerminalThemes, Mode=OneWay}"
                                     SelectedItem="{Binding ProfileVm.SelectedTerminalTheme, Mode=TwoWay}" />
 
-                                <ToggleSwitch
+                                <ComboBox
+                                    x:Uid="SessionType"
                                     Margin="{StaticResource ItemMargin}"
-                                    Header="{x:Bind Converter={StaticResource I18NConverter}, ConverterParameter=UseConPty}"
-                                    IsEnabled="{x:Bind InEditMode, Mode=OneWay}"
-                                    IsOn="{x:Bind ProfileVm.UseConPty, Mode=TwoWay}" />
+                                    VerticalAlignment="Center"
+                                    ItemsSource="{x:Bind ProfileVm.SessionTypes}"
+                                    SelectedItem="{Binding ProfileVm.SessionType, Mode=TwoWay}">
+                                </ComboBox>
 
                                 <StackPanel Margin="{StaticResource ItemMargin}">
                                     <TextBlock
@@ -466,13 +468,8 @@
                                     Margin="{StaticResource ItemMargin}"
                                     HorizontalContentAlignment="Stretch"
                                     DataContext="{Binding ProfileVm}"
-                                    Header="{x:Bind Converter={StaticResource I18NConverter}, ConverterParameter=UseConPty}">
-                                    <ContentControl
-                                        Margin="0,6,0,0"
-                                        Content="{Binding UseConPty, Mode=OneWay}"
-                                        ContentTemplateSelector="{StaticResource UseConPtyTemplateSelector}"
-                                        FontSize="18"
-                                        FontWeight="Light" />
+                                    Header="SessionType">
+                                    <TextBlock Margin="0,6,0,0" Text="{Binding SessionType}" FontSize="18" FontWeight="Light" />
                                 </controls:HeaderedContentControl>
 
                                 <controls:HeaderedContentControl

@@ -242,12 +242,13 @@
                                     ItemsSource="{x:Bind ProfileVm.TerminalThemes, Mode=OneWay}"
                                     SelectedItem="{Binding ProfileVm.SelectedTerminalTheme, Mode=TwoWay}" />
 
-                                <ToggleSwitch
-                                    x:Uid="UseConPty"
+                                <ComboBox
+                                    x:Uid="SessionType"
                                     Margin="{StaticResource ItemMargin}"
-                                    Header="{x:Bind Converter={StaticResource I18NConverter}, ConverterParameter=UseConPty}"
-                                    IsEnabled="{x:Bind InEditMode, Mode=OneWay}"
-                                    IsOn="{x:Bind ProfileVm.UseConPty, Mode=TwoWay}" />
+                                    VerticalAlignment="Center"
+                                    ItemsSource="{x:Bind ProfileVm.SessionTypes}"
+                                    SelectedItem="{Binding ProfileVm.SessionType, Mode=TwoWay}">
+                                </ComboBox>
 
                                 <ComboBox
                                     x:Uid="LineEndingMode"
@@ -347,13 +348,8 @@
                                 <controls:HeaderedContentControl
                                     Margin="{StaticResource ItemMargin}"
                                     HorizontalContentAlignment="Stretch"
-                                    Header="{x:Bind Converter={StaticResource I18NConverter}, ConverterParameter=UseConPty}">
-                                    <ContentControl
-                                        Margin="0,6,0,0"
-                                        Content="{x:Bind ProfileVm.UseConPty, Mode=OneWay}"
-                                        ContentTemplateSelector="{StaticResource UseConPtyTemplateSelector}"
-                                        FontSize="18"
-                                        FontWeight="Light" />
+                                    Header="Session type">
+                                    <TextBlock Margin="0,6,0,0" Text="{x:Bind ProfileVm.SessionType}" FontSize="18" FontWeight="Light"/>
                                 </controls:HeaderedContentControl>
 
                                 <controls:HeaderedContentControl

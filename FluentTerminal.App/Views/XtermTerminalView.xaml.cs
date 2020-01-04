@@ -16,6 +16,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Foundation;
+using Windows.Foundation.Metadata;
 using Windows.System;
 using Windows.UI;
 using Windows.UI.Xaml;
@@ -260,11 +261,13 @@ namespace FluentTerminal.App.Views
             // Waiting for IxtermEventListener.OnInitialized() call to happen
             await _tcsConnected.Task;
 
-            var sessionType =
-                ViewModel.ShellProfile.UseConPty &&
-                ViewModel.ApplicationView.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 7)
-                    ? SessionType.ConPty
-                    : SessionType.WinPty;
+            var sessionType = ViewModel.ShellProfile.SessionType;
+
+            if (sessionType == SessionType.ConPty &&
+                !ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 7))
+            {
+                sessionType = SessionType.WinPty;
+            }
 
             lock (_resizeLock)
             {
